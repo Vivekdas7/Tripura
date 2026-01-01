@@ -36,7 +36,7 @@ export default function AuthForm() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-indigo-950 items-center justify-center p-12">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1621356880091-6f7773248c8b?q=80&w=1000&auto=format&fit=crop" 
+            src="https://hblimg.mmtcdn.com/content/hubble/img/tvdestinationimages/mmt/activities/m_Agartala_tv_destination_img_2_l_591_1000.jpg" 
             className="w-full h-full object-cover opacity-40 brightness-75"
             alt="Tripura Heritage"
           />
