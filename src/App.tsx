@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Added Router
 import { useAuth } from './contexts/AuthContext';
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
@@ -6,7 +7,11 @@ import FlightSearch from './components/FlightSearch';
 import FlightList from './components/FlightList';
 import BookingModal from './components/BookingModal';
 import MyBookings from './components/MyBookings';
+import Privacy from'./components/PrivacyPolicy'
 import { Flight, supabase } from './lib/supabase';
+
+// --- MOCK PRIVACY PAGE (Create a separate file for this usually) ---
+
 
 // --- SUCCESS POPUP COMPONENT ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
@@ -135,7 +140,6 @@ function App() {
   const { user, loading: authLoading } = useAuth();
   
   // Base States
-  const [currentView, setCurrentView] = useState<'search' | 'bookings'>('search');
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
@@ -210,127 +214,136 @@ function App() {
   if (!user) return <AuthForm />;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
-      {loading && <FullScreenLoader />}
+    <Router>
+      <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
+        {loading && <FullScreenLoader />}
 
-      <Header currentView={currentView} onViewChange={setCurrentView} />
+        {/* Note: Header might need internal update to use <Link> instead of onViewChange */}
+        <Header currentView="search" onViewChange={() => {}} />
 
-      {currentView === 'search' ? (
-        <>
-          <section className="relative min-h-[500px] md:h-[650px] flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 z-0">
-              <img src="https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg" className="w-full h-full object-cover brightness-[0.35]" alt="Agartala" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-slate-900/90"></div>
-            </div>
-            <div className="relative z-10 container mx-auto px-4 text-center text-white">
-              <span className="inline-block px-4 py-1.5 mb-6 bg-orange-600 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full">Direct Flights to Agartala</span>
-              <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-6 tracking-tighter">Tripura's <span className="text-orange-500">Affordable</span> <br/> Travel Partner</h1>
-            </div>
-          </section>
-
-          <div className="container mx-auto px-4 -mt-12 md:-mt-20 relative z-20">
-            <div className="bg-white p-4 rounded-3xl shadow-2xl border border-slate-100">
-              <FlightSearch onSearch={handleSearch} />
-            </div>
-          </div>
-
-          <main className="container mx-auto px-4 py-16 md:py-24">
-            <div className="mb-24">
-              {flights.length > 0 ? (
-                <div className="space-y-6">
-                  <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-3"><span className="w-2 h-8 bg-indigo-600 rounded-full"></span>Best Deals Found</h2>
-                  <FlightList flights={flights} onSelectFlight={(f) => { setSelectedFlight(f); setShowBookingModal(true); }} loading={loading} />
+        <Routes>
+          <Route path="/" element={
+            <>
+              <section className="relative min-h-[500px] md:h-[650px] flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                  <img src="https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg" className="w-full h-full object-cover brightness-[0.35]" alt="Agartala" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-slate-900/90"></div>
                 </div>
-              ) : !loading && (
-                <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
-                  <div className="text-5xl mb-4">📍</div>
-                  <h3 className="text-xl font-bold text-slate-800">Ready to explore?</h3>
+                <div className="relative z-10 container mx-auto px-4 text-center text-white">
+                  <span className="inline-block px-4 py-1.5 mb-6 bg-orange-600 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full">Direct Flights to Agartala</span>
+                  <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-6 tracking-tighter">Tripura's <span className="text-orange-500">Affordable</span> <br/> Travel Partner</h1>
                 </div>
-              )}
-            </div>
+              </section>
 
-            <section className="mb-24 px-4">
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-                <div>
-                  <h2 className="text-3xl md:text-4xl font-black text-slate-900">Exclusive <span className="text-indigo-600">Packages</span></h2>
-                  <p className="text-slate-500 mt-2">Flight + Hotel + Sightseeing starting at unbeatable prices.</p>
+              <div className="container mx-auto px-4 -mt-12 md:-mt-20 relative z-20">
+                <div className="bg-white p-4 rounded-3xl shadow-2xl border border-slate-100">
+                  <FlightSearch onSearch={handleSearch} />
                 </div>
-                <div className="h-1.5 w-20 bg-orange-500 rounded-full hidden md:block"></div>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {[
-                  { title: "Ujjayanta Palace", img: "https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg", tag: "Agartala", price: "1499", desc: "3 Days / 2 Nights" },
-                  { title: "Neermahal Palace", img: "https://imgs.search.brave.com/2EscS-uhK0brQGmC59HClqWEuYiKbN0eSojOFNNYEHY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/LnRyaXBvdG8uY29t/L21lZGlhL2ZpbHRl/ci9ueHhsL2ltZy83/Njc0Mi9UcmlwRG9j/dW1lbnQvMTQ5MTQy/OTY0OV9kc2NfMDAw/MS5qcGcud2VicA", tag: "Melaghar", price: "1250", desc: "2 Days / 1 Night" },
-                  { title: "Jampui Hills", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop", tag: "North Tripura", price: "1800", desc: "4 Days / 3 Nights" }
-                ].map((item, i) => (
-                  <div key={i} className="group relative rounded-[2.5rem] overflow-hidden h-[450px] shadow-xl transition-all duration-500 hover:-translate-y-2">
-                    <img src={item.img} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={item.title} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
-                    <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                         <span className="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full text-white uppercase tracking-widest">{item.tag}</span>
-                         <span className="bg-white/20 backdrop-blur-md text-[10px] font-black px-3 py-1 rounded-full text-white uppercase tracking-widest">{item.desc}</span>
-                      </div>
-                      <h3 className="text-white text-2xl md:text-3xl font-black mb-4">{item.title}</h3>
-                      <div className="flex items-center justify-between gap-4 border-t border-white/20 pt-4">
-                        <div>
-                          <p className="text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Starting at</p>
-                          <p className="text-orange-400 text-2xl font-black italic">₹{item.price}</p>
+
+              <main className="container mx-auto px-4 py-16 md:py-24">
+                <div className="mb-24">
+                  {flights.length > 0 ? (
+                    <div className="space-y-6">
+                      <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-3"><span className="w-2 h-8 bg-indigo-600 rounded-full"></span>Best Deals Found</h2>
+                      <FlightList flights={flights} onSelectFlight={(f) => { setSelectedFlight(f); setShowBookingModal(true); }} loading={loading} />
+                    </div>
+                  ) : !loading && (
+                    <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
+                      <div className="text-5xl mb-4">📍</div>
+                      <h3 className="text-xl font-bold text-slate-800">Ready to explore?</h3>
+                    </div>
+                  )}
+                </div>
+
+                <section className="mb-24 px-4">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div>
+                      <h2 className="text-3xl md:text-4xl font-black text-slate-900">Exclusive <span className="text-indigo-600">Packages</span></h2>
+                      <p className="text-slate-500 mt-2">Flight + Hotel + Sightseeing starting at unbeatable prices.</p>
+                    </div>
+                    <div className="h-1.5 w-20 bg-orange-500 rounded-full hidden md:block"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {[
+                      { title: "Ujjayanta Palace", img: "https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg", tag: "Agartala", price: "1499", desc: "3 Days / 2 Nights" },
+                      { title: "Neermahal Palace", img: "https://imgs.search.brave.com/2EscS-uhK0brQGmC59HClqWEuYiKbN0eSojOFNNYEHY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/LnRyaXBvdG8uY29t/L21lZGlhL2ZpbHRl/ci9ueHhsL2ltZy83/Njc0Mi9UcmlwRG9j/dW1lbnQvMTQ5MTQy/OTY0OV9kc2NfMDAw/MS5qcGcud2VicA", tag: "Melaghar", price: "1250", desc: "2 Days / 1 Night" },
+                      { title: "Jampui Hills", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop", tag: "North Tripura", price: "1800", desc: "4 Days / 3 Nights" }
+                    ].map((item, i) => (
+                      <div key={i} className="group relative rounded-[2.5rem] overflow-hidden h-[450px] shadow-xl transition-all duration-500 hover:-translate-y-2">
+                        <img src={item.img} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={item.title} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
+                        <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <span className="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full text-white uppercase tracking-widest">{item.tag}</span>
+                            <span className="bg-white/20 backdrop-blur-md text-[10px] font-black px-3 py-1 rounded-full text-white uppercase tracking-widest">{item.desc}</span>
+                          </div>
+                          <h3 className="text-white text-2xl md:text-3xl font-black mb-4">{item.title}</h3>
+                          <div className="flex items-center justify-between gap-4 border-t border-white/20 pt-4">
+                            <div>
+                              <p className="text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Starting at</p>
+                              <p className="text-orange-400 text-2xl font-black italic">₹{item.price}</p>
+                            </div>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setBookingPackage(item); }}
+                              className="bg-white text-indigo-950 px-6 py-3 rounded-2xl font-black text-sm transition-all hover:bg-orange-500 hover:text-white shadow-xl active:scale-90"
+                            >
+                              Book Package
+                            </button>
+                          </div>
                         </div>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setBookingPackage(item); }}
-                          className="bg-white text-indigo-950 px-6 py-3 rounded-2xl font-black text-sm transition-all hover:bg-orange-500 hover:text-white shadow-xl active:scale-90"
-                        >
-                          Book Package
-                        </button>
                       </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="bg-indigo-950 rounded-[3rem] p-8 md:p-16 text-white relative overflow-hidden shadow-2xl">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] -mr-20 -mt-20"></div>
+                  <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                      <h2 className="text-3xl md:text-5xl font-black mb-8 leading-[1.1]">The Smartest Way <br/> to fly to Tripura.</h2>
+                      <p className="text-indigo-200 text-base md:text-lg mb-10 leading-relaxed font-light">Direct local partnerships for regional fares major search engines miss.</p>
+                      <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="bg-white text-indigo-950 hover:bg-orange-500 hover:text-white px-10 py-4 rounded-2xl font-black transition-all shadow-xl">Book Now — Save 20%</button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 md:gap-6">
+                      <FeatureCard icon="🚀" title="Instant" desc="Tickets in seconds." />
+                      <FeatureCard icon="🔒" title="Secure" desc="RBI compliant pay." />
+                      <FeatureCard icon="🎧" title="24/7 Support" desc="Agartala local team." />
+                      <FeatureCard icon="🎟️" title="No Hidden" desc="Tax included price." />
                     </div>
                   </div>
-                ))}
-              </div>
-            </section>
+                </section>
+              </main>
+            </>
+          } />
+          <Route path="/bookings" element={<main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
+          <Route path="/privacy" element={<Privacy />} />
+        </Routes>
 
-            <section className="bg-indigo-950 rounded-[3rem] p-8 md:p-16 text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] -mr-20 -mt-20"></div>
-              <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
-                <div>
-                  <h2 className="text-3xl md:text-5xl font-black mb-8 leading-[1.1]">The Smartest Way <br/> to fly to Tripura.</h2>
-                  <p className="text-indigo-200 text-base md:text-lg mb-10 leading-relaxed font-light">Direct local partnerships for regional fares major search engines miss.</p>
-                  <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="bg-white text-indigo-950 hover:bg-orange-500 hover:text-white px-10 py-4 rounded-2xl font-black transition-all shadow-xl">Book Now — Save 20%</button>
-                </div>
-                <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  <FeatureCard icon="🚀" title="Instant" desc="Tickets in seconds." />
-                  <FeatureCard icon="🔒" title="Secure" desc="RBI compliant pay." />
-                  <FeatureCard icon="🎧" title="24/7 Support" desc="Agartala local team." />
-                  <FeatureCard icon="🎟️" title="No Hidden" desc="Tax included price." />
-                </div>
-              </div>
-            </section>
-          </main>
-        </>
-      ) : (
-        <main className="container mx-auto px-4 py-12"><MyBookings /></main>
-      )}
+        <footer className="bg-slate-950 text-slate-500 py-12 text-center">
+          <h3 className="text-white text-xl font-black italic mb-2">TripuraFly</h3>
+          <p className="text-[9px] uppercase tracking-widest mb-4">© 2026 TripuraFly Aviation. महाराजा बीर बिक्रम एअरपोर्ट, अगरतला</p>
+          <div className="flex justify-center gap-6 text-xs font-bold uppercase tracking-tighter">
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/" className="hover:text-white transition-colors">Terms of Service</Link>
+          </div>
+        </footer>
 
-      <footer className="bg-slate-950 text-slate-500 py-10 text-center">
-        <h3 className="text-white text-xl font-black italic mb-2">TripuraFly</h3>
-        <p className="text-[9px] uppercase tracking-widest">© 2026 TripuraFly Aviation. महाराजा बीर बिक्रम एअरपोर्ट, अगरतला</p>
-      </footer>
+        {/* --- MODALS & OVERLAYS --- */}
+        {showBookingModal && selectedFlight && (
+          <BookingModal flight={selectedFlight} onClose={() => { setShowBookingModal(false); setSelectedFlight(null); }} onBookingComplete={() => { setShowBookingModal(false); setSelectedFlight(null); }} />
+        )}
 
-      {/* --- MODALS & OVERLAYS --- */}
-      {showBookingModal && selectedFlight && (
-        <BookingModal flight={selectedFlight} onClose={() => { setShowBookingModal(false); setSelectedFlight(null); }} onBookingComplete={() => { setShowBookingModal(false); setSelectedFlight(null); setCurrentView('bookings'); }} />
-      )}
+        {bookingPackage && (
+          <PackageModal pkg={bookingPackage} onClose={() => setBookingPackage(null)} onConfirm={confirmPackageBooking} />
+        )}
 
-      {bookingPackage && (
-        <PackageModal pkg={bookingPackage} onClose={() => setBookingPackage(null)} onConfirm={confirmPackageBooking} />
-      )}
-
-      {showSuccess && completedBooking && (
-        <SuccessPopup details={completedBooking} onClose={() => setShowSuccess(false)} />
-      )}
-    </div>
+        {showSuccess && completedBooking && (
+          <SuccessPopup details={completedBooking} onClose={() => setShowSuccess(false)} />
+        )}
+      </div>
+    </Router>
   );
 }
 
