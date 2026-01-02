@@ -1,154 +1,197 @@
-import { useState } from 'react';
-import { Plane, Clock, Users } from 'lucide-react';
-import { Flight } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { Plane, Clock, ShieldCheck, TrendingDown, CheckCircle2, AlertCircle, ArrowRight, MapPin, Calendar, UserCheck } from 'lucide-react';
 
-type FlightListProps = {
-  flights: Flight[];
-  onSelectFlight: (flight: Flight) => void;
-  loading: boolean;
+// --- TYPES ---
+type Flight = {
+  id: string;
+  airline: string;
+  airline_code: string;
+  logo: string;
+  flight_number: string;
+  origin: string;
+  destination: string;
+  departure_time: string;
+  arrival_time: string;
+  price: number;
+  currency: string;
+  available_seats: number; // Added to track seat availability
+  isConnecting: boolean;
+  stops: number;
+  duration: string;
+  layoverInfo: { city: string; duration: string } | null;
 };
 
-// --- MOBILE FRIENDLY BOOKING LOADER ---
-const BookingOverlay = () => (
-  <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
-    <div className="relative">
-      <div className="w-20 h-20 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <Plane className="text-indigo-600 animate-pulse" size={24} />
-      </div>
+// --- HELPERS ---
+const getAirlineName = (code: string, dictionary: any) => {
+  const manualMap: { [key: string]: string } = {
+    "6E": "IndiGo", "AI": "Air India", "UK": "Vistara", 
+    "SG": "SpiceJet", "QP": "Akasa Air", "I5": "AirAsia India", "IX": "Air India Express"
+  };
+  return manualMap[code] || (dictionary && dictionary[code]) || `Airline (${code})`;
+};
+
+const formatDuration = (ptString: string) => {
+  return ptString.replace('PT', '').replace('H', 'h ').replace('M', 'm').toLowerCase();
+};
+
+const formatDisplayTime = (isoString: string) => {
+  return new Date(isoString).toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+const formatDisplayDate = (isoString: string) => {
+  return new Date(isoString).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    weekday: 'short'
+  });
+};
+
+export default function FlightList({ searchParams, onSelectFlight }: any) {
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRealTimeFlights = async () => {
+    if (!searchParams.origin || !searchParams.destination || !searchParams.date) return;
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const authResponse = await fetch("https://test.api.amadeus.com/v1/security/oauth2/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `grant_type=client_credentials&client_id=4n93Mpcjg4LYGmFkHHEUYlVAuEc18D1t&client_secret=KvSWiE1lTFsN7jxo`,
+      });
+      const { access_token } = await authResponse.json();
+
+      const flightResponse = await fetch(
+        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${searchParams.origin}&destinationLocationCode=${searchParams.destination}&departureDate=${searchParams.date}&adults=1&currencyCode=INR&max=15`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+      const data = await flightResponse.json();
+
+      if (!data.data || data.data.length === 0) {
+        throw new Error("No available flights found for this route.");
+      }
+
+      // --- DYNAMIC FILTERING & MAPPING ---
+      const processedFlights = data.data
+        .filter((offer: any) => offer.numberOfBookableSeats > 0) // REMOVE IF NO SEATS
+        .map((offer: any) => {
+          const itinerary = offer.itineraries[0];
+          const segments = itinerary.segments;
+          const carrierCode = segments[0].carrierCode;
+          const isConnecting = segments.length > 1;
+          
+          return {
+            id: offer.id,
+            airline: getAirlineName(carrierCode, data.dictionaries?.carriers),
+            airline_code: carrierCode,
+            logo: `https://pics.avs.io/200/200/${carrierCode}.png`,
+            flight_number: `${carrierCode}-${segments[0].number}`,
+            origin: segments[0].departure.iataCode,
+            destination: segments[segments.length - 1].arrival.iataCode,
+            departure_time: segments[0].departure.at,
+            arrival_time: segments[segments.length - 1].arrival.at,
+            duration: formatDuration(itinerary.duration),
+            price: parseFloat(offer.price.grandTotal || offer.price.total),
+            currency: offer.price.currency,
+            available_seats: offer.numberOfBookableSeats,
+            isConnecting: isConnecting,
+            stops: segments.length - 1,
+            segments: segments,
+            layoverInfo: isConnecting ? {
+              city: segments[0].arrival.iataCode,
+              duration: "Flexible"
+            } : null
+          };
+        });
+
+      setFlights(processedFlights.sort((a: any, b: any) => a.price - b.price));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealTimeFlights();
+  }, [searchParams]);
+
+  if (loading) return (
+    <div className="py-20 text-center flex flex-col items-center">
+      <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <p className="font-bold text-slate-500">Checking seat availability...</p>
     </div>
-    <p className="mt-4 font-bold text-slate-800 animate-pulse px-6 text-center">
-      Securing your seat...
-    </p>
-  </div>
-);
-
-export default function FlightList({ flights, onSelectFlight, loading }: FlightListProps) {
-  const [isBooking, setIsBooking] = useState(false);
-
-  const handleBookNow = (flight: Flight) => {
-    setIsBooking(true);
-    // Simulate a small delay for better UX/Process transition
-    setTimeout(() => {
-      onSelectFlight(flight);
-      setIsBooking(false);
-    }, 800);
-  };
-
-  if (loading) {
-    return (
-      <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-indigo-600"></div>
-        <p className="mt-4 text-slate-500 font-medium">Searching for the best deals...</p>
-      </div>
-    );
-  }
-
-  if (flights.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Plane size={48} className="mx-auto text-gray-400 mb-4" />
-        <p className="text-gray-600">No flights found. Try different search criteria.</p>
-      </div>
-    );
-  }
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const calculateDuration = (departure: string, arrival: string) => {
-    const diff = new Date(arrival).getTime() - new Date(departure).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
-  };
+  );
 
   return (
     <div className="space-y-6">
-      {/* Show overlay loader when booking button is clicked */}
-      {isBooking && <BookingOverlay />}
-
-      <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-        Available Flights 
-        <span className="text-sm font-normal bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">
-          {flights.length}
-        </span>
-      </h3>
-
       {flights.map((flight) => (
-        <div
-          key={flight.id}
-          className="group bg-white rounded-[1.5rem] shadow-sm hover:shadow-xl transition-all duration-300 p-5 md:p-6 border border-slate-100 overflow-hidden relative"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div key={flight.id} className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+          <div className="flex flex-col lg:flex-row justify-between gap-6">
+            
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-indigo-50 p-2 rounded-lg text-indigo-600">
-                  <Plane size={20} />
-                </div>
+              <div className="flex items-center gap-4 mb-6">
+                <img src={flight.logo} className="w-12 h-12 object-contain rounded-xl bg-slate-50 p-1 border border-slate-100" alt={flight.airline} />
                 <div>
-                  <span className="font-bold text-slate-900 block leading-none">{flight.airline}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-slate-400">{flight.flight_number}</span>
+                  <h4 className="font-black text-slate-900 leading-none">{flight.airline}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{flight.flight_number}</span>
+                    <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                      <Calendar size={10} /> {formatDisplayDate(flight.departure_time)}
+                    </span>
+                  </div>
+                </div>
+                {/* SEAT BADGE */}
+                <div className="ml-auto flex items-center gap-1.5 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
+                  <UserCheck size={12} />
+                  <span className="text-[10px] font-black uppercase tracking-tight">
+                    {flight.available_seats > 8 ? "9+ Seats Available" : `${flight.available_seats} Seats Left`}
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 md:gap-8 items-center bg-slate-50 p-4 rounded-2xl">
+              <div className="grid grid-cols-3 items-center bg-slate-50/50 p-5 rounded-3xl border border-slate-50">
                 <div className="text-left">
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">Dep</p>
-                  <p className="text-lg font-black text-slate-900">{flight.origin}</p>
-                  <p className="text-sm font-semibold text-indigo-600">{formatTime(flight.departure_time)}</p>
-                  <p className="text-[10px] text-slate-400">{formatDate(flight.departure_time)}</p>
+                  <p className="text-2xl font-black text-slate-900">{flight.origin}</p>
+                  <p className="text-xs font-bold text-slate-500">{formatDisplayTime(flight.departure_time)}</p>
                 </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="w-full h-[1px] bg-slate-200 relative">
-                    <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-white px-2">
-                      <Clock size={12} className="text-slate-300" />
-                    </div>
+                
+                <div className="flex flex-col items-center px-4">
+                  <span className="text-[10px] font-black text-slate-400 uppercase mb-1">{flight.duration}</span>
+                  <div className="w-full h-[2px] bg-slate-200 relative flex items-center justify-center">
+                    <Plane size={14} className="text-indigo-600 absolute bg-white px-0.5" />
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase">
-                    {calculateDuration(flight.departure_time, flight.arrival_time)}
-                  </p>
+                  <span className="text-[9px] font-bold text-indigo-500 mt-1 uppercase tracking-tighter">
+                    {flight.isConnecting ? `${flight.stops} Stop via ${flight.layoverInfo?.city}` : 'Non-stop'}
+                  </span>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">Arr</p>
-                  <p className="text-lg font-black text-slate-900">{flight.destination}</p>
-                  <p className="text-sm font-semibold text-indigo-600">{formatTime(flight.arrival_time)}</p>
-                  <p className="text-[10px] text-slate-400">{formatDate(flight.arrival_time)}</p>
+                  <p className="text-2xl font-black text-slate-900">{flight.destination}</p>
+                  <p className="text-xs font-bold text-slate-500">{formatDisplayTime(flight.arrival_time)}</p>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4 mt-4 text-xs font-medium text-slate-500">
-                <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full">
-                  <Users size={14} className="text-indigo-500" />
-                  {flight.available_seats} seats
-                </span>
-                <span className="bg-slate-100 px-3 py-1 rounded-full">
-                   {flight.aircraft_type}
-                </span>
               </div>
             </div>
 
-            <div className="flex md:flex-col items-center justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
-              <div className="text-left md:text-right">
-                <p className="text-xs font-bold text-slate-400 uppercase">Total Price</p>
-                <div className="flex items-center md:justify-end text-3xl font-black text-orange-600">
-                  <span className="text-lg mr-0.5">₹</span>
-                  {flight.price.toLocaleString()}
-                </div>
+            <div className="lg:w-48 flex lg:flex-col items-center justify-between lg:justify-center lg:items-end lg:border-l border-slate-100 lg:pl-8">
+              <div className="text-right">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Price</p>
+                <p className="text-3xl font-black text-slate-900 tracking-tighter">
+                  <span className="text-lg text-indigo-600 mr-0.5">₹</span>
+                  {Math.round(flight.price).toLocaleString('en-IN')}
+                </p>
+                <p className="text-[9px] font-bold text-blue-600 mt-1 uppercase tracking-tight">Confirmed Fare</p>
               </div>
-              
               <button 
-                onClick={() => handleBookNow(flight)}
-                className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-500 active:scale-95 transition-all shadow-lg shadow-indigo-100"
+                onClick={() => onSelectFlight(flight)}
+                className="bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-black hover:bg-indigo-600 transition-all active:scale-95 shadow-lg mt-4 w-full lg:w-auto"
               >
                 Book Now
               </button>
