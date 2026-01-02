@@ -14,7 +14,7 @@ type Flight = {
   arrival_time: string;
   price: number;
   currency: string;
-  available_seats: number; // Added to track seat availability
+  available_seats: number;
   isConnecting: boolean;
   stops: number;
   duration: string;
@@ -34,16 +34,22 @@ const formatDuration = (ptString: string) => {
   return ptString.replace('PT', '').replace('H', 'h ').replace('M', 'm').toLowerCase();
 };
 
+/** * UPDATED: Explicitly forces Asia/Kolkata (IST) 
+ */
 const formatDisplayTime = (isoString: string) => {
   return new Date(isoString).toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
   });
 };
 
+/** * UPDATED: Explicitly forces Asia/Kolkata (IST) 
+ */
 const formatDisplayDate = (isoString: string) => {
   return new Date(isoString).toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: '2-digit',
     month: 'short',
     weekday: 'short'
@@ -78,9 +84,8 @@ export default function FlightList({ searchParams, onSelectFlight }: any) {
         throw new Error("No available flights found for this route.");
       }
 
-      // --- DYNAMIC FILTERING & MAPPING ---
       const processedFlights = data.data
-        .filter((offer: any) => offer.numberOfBookableSeats > 0) // REMOVE IF NO SEATS
+        .filter((offer: any) => offer.numberOfBookableSeats > 0) 
         .map((offer: any) => {
           const itinerary = offer.itineraries[0];
           const segments = itinerary.segments;
@@ -144,11 +149,10 @@ export default function FlightList({ searchParams, onSelectFlight }: any) {
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{flight.flight_number}</span>
                     <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                      <Calendar size={10} /> {formatDisplayDate(flight.departure_time)}
+                      <Calendar size={10} /> {formatDisplayDate(flight.departure_time)} (IST)
                     </span>
                   </div>
                 </div>
-                {/* SEAT BADGE */}
                 <div className="ml-auto flex items-center gap-1.5 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
                   <UserCheck size={12} />
                   <span className="text-[10px] font-black uppercase tracking-tight">
