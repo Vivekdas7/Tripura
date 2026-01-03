@@ -43,30 +43,79 @@ const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void 
 );
 
 // --- PACKAGE MODAL ---
-const PackageModal = ({ pkg, onClose, onConfirm }: { pkg: any, onClose: () => void, onConfirm: (details: any) => void }) => {
+   const PackageModal = ({ pkg, onClose, onConfirm }: { pkg: any, onClose: () => void, onConfirm: (details: any) => void }) => {
   const [details, setDetails] = useState({ date: '', travelers: 1, phone: '' });
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-md rounded-t-[2.5rem] md:rounded-[2rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
-        <div className="flex justify-between items-start mb-6">
+    <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center bg-slate-900/80 backdrop-blur-md p-0 md:p-4">
+      {/* Background Overlay Click to Close */}
+      <div className="absolute inset-0" onClick={onClose} />
+
+      <div className="relative bg-white w-full max-w-md rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-500 transition-all">
+        
+        {/* Mobile Drag Handle Indicator */}
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden" />
+
+        <div className="flex justify-between items-start mb-8">
           <div>
-            <h3 className="text-2xl font-black text-slate-900 leading-none">{pkg.title}</h3>
-            <p className="text-orange-600 font-bold mt-2 italic">₹{pkg.price} / person</p>
+            <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest bg-indigo-50 px-2 py-1 rounded-md">Confirm Trip</span>
+            <h3 className="text-2xl md:text-3xl font-black text-slate-900 mt-2">{pkg.title}</h3>
+            <p className="text-orange-600 font-extrabold text-lg mt-1">₹{pkg.price} <span className="text-slate-400 text-xs font-medium">/ per person</span></p>
           </div>
-          <button onClick={onClose} className="text-slate-300 hover:text-slate-600 text-2xl">✕</button>
-        </div>
-        <div className="space-y-5">
-          <input type="date" required className="w-full p-4 bg-slate-50 border rounded-2xl" onChange={e => setDetails({...details, date: e.target.value})} />
-          <div className="grid grid-cols-2 gap-4">
-            <select className="w-full p-4 bg-slate-50 border rounded-2xl" onChange={e => setDetails({...details, travelers: parseInt(e.target.value)})}>
-              {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n} Guest{n>1?'s':''}</option>)}
-            </select>
-            <input type="tel" placeholder="Mobile number" className="w-full p-4 bg-slate-50 border rounded-2xl" onChange={e => setDetails({...details, phone: e.target.value})} />
-          </div>
-          <button disabled={!details.date || !details.phone} onClick={() => onConfirm(details)} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black transition-all">
-            Confirm Booking
+          <button 
+            onClick={onClose} 
+            className="h-10 w-10 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors"
+          >
+            ✕
           </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Date Picker - Full width for easy tapping */}
+          <div>
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Preferred Date</label>
+            <input 
+              type="date" 
+              required 
+              className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:outline-none transition-all text-slate-900 font-bold" 
+              onChange={e => setDetails({...details, date: e.target.value})} 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Guest Selection */}
+            <div>
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Guests</label>
+              <select 
+                className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:outline-none appearance-none font-bold text-slate-900" 
+                onChange={e => setDetails({...details, travelers: parseInt(e.target.value)})}
+              >
+                {[1,2,3,4,5,6,10].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>)}
+              </select>
+            </div>
+
+            {/* Phone Input */}
+            <div>
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Contact Number</label>
+              <input 
+                type="tel" 
+                placeholder="00000 00000" 
+                className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:outline-none font-bold" 
+                onChange={e => setDetails({...details, phone: e.target.value})} 
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 pb-2">
+            <button 
+              disabled={!details.date || !details.phone} 
+              onClick={() => onConfirm(details)} 
+              className="w-full py-5 bg-indigo-600 disabled:bg-slate-300 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 active:scale-[0.98] transition-all"
+            >
+              Confirm Booking
+            </button>
+            <p className="text-center text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-tighter">No payment required now</p>
+          </div>
         </div>
       </div>
     </div>
@@ -198,42 +247,149 @@ function App() {
                 </div>
 
                 {/* PACKAGES SECTION */}
-                <section className="mb-24">
-                  <h2 className="text-3xl font-black text-slate-900 mb-8">Tripura <span className="text-indigo-600">Specials</span></h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                      { title: "Ujjayanta Palace", img: "https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg", tag: "Agartala", price: "1499", desc: "3 Days / 2 Nights" },
-                      { title: "Neermahal Palace", img: "https://imgs.search.brave.com/2EscS-uhK0brQGmC59HClqWEuYiKbN0eSojOFNNYEHY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/LnRyaXBvdG8u/Y29t/L21lZGlhL2ZpbHRl/ci9ueHhsL2ltZy83/Njc0Mi9UcmlwRG9j/dW1lbnQvMTQ5MTQy/OTY0OV9kc2NfMDAw/MS5qcGcud2VicA", tag: "Melaghar", price: "1250", desc: "2 Days / 1 Night" },
-                      { title: "Jampui Hills", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop", tag: "North Tripura", price: "1800", desc: "4 Days / 3 Nights" }
-                    ].map((item, i) => (
-                      <div key={i} className="group relative rounded-[2.5rem] overflow-hidden h-[400px] shadow-lg">
-                        <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-8 flex flex-col justify-end">
-                          <h3 className="text-white text-2xl font-black">{item.title}</h3>
-                          <p className="text-orange-400 font-bold mb-4">₹{item.price}</p>
-                          <button onClick={() => setBookingPackage(item)} className="bg-white text-indigo-900 py-3 rounded-xl font-black text-sm">Book Package</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+                  <section className="mb-16 md:mb-24 px-0 md:px-0">
+  <div className="flex items-end justify-between mb-6 md:mb-8">
+    <div>
+      <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+        Tripura <span className="text-indigo-600 block md:inline">Specials</span>
+      </h2>
+      <p className="text-slate-500 text-xs md:text-sm font-bold mt-1 uppercase tracking-wider">Handpicked local getaways</p>
+    </div>
+  </div>
+
+  {/* MOBILE OPTIMIZATION: 
+      - Added 'snap-x' for physical-feeling swipes.
+      - Added padding-right on the last item so it doesn't stick to the edge.
+  */}
+  <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible no-scrollbar snap-x snap-mandatory pb-8">
+    {[
+      { 
+        title: "Ujjayanta Palace", 
+        img: "https://imgs.search.brave.com/VKlKADSNjxB9inPbUnYd4Q6YsqlnVmVYZ-OWl306I6o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zN2Fw/MS5zY2VuZTcuY29t/L2lzL2ltYWdlL2lu/Y3JlZGlibGVpbmRp/YS9FeHBsb3Jpbmct/SGVyaXRhZ2UtYW5k/LVJlbGlnaW91cy1H/ZW1zLW9mLUFnYXJ0/YWxhLTEtcG9wdWxh/cj9xbHQ9ODImdHM9/MTcyNjY1MTA2NzY1/MA", 
+        tag: "Agartala", 
+        price: "2,499", 
+        desc: "3 Days / 2 Nights",
+        includes: ["Hotel", "Breakfast", "Guide"],
+        excludes: ["Flight", "Dinner"]
+      },
+      { 
+        title: "Neermahal Palace", 
+        img: "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
+        tag: "Melaghar", 
+        price: "1,250", 
+        desc: "2 Days / 1 Night",
+        includes: ["Boating", "Entry Fees", "Lunch","Bus"],
+        excludes: ["Stay", "Transport"]
+      },
+      { 
+        title: "Jampui Hills", 
+        img: "https://imgs.search.brave.com/mKJ0y5ZiRvtsZbkf3TmY_bfP3SORyg-zt2K9cvyEzOA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9KYW1w/dWktSGlsbC1Bcy1T/ZWVuLUZyb20tdGhl/LVdhdGNoLVRvd2Vy/LmpwZw", 
+        tag: "North Tripura", 
+        price: "3,800", 
+        desc: "2 Days / 1 Nights",
+        includes: ["Resort", "Trekking", "All Meals"],
+        excludes: ["Photography", "Personal Care"]
+      }
+    ].map((item, i) => (
+      <div 
+        key={i} 
+        className="min-w-[90vw] sm:min-w-[45vw] md:min-w-full snap-center group relative rounded-[2.5rem] overflow-hidden h-[480px] shadow-xl border border-slate-100/10"
+      >
+        <img src={item.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-110" alt={item.title} />
+        
+        {/* Top Badges */}
+        <div className="absolute top-5 left-5 right-5 flex justify-between items-start">
+          <span className="bg-white/95 backdrop-blur-md text-indigo-900 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-tighter shadow-xl">
+            {item.tag}
+          </span>
+          <div className="bg-orange-500 text-white p-2 rounded-2xl shadow-lg">
+             <span className="text-[10px] font-black block leading-none">HOT</span>
+          </div>
+        </div>
+
+        {/* Gradient Overlay: Deeper at bottom for text safety */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-6 flex flex-col justify-end">
+          
+          <div className="mb-3">
+             <p className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.2em] mb-1">{item.desc}</p>
+             <h3 className="text-white text-3xl font-black leading-tight drop-shadow-md">{item.title}</h3>
+          </div>
+          
+          {/* MOBILE LIST: Using Icons (represented by dots) and horizontal flex for speed reading */}
+          <div className="flex flex-wrap gap-2 mb-6 opacity-90">
+            {item.includes.map((inc, idx) => (
+              <span key={idx} className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-lg flex items-center gap-1">
+                ✓ {inc}
+              </span>
+            ))}
+            {item.excludes.map((exc, idx) => (
+              <span key={idx} className="bg-white/5 backdrop-blur-md border border-white/10 text-white/40 text-[10px] font-bold px-3 py-1 rounded-lg">
+                × {exc}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-xl p-4 rounded-[2rem] border border-white/20">
+            <div className="flex-1">
+              <span className="text-white/60 text-[10px] font-bold uppercase block tracking-tighter">Total Package</span>
+              <p className="text-white text-2xl font-black leading-none mt-1">₹{item.price}</p>
+            </div>
+            <button 
+              onClick={() => setBookingPackage(item)} 
+              className="bg-indigo-600 text-white px-8 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-widest active:scale-90 transition-all shadow-lg hover:bg-white hover:text-indigo-900"
+            >
+              Book
+            </button>
+          </div>
+        </div>
+      </div>
+    ))}
+    {/* Spacer for horizontal scroll padding */}
+    <div className="min-w-[1px] md:hidden" />
+  </div>
+</section>
 
                 {/* FEATURES SECTION */}
-                <section className="bg-indigo-950 rounded-[3rem] p-12 text-white">
-                  <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                      <h2 className="text-4xl font-black mb-6">Why TripuraFly?</h2>
-                      <p className="text-indigo-200 mb-8">We are Tripura's local travel tech partner, offering fares integrated directly with regional carriers.</p>
-                      <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="bg-orange-500 text-white px-8 py-3 rounded-xl font-bold">Start Searching</button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FeatureCard icon="🚀" title="Instant" desc="E-Tickets" />
-                      <FeatureCard icon="🔒" title="Secure" desc="Payments" />
-                      <FeatureCard icon="🎧" title="24/7" desc="Local Support" />
-                      <FeatureCard icon="🎟️" title="Best" desc="Regional Fares" />
-                    </div>
-                  </div>
-                </section>
+                <section className="bg-indigo-950 rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 text-white overflow-hidden">
+  <div className="grid lg:grid-cols-2 gap-10 md:gap-12 items-center">
+    {/* Text Content: Center aligned on mobile for better balance */}
+    <div className="text-center lg:text-left">
+      <h2 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 leading-tight">
+        Why <span className="text-orange-500">TripuraFly?</span>
+      </h2>
+      <p className="text-indigo-200 text-sm md:text-base mb-6 md:mb-8 max-w-md mx-auto lg:mx-0">
+        We are Tripura's local travel tech partner, offering fares integrated directly with regional carriers.
+      </p>
+      <button 
+        onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} 
+        className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-900/20"
+      >
+        Start Searching
+      </button>
+    </div>
+
+    {/* Feature Grid: Balanced 2x2 layout on all screens */}
+    <div className="grid grid-cols-2 gap-3 md:gap-4">
+      {[
+        { icon: "🚀", title: "Instant", desc: "E-Tickets" },
+        { icon: "🔒", title: "Secure", desc: "Payments" },
+        { icon: "🎧", title: "24/7", desc: "Local Support" },
+        { icon: "🎟️", title: "Best", desc: "Regional Fares" }
+      ].map((feature, index) => (
+        <div 
+          key={index} 
+          className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] hover:bg-white/10 transition-colors"
+        >
+          <div className="text-2xl md:text-3xl mb-2">{feature.icon}</div>
+          <h4 className="text-white font-black text-sm md:text-lg leading-none">{feature.title}</h4>
+          <p className="text-indigo-300 text-[10px] md:text-xs font-bold uppercase mt-1 tracking-tighter">
+            {feature.desc}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
               </main>
             </>
           } />

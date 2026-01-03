@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plane, Clock, ShieldCheck, TrendingDown, CheckCircle2, AlertCircle, ArrowRight, MapPin, Calendar, UserCheck } from 'lucide-react';
+import { Plane, Calendar, UserCheck, Info } from 'lucide-react';
 
 // --- TYPES ---
 type Flight = {
@@ -34,8 +34,6 @@ const formatDuration = (ptString: string) => {
   return ptString.replace('PT', '').replace('H', 'h ').replace('M', 'm').toLowerCase();
 };
 
-/** * UPDATED: Explicitly forces Asia/Kolkata (IST) 
- */
 const formatDisplayTime = (isoString: string) => {
   return new Date(isoString).toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -45,8 +43,6 @@ const formatDisplayTime = (isoString: string) => {
   });
 };
 
-/** * UPDATED: Explicitly forces Asia/Kolkata (IST) 
- */
 const formatDisplayDate = (isoString: string) => {
   return new Date(isoString).toLocaleDateString('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -108,7 +104,6 @@ export default function FlightList({ searchParams, onSelectFlight }: any) {
             available_seats: offer.numberOfBookableSeats,
             isConnecting: isConnecting,
             stops: segments.length - 1,
-            segments: segments,
             layoverInfo: isConnecting ? {
               city: segments[0].arrival.iataCode,
               duration: "Flexible"
@@ -130,72 +125,81 @@ export default function FlightList({ searchParams, onSelectFlight }: any) {
 
   if (loading) return (
     <div className="py-20 text-center flex flex-col items-center">
-      <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-      <p className="font-bold text-slate-500">Checking seat availability...</p>
+      <div className="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <p className="font-bold text-slate-500 text-sm">Searching the best fares...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="p-6 bg-red-50 rounded-3xl border border-red-100 text-center">
+      <p className="text-red-600 font-bold text-sm">{error}</p>
     </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-2">
       {flights.map((flight) => (
-        <div key={flight.id} className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
-          <div className="flex flex-col lg:flex-row justify-between gap-6">
+        <div key={flight.id} className="bg-white rounded-[2rem] p-4 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             
+            {/* AIRLINE INFO SECTION */}
             <div className="flex-1">
-              <div className="flex items-center gap-4 mb-6">
-                <img src={flight.logo} className="w-12 h-12 object-contain rounded-xl bg-slate-50 p-1 border border-slate-100" alt={flight.airline} />
-                <div>
-                  <h4 className="font-black text-slate-900 leading-none">{flight.airline}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{flight.flight_number}</span>
-                    <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                      <Calendar size={10} /> {formatDisplayDate(flight.departure_time)} (IST)
+              <div className="flex items-center gap-3 mb-5">
+                <img src={flight.logo} className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-xl bg-slate-50 p-1 border border-slate-100" alt={flight.airline} />
+                <div className="flex-1">
+                  <h4 className="font-black text-slate-900 text-sm md:text-base leading-none">{flight.airline}</h4>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                    <span className="text-[9px] md:text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{flight.flight_number}</span>
+                    <span className="text-[9px] md:text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                      <Calendar size={10} /> {formatDisplayDate(flight.departure_time)}
                     </span>
                   </div>
                 </div>
-                <div className="ml-auto flex items-center gap-1.5 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
-                  <UserCheck size={12} />
-                  <span className="text-[10px] font-black uppercase tracking-tight">
-                    {flight.available_seats > 8 ? "9+ Seats Available" : `${flight.available_seats} Seats Left`}
+                {/* SEAT BADGE - Hidden on very small screens to save space, or kept compact */}
+                <div className="hidden sm:flex items-center gap-1.5 bg-green-50 text-green-600 px-2.5 py-1 rounded-lg border border-green-100">
+                  <UserCheck size={10} />
+                  <span className="text-[9px] font-black uppercase tracking-tight">
+                    {flight.available_seats > 5 ? "Available" : `${flight.available_seats} Left`}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 items-center bg-slate-50/50 p-5 rounded-3xl border border-slate-50">
+              {/* ROUTE VISUALIZER */}
+              <div className="grid grid-cols-3 items-center bg-slate-50/80 p-4 md:p-5 rounded-[1.5rem] md:rounded-3xl border border-slate-100">
                 <div className="text-left">
-                  <p className="text-2xl font-black text-slate-900">{flight.origin}</p>
-                  <p className="text-xs font-bold text-slate-500">{formatDisplayTime(flight.departure_time)}</p>
+                  <p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{flight.origin}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-slate-500 mt-1">{formatDisplayTime(flight.departure_time)}</p>
                 </div>
                 
-                <div className="flex flex-col items-center px-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase mb-1">{flight.duration}</span>
-                  <div className="w-full h-[2px] bg-slate-200 relative flex items-center justify-center">
-                    <Plane size={14} className="text-indigo-600 absolute bg-white px-0.5" />
+                <div className="flex flex-col items-center px-2">
+                  <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase mb-1">{flight.duration}</span>
+                  <div className="w-full h-[1.5px] bg-slate-200 relative flex items-center justify-center">
+                    <Plane size={12} className="text-indigo-600 absolute bg-slate-50 px-0.5" />
                   </div>
-                  <span className="text-[9px] font-bold text-indigo-500 mt-1 uppercase tracking-tighter">
+                  <span className="text-[8px] md:text-[9px] font-bold text-indigo-500 mt-1 uppercase text-center leading-tight">
                     {flight.isConnecting ? `${flight.stops} Stop via ${flight.layoverInfo?.city}` : 'Non-stop'}
                   </span>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-2xl font-black text-slate-900">{flight.destination}</p>
-                  <p className="text-xs font-bold text-slate-500">{formatDisplayTime(flight.arrival_time)}</p>
+                  <p className="text-xl md:text-2xl font-black text-slate-900 leading-none">{flight.destination}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-slate-500 mt-1">{formatDisplayTime(flight.arrival_time)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="lg:w-48 flex lg:flex-col items-center justify-between lg:justify-center lg:items-end lg:border-l border-slate-100 lg:pl-8">
-              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Price</p>
-                <p className="text-3xl font-black text-slate-900 tracking-tighter">
-                  <span className="text-lg text-indigo-600 mr-0.5">₹</span>
+            {/* PRICE & ACTION SECTION */}
+            <div className="flex items-center justify-between lg:flex-col lg:justify-center lg:items-end lg:border-l border-slate-100 lg:pl-8 pt-4 lg:pt-0 border-t lg:border-t-0 border-dashed border-slate-200">
+              <div className="text-left lg:text-right">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Grand Total</p>
+                <p className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">
+                  <span className="text-sm md:text-lg text-indigo-600 mr-0.5">₹</span>
                   {Math.round(flight.price).toLocaleString('en-IN')}
                 </p>
-                <p className="text-[9px] font-bold text-blue-600 mt-1 uppercase tracking-tight">Confirmed Fare</p>
               </div>
               <button 
                 onClick={() => onSelectFlight(flight)}
-                className="bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-black hover:bg-indigo-600 transition-all active:scale-95 shadow-lg mt-4 w-full lg:w-auto"
+                className="bg-slate-900 text-white px-6 md:px-8 py-3 rounded-xl md:rounded-2xl font-black text-xs md:text-sm hover:bg-indigo-600 transition-all active:scale-95 shadow-md"
               >
                 Book Now
               </button>
@@ -203,6 +207,14 @@ export default function FlightList({ searchParams, onSelectFlight }: any) {
           </div>
         </div>
       ))}
+
+      {/* FOOTER ADVISORY */}
+      <div className="flex items-start gap-2 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+        <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+        <p className="text-[10px] font-medium text-blue-700 leading-relaxed uppercase tracking-tight">
+          Fares are real-time and include all taxes. Seat availability is subject to change at the time of final booking on the airline portal.
+        </p>
+      </div>
     </div>
   );
 }
