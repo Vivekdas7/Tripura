@@ -1,35 +1,43 @@
 import { Plane, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom'; // Added these
 import { useAuth } from '../contexts/AuthContext';
 
-type HeaderProps = {
-  currentView: 'search' | 'bookings';
-  onViewChange: (view: 'search' | 'bookings') => void;
-};
-
-export default function Header({ currentView, onViewChange }: HeaderProps) {
+// We no longer need the HeaderProps type since the URL handles the state!
+export default function Header() {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleNavClick = (view: 'search' | 'bookings') => {
-    onViewChange(view);
-    setIsMenuOpen(false);
-  };
+  // Helper for NavLink styling to avoid repetition
+  const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    `px-4 py-2 rounded-full text-sm font-bold transition-all ${
+      isActive
+        ? 'bg-orange-100 text-orange-700'
+        : 'text-slate-600 hover:bg-slate-50'
+    }`;
+
+  const mobileNavLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    `w-full text-left px-4 py-4 rounded-xl font-bold transition-all ${
+      isActive
+        ? 'bg-orange-600 text-white shadow-lg shadow-orange-200'
+        : 'bg-slate-50 text-slate-700'
+    }`;
 
   return (
     <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-slate-100">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           
-          {/* --- LOGO --- */}
+          {/* --- LOGO (Now links to Home) --- */}
           <div 
             className="flex items-center gap-2 md:gap-3 cursor-pointer" 
-            onClick={() => handleNavClick('search')}
+            onClick={() => navigate('/')}
           >
             <div className="bg-orange-600 p-1.5 md:p-2 rounded-xl">
-              
+              <Plane className="text-white" size={20} />
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight italic">
@@ -41,26 +49,12 @@ export default function Header({ currentView, onViewChange }: HeaderProps) {
           {/* --- DESKTOP NAVIGATION --- */}
           <div className="hidden md:flex items-center gap-8">
             <nav className="flex gap-1">
-              <button
-                onClick={() => handleNavClick('search')}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                  currentView === 'search'
-                    ? 'bg-orange-100 text-orange-700'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
+              <NavLink to="/" className={navLinkClasses}>
                 Find Flights
-              </button>
-              <button
-                onClick={() => handleNavClick('bookings')}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                  currentView === 'bookings'
-                    ? 'bg-orange-100 text-orange-700'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
+              </NavLink>
+              <NavLink to="/bookings" className={navLinkClasses}>
                 My Bookings
-              </button>
+              </NavLink>
             </nav>
 
             <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
@@ -100,26 +94,20 @@ export default function Header({ currentView, onViewChange }: HeaderProps) {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 p-4 absolute w-full shadow-xl animate-in slide-in-from-top duration-200">
           <nav className="flex flex-col gap-2">
-            <button
-              onClick={() => handleNavClick('search')}
-              className={`w-full text-left px-4 py-4 rounded-xl font-bold ${
-                currentView === 'search'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-slate-50 text-slate-700'
-              }`}
+            <NavLink 
+              to="/" 
+              onClick={() => setIsMenuOpen(false)}
+              className={mobileNavLinkClasses}
             >
               Search Flights
-            </button>
-            <button
-              onClick={() => handleNavClick('bookings')}
-              className={`w-full text-left px-4 py-4 rounded-xl font-bold ${
-                currentView === 'bookings'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-slate-50 text-slate-700'
-              }`}
+            </NavLink>
+            <NavLink 
+              to="/bookings" 
+              onClick={() => setIsMenuOpen(false)}
+              className={mobileNavLinkClasses}
             >
               My Bookings
-            </button>
+            </NavLink>
             <div className="mt-4 p-4 bg-slate-50 rounded-xl">
               <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Logged in as</p>
               <p className="text-sm text-slate-800 font-medium truncate">{user?.email}</p>
