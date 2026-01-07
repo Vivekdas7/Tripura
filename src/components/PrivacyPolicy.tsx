@@ -1,58 +1,64 @@
+import { ArrowLeft, ShieldCheck, Lock, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PrivacyPolicy = () => {
   return (
-    <div className="bg-[#f8fafc] min-h-screen py-16 px-4">
-      <div className="container mx-auto max-w-3xl bg-white p-8 md:p-12 rounded-[3rem] shadow-sm border border-slate-100">
-        <Link 
-          to="/" 
-          className="inline-flex items-center text-indigo-600 font-bold mb-8 hover:gap-2 transition-all"
-        >
-          ← <span className="ml-2">Back to Booking</span>
-        </Link>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Mini Header */}
+      <nav className="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-slate-600 hover:text-indigo-600 transition-colors">
+            <ArrowLeft size={20} />
+            <span className="font-bold text-sm uppercase tracking-tight">Back to Search</span>
+          </Link>
+          <span className="text-slate-400 font-black italic">TripuraFly</span>
+        </div>
+      </nav>
 
-        <h1 className="text-4xl font-black text-slate-900 mb-2">Privacy Policy</h1>
-        <p className="text-slate-400 mb-10 font-medium uppercase tracking-widest text-[10px]">
-          Last Updated: January 2026
-        </p>
+      <div className="max-w-3xl mx-auto px-6 pt-12">
+        <header className="mb-12 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 text-indigo-600 rounded-3xl mb-4">
+            <ShieldCheck size={32} />
+          </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-4">Privacy Policy</h1>
+          <p className="text-slate-500 font-medium">Last Updated: January 2026</p>
+        </header>
 
         <div className="space-y-10">
-          <section>
-            <h3 className="text-xl font-black text-slate-800 mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
-              1. Information We Collect
-            </h3>
-            <p className="text-slate-600 leading-relaxed">
-              We collect personal information that you provide to us, including your name, email address, contact number, and payment details during the booking process. We also collect travel document details required by airlines and government authorities.
+          {/* Section 1 */}
+          <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex items-center gap-3 mb-4 text-indigo-600">
+              <Eye size={22} />
+              <h2 className="text-xl font-black uppercase tracking-tight">Data Collection</h2>
+            </div>
+            <p className="text-slate-600 leading-relaxed font-medium">
+              At TripuraFly, we collect only the essential information needed to book your flights and packages, 
+              including your name, phone number, and travel preferences. We do not sell your personal data 
+              to third-party advertisers.
             </p>
           </section>
 
-          <section>
-            <h3 className="text-xl font-black text-slate-800 mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
-              2. How We Use Your Data
-            </h3>
-            <ul className="space-y-3">
-              {[
-                "To process and confirm your flight bookings.",
-                "To send flight updates and itinerary changes.",
-                "To comply with MBB Airport security regulations.",
-                "For fraud prevention and secure payment processing."
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-slate-600">
-                  <span className="text-indigo-500 mt-1">✓</span> {item}
-                </li>
-              ))}
-            </ul>
+          {/* Section 2 */}
+          <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex items-center gap-3 mb-4 text-orange-500">
+              <Lock size={22} />
+              <h2 className="text-xl font-black uppercase tracking-tight">Booking Security</h2>
+            </div>
+            <p className="text-slate-600 leading-relaxed font-medium">
+              Your contact details are shared only with our verified local partners in Agartala and 
+              airline carriers to ensure your booking is processed within our 15-minute guarantee window.
+            </p>
           </section>
 
-          <div className="bg-indigo-50 p-8 rounded-[2rem] border border-indigo-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">🔒</div>
-            <h3 className="text-indigo-900 font-black mb-3">3. Data Security</h3>
-            <p className="text-indigo-800/80 text-sm leading-relaxed">
-              TripuraFly uses 256-bit SSL encryption to protect your data. We do not store full credit card information on our servers; all payments are handled through PCI-DSS compliant payment gateways.
-            </p>
-          </div>
+          {/* Section 3 */}
+          <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h2 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Contact Our Privacy Team</h2>
+            <div className="bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-200">
+              <p className="text-sm text-slate-500 font-bold mb-1 uppercase tracking-widest">Support Office</p>
+              <p className="text-slate-900 font-black">Maharaja Bir Bikram Airport, Agartala, Tripura</p>
+              <p className="text-indigo-600 font-bold mt-2 underline">support@tripurafly.in</p>
+            </div>
+          </section>
         </div>
       </div>
     </div>

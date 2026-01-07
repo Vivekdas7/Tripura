@@ -10,6 +10,7 @@ import BookingModal from './components/BookingModal';
 import MyBookings from './components/MyBookings';
 import Privacy from './components/PrivacyPolicy';
 import { Flight, supabase } from './lib/supabase';
+import TripuraQuest from './components/TripuraQuest';
 
 // --- TECHNICAL NOTICE BANNER ---
 const TechnicalNotice = () => (
@@ -395,6 +396,7 @@ function App() {
           } />
           <Route path="/bookings" element={<main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/game" element={<TripuraQuest/>} />
         </Routes>
 
         {/* FOOTER */}
