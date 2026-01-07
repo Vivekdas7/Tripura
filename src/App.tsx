@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+/* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
+import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { AlertTriangle, Info } from 'lucide-react'; // Added icons for the notice
 import AuthForm from './components/AuthForm';
