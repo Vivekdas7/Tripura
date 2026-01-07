@@ -189,8 +189,6 @@ function App() {
     </div>
   );
 
-  if (!user) return <AuthForm />;
-
   return (
     <Router>
       <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
@@ -199,6 +197,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={
+            !user ? <AuthForm /> : (
             <>
               {/* HERO SECTION */}
               <section className="relative min-h-[500px] md:h-[650px] flex items-center justify-center overflow-hidden">
@@ -394,8 +393,8 @@ function App() {
 </section>
               </main>
             </>
-          } />
-          <Route path="/bookings" element={<main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
+          )} />
+          <Route path="/bookings" element={!user ? <AuthForm /> : <main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/game" element={<TripuraQuest/>} />
         </Routes>
