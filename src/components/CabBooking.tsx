@@ -6,12 +6,15 @@ import {
   ShieldCheck, MapPin, X, Zap, Info, ChevronRight, Shield, ArrowRight, 
   LocateFixed, Train, Plane, Bus, CreditCard, Wallet, ChevronUp
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 /**
  * CONFIGURATION & CONSTANTS
  */
 const MAPTILER_KEY = "aFQYw5QCur2NKcmDkKaP"; 
 const AGARTALA_CENTER: [number, number] = [91.2863, 23.8315];
+
+
 
 const TRIPURA_HUBS = [
   { name: 'MBB Airport Agartala', detail: 'Singerbhil, Agartala', coords: [91.2416, 23.8878], icon: Plane },
@@ -53,6 +56,37 @@ export default function TripuraGo() {
   const pickupMarker = useRef<maplibregl.Marker | null>(null);
   const destMarker = useRef<maplibregl.Marker | null>(null);
 
+
+  useEffect(() => {
+  const checkActiveRide = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: activeRide } = await supabase
+      .from('rides')
+      .select('*, drivers(*)')
+      .eq('user_id', user.id)
+      .in('status', ['accepted', 'started']) // Find non-completed rides
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (activeRide) {
+      setPickup({ address: activeRide.pickup_address, coords: activeRide.pickup_coords });
+      setDestination({ address: activeRide.dest_address, coords: activeRide.dest_coords });
+      setAssignedDriver({
+        ride_id: activeRide.id,
+        profiles: { full_name: activeRide.drivers.full_name },
+        vehicle_model: activeRide.drivers.vehicle_model,
+        license_plate: activeRide.drivers.license_plate,
+        otp: activeRide.otp
+      });
+      setStep('active');
+    }
+  };
+
+  checkActiveRide();
+}, []);
   // --- MOBILE VIEWPORT & KEYBOARD FIX ---
   useEffect(() => {
     const handleResize = () => {
@@ -160,13 +194,81 @@ export default function TripuraGo() {
 
   useEffect(() => { if (destination.coords) drawRoute(); }, [destination.coords]);
 
-  const confirmBooking = () => {
-    setStep('matching');
-    setTimeout(() => {
-      setAssignedDriver({ profiles: { full_name: 'Biswajit Das' }, vehicle_model: 'Swift Dzire', license_plate: 'TR01-BJ-5521' });
-      setStep('active');
-    }, 2000);
-  };
+const confirmBooking = async () => {
+  setStep('matching');
+  setSliderPos(0);
+
+  try {
+    // 1. Get the current logged-in user (Example for Supabase)
+    // If you are using another auth system, get the ID from there.
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    
+    // For testing: If no user is logged in, we use a placeholder ID 
+    // or tell the user to login.
+    if (!authUser) {
+      console.error("No user logged in");
+      // Optional: alert("Please login to book a ride");
+      // setStep('select');
+      // return;
+    }
+
+    const userId = authUser?.id || "00000000-0000-0000-0000-000000000000"; // Dummy UUID for testing
+
+    // 2. Find an available driver for the selected vehicle type
+    const { data: driver, error: driverError } = await supabase
+      .from('drivers')
+      .select('*')
+      .eq('is_available', true)
+      .eq('vehicle_type', selectedVehicle.id)
+      .limit(1)
+      .single();
+
+    if (driverError || !driver) {
+      alert("No drivers available in Agartala right now.");
+      setStep('select');
+      return;
+    }
+
+    // 3. Generate Ride Details
+    const finalPrice = Math.round(selectedVehicle.base + (routeData?.distance * selectedVehicle.perKm));
+    const rideOtp = Math.floor(1000 + Math.random() * 9000);
+
+    // 4. INSERT into 'rides' table
+    const { data: ride, error: rideError } = await supabase
+      .from('rides')
+      .insert([{
+        user_id: userId,
+        driver_id: driver.id,
+        pickup_address: pickup.address,
+        dest_address: destination.address,
+        pickup_coords: pickup.coords, // Ensure column type is jsonb or point
+        dest_coords: destination.coords,
+        price: finalPrice,
+        status: 'accepted',
+        otp: rideOtp,
+        payment_method: paymentMethod
+      }])
+      .select()
+      .single();
+
+    if (rideError) throw rideError;
+
+    // 5. Success! Update UI
+    setAssignedDriver({
+      profiles: { full_name: driver.full_name },
+      vehicle_model: driver.vehicle_model,
+      license_plate: driver.license_plate,
+      otp: ride.otp // Use OTP from the database
+    });
+    
+    setStep('active');
+
+  } catch (error) {
+    console.error("Booking failed:", error);
+    alert("Something went wrong with the database connection.");
+    setStep('select');
+  }
+};
 
   return (
     <div style={{ height: viewportHeight }} className="w-full relative bg-slate-50 overflow-hidden font-sans select-none">
