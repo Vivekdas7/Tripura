@@ -2,7 +2,7 @@ import { useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User } from 'lucide-react'; // Added icons for navigation
+import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car } from 'lucide-react'; // Added icons for navigation
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import FlightSearch from './components/FlightSearch';
@@ -12,6 +12,8 @@ import MyBookings from './components/MyBookings';
 import Privacy from './components/PrivacyPolicy';
 import { Flight, supabase } from './lib/supabase';
 import TripuraQuest from './components/TripuraQuest';
+import CabBooking from './components/CabBooking';
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 // --- BOTTOM NAVIGATION COMPONENT ---
 const BottomNav = () => {
@@ -23,7 +25,10 @@ const BottomNav = () => {
   const navItems = [
     { path: '/', icon: <Home size={20} />, label: 'Home' },
     { path: '/bookings', icon: <Ticket size={20} />, label: 'Bookings' },
-    { path: '/game', icon: <User size={20} />, label: 'Profile' },
+
+    { path: '/cab-booking', icon: <Car size={20} />, label: 'Cabs' },
+        { path: '/game', icon: <User size={20} />, label: 'Profile' },
+
   ];
 
   return (
@@ -422,6 +427,7 @@ function App() {
           <Route path="/bookings" element={!user ? <AuthForm /> : <main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/game" element={<TripuraQuest/>} />
+          <Route path="/cab-booking" element={<CabBooking/>} />
         </Routes>
 
         {/* FOOTER */}
