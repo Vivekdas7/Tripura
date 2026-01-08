@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
@@ -16,51 +16,44 @@ import CabBooking from './components/CabBooking';
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 // --- BOTTOM NAVIGATION COMPONENT ---
+// --- UPDATED BOTTOM NAVIGATION ---
 const BottomNav = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-  if (!user) return null;
+  // Detect keyboard to hide nav when typing
+  useEffect(() => {
+    const handleResize = () => {
+      // If the window height is significantly small, keyboard is likely open
+      if (window.visualViewport) {
+        setKeyboardVisible(window.visualViewport.height < window.innerHeight * 0.85);
+      }
+    };
+    window.visualViewport?.addEventListener('resize', handleResize);
+    return () => window.visualViewport?.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!user || isKeyboardVisible) return null; // Hide when keyboard is up
 
   const navItems = [
     { path: '/', icon: <Home size={20} />, label: 'Home' },
     { path: '/bookings', icon: <Ticket size={20} />, label: 'Bookings' },
-
     { path: '/cab-booking', icon: <Car size={20} />, label: 'Cabs' },
-        { path: '/game', icon: <User size={20} />, label: 'Profile' },
-
+    { path: '/game', icon: <User size={20} />, label: 'Profile' },
   ];
 
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 z-[100] px-2 pt-3 pb-safe-offset-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-      {/* pb-safe handles the iPhone "Home Bar" spacing automatically */}
+ return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 z-[100] px-2 pt-3 pb-safe-offset-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300">
       <div className="flex justify-around items-center max-w-lg mx-auto pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Link 
-              key={item.path} 
-              to={item.path} 
-              className="flex flex-col items-center min-w-[64px] relative group"
-            >
-              <div className={`
-                relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-300
-                ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:bg-slate-50'}
-              `}>
+            <Link key={item.path} to={item.path} className="flex flex-col items-center min-w-[64px] relative">
+              <div className={`w-12 h-10 rounded-2xl flex items-center justify-center transition-all ${isActive ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}>
                 {item.icon}
-                {/* Active Indicator Dot */}
-                {isActive && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                  </span>
-                )}
               </div>
-              
-              <span className={`
-                text-[9px] mt-1.5 font-black uppercase tracking-[0.1em] transition-colors
-                ${isActive ? 'text-indigo-600' : 'text-slate-400'}
-              `}>
+              <span className={`text-[9px] mt-1.5 font-black uppercase tracking-widest ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
                 {item.label}
               </span>
             </Link>
@@ -70,6 +63,8 @@ const BottomNav = () => {
     </nav>
   );
 };
+
+
 
 // --- TECHNICAL NOTICE BANNER ---
 const TechnicalNotice = () => (

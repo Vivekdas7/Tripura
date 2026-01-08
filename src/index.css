@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  input[type="text"], input[type="number"], input[type="tel"], select {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+  }
+}
