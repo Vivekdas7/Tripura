@@ -42,6 +42,5 @@ export type Passenger = {
   last_name: string;
   email: string;
   phone?: string;
-  date_of_birth: string;
   passport_number?: string;
 };

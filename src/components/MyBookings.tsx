@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Ticket, Plane, Calendar, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Ticket, Plane, Calendar, Users, CheckCircle, XCircle, MapPin, IndianRupee, ArrowRight, MoreVertical } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,14 +10,12 @@ type BookingWithFlight = {
   total_passengers: number;
   total_price: number;
   booking_date: string;
-  flight: {
-    flight_number: string;
-    airline: string;
-    origin: string;
-    destination: string;
-    departure_time: string;
-    arrival_time: string;
-  };
+  airline: string;
+  flight_number: string;
+  origin: string;
+  destination: string;
+  departure_time: string;
+  arrival_time: string;
 };
 
 export default function MyBookings() {
@@ -26,34 +24,19 @@ export default function MyBookings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (user) fetchBookings();
+  }, [user]);
 
   const fetchBookings = async () => {
     try {
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
-          id,
-          booking_reference,
-          status,
-          total_passengers,
-          total_price,
-          booking_date,
-          flight:flights (
-            flight_number,
-            airline,
-            origin,
-            destination,
-            departure_time,
-            arrival_time
-          )
-        `)
+        .select(`id, booking_reference, status, total_passengers, total_price, booking_date, airline, flight_number, origin, destination, departure_time, arrival_time`)
         .eq('user_id', user!.id)
-        .order('booking_date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setBookings(data as any);
+      setBookings(data || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     } finally {
@@ -61,144 +44,116 @@ export default function MyBookings() {
     }
   };
 
-  const handleCancelBooking = async (bookingId: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', bookingId);
-
-      if (error) throw error;
-      fetchBookings();
-    } catch (error) {
-      console.error('Error cancelling booking:', error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-gray-600">Loading your bookings...</p>
-      </div>
-    );
-  }
-
-  if (bookings.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Ticket size={48} className="mx-auto text-gray-400 mb-4" />
-        <p className="text-gray-600">You don't have any bookings yet.</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="w-12 h-12 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <Ticket size={28} className="text-blue-600" />
-        My Bookings
-      </h2>
-
-      {bookings.map((booking) => (
-        <div
-          key={booking.id}
-          className="bg-white rounded-xl shadow-md p-6 border border-gray-200"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  booking.status === 'confirmed'
-                    ? 'bg-green-100 text-green-800'
-                    : booking.status === 'cancelled'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {booking.status === 'confirmed' ? (
-                    <span className="flex items-center gap-1">
-                      <CheckCircle size={16} />
-                      Confirmed
-                    </span>
-                  ) : booking.status === 'cancelled' ? (
-                    <span className="flex items-center gap-1">
-                      <XCircle size={16} />
-                      Cancelled
-                    </span>
-                  ) : (
-                    'Pending'
-                  )}
-                </div>
-                <span className="text-sm font-mono bg-gray-100 px-3 py-1 rounded">
-                  {booking.booking_reference}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 mb-3">
-                <Plane size={20} className="text-blue-600" />
-                <span className="font-semibold text-gray-800">{booking.flight.airline}</span>
-                <span className="text-sm text-gray-500">({booking.flight.flight_number})</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-gray-600">Route</p>
-                  <p className="font-semibold text-gray-800">
-                    {booking.flight.origin} → {booking.flight.destination}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-600 flex items-center gap-1">
-                    <Calendar size={14} />
-                    Departure
-                  </p>
-                  <p className="font-semibold text-gray-800">
-                    {new Date(booking.flight.departure_time).toLocaleString('en-US', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short'
-                    })}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-600 flex items-center gap-1">
-                    <Users size={14} />
-                    Passengers
-                  </p>
-                  <p className="font-semibold text-gray-800">{booking.total_passengers}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-600">Booked on</p>
-                  <p className="font-semibold text-gray-800">
-                    {new Date(booking.booking_date).toLocaleDateString('en-US', {
-                      dateStyle: 'medium'
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="md:text-right md:border-l md:pl-6">
-              <p className="text-sm text-gray-600 mb-1">Total Price</p>
-              <p className="text-3xl font-bold text-blue-600 mb-3">
-                ${booking.total_price.toFixed(2)}
-              </p>
-              {booking.status === 'confirmed' && (
-                <button
-                  onClick={() => handleCancelBooking(booking.id)}
-                  className="px-4 py-2 border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition-colors"
-                >
-                  Cancel Booking
-                </button>
-              )}
-            </div>
+    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+      {/* Premium Header */}
+      <div className="bg-white px-6 pt-12 pb-8 rounded-b-[3rem] shadow-sm mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">My Trips</h2>
+          <div className="bg-indigo-50 p-2 rounded-2xl text-indigo-600">
+            <Ticket size={24} />
           </div>
         </div>
-      ))}
+        <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">
+          You have {bookings.length} active bookings
+        </p>
+      </div>
+
+      <div className="px-6 space-y-8">
+        {bookings.map((booking) => (
+          <div key={booking.id} className="relative animate-in slide-in-from-bottom-4 duration-500">
+            
+            {/* The Main Ticket Card */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden">
+              
+              {/* Airline & Status Bar */}
+              <div className="px-8 py-5 flex justify-between items-center border-b border-dashed border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-[10px]">
+                    {booking.airline.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">Airline</p>
+                    <p className="text-xs font-bold text-slate-800">{booking.airline}</p>
+                  </div>
+                </div>
+                <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                  booking.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                }`}>
+                  {booking.status}
+                </div>
+              </div>
+
+              {/* Journey Path */}
+              <div className="p-8">
+                <div className="flex justify-between items-center relative mb-8">
+                  <div className="z-10 bg-white">
+                    <h4 className="text-4xl font-black text-slate-900 tracking-tighter">{booking.origin}</h4>
+                    <p className="text-[10px] font-black text-slate-400 uppercase mt-1">Departure</p>
+                  </div>
+
+                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
+                    <div className="w-full border-t-2 border-dashed border-slate-100 absolute top-1/2" />
+                    <div className="bg-white px-3 z-20">
+                      <Plane className="text-indigo-600 rotate-90" size={20} />
+                    </div>
+                  </div>
+
+                  <div className="z-10 bg-white text-right">
+                    <h4 className="text-4xl font-black text-slate-900 tracking-tighter">{booking.destination}</h4>
+                    <p className="text-[10px] font-black text-slate-400 uppercase mt-1">Arrival</p>
+                  </div>
+                </div>
+
+                {/* Info Pills */}
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                  <div className="bg-slate-50 p-4 rounded-3xl">
+                    <Calendar className="text-indigo-600 mb-2" size={16} />
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Date</p>
+                    <p className="text-xs font-bold text-slate-800">
+                      {new Date(booking.departure_time).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-3xl">
+                    <Users className="text-indigo-600 mb-2" size={16} />
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Passengers</p>
+                    <p className="text-xs font-bold text-slate-800">{booking.total_passengers} Pax</p>
+                  </div>
+                </div>
+
+                {/* Footer Section */}
+                <div className="flex justify-between items-end pt-2">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Total Paid</p>
+                    <div className="flex items-center gap-1">
+                      <IndianRupee size={14} className="text-slate-900 font-black" />
+                      <span className="text-2xl font-black text-slate-900 leading-none">
+                        {booking.total_price.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Ref Number</p>
+                    <p className="text-xs font-mono font-bold text-indigo-600 tracking-wider">
+                      {booking.booking_reference}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Aesthetic Ticket Perforation (Notches) */}
+            <div className="absolute left-[-8px] top-[72px] w-4 h-8 bg-[#F8FAFC] rounded-r-full shadow-inner" />
+            <div className="absolute right-[-8px] top-[72px] w-4 h-8 bg-[#F8FAFC] rounded-l-full shadow-inner" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
