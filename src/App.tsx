@@ -32,25 +32,42 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-[100] px-6 py-3 pb-8">
-      <div className="flex justify-between items-center max-w-md mx-auto">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 z-[100] px-2 pt-3 pb-safe-offset-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      {/* pb-safe handles the iPhone "Home Bar" spacing automatically */}
+      <div className="flex justify-around items-center max-w-lg mx-auto pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link 
               key={item.path} 
               to={item.path} 
-              className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-indigo-600 scale-110' : 'text-slate-400'}`}
+              className="flex flex-col items-center min-w-[64px] relative group"
             >
-              <div className={`${isActive ? 'bg-indigo-50 p-2 rounded-xl' : 'p-2'}`}>
+              <div className={`
+                relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-300
+                ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:bg-slate-50'}
+              `}>
                 {item.icon}
+                {/* Active Indicator Dot */}
+                {isActive && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                )}
               </div>
-              <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
+              
+              <span className={`
+                text-[9px] mt-1.5 font-black uppercase tracking-[0.1em] transition-colors
+                ${isActive ? 'text-indigo-600' : 'text-slate-400'}
+              `}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };
 
