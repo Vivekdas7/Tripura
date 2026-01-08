@@ -235,106 +235,201 @@ export default function TripuraGo() {
           <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mt-4 mb-2 flex-shrink-0" />
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden ">
           
           {/* --- STEP: SEARCH --- */}
-          {step === 'search' && (
-            <div className="px-6 py-2 h-full flex flex-col overflow-hidden">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Tripura Go</h2>
-                {isKeyboardVisible && (
-                  <button onClick={() => (document.activeElement as HTMLElement)?.blur()} className="text-indigo-600 font-bold text-sm">DONE</button>
-                )}
-              </div>
-              
-              <div className="space-y-3 relative flex-shrink-0">
-                <div className={`flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border-2 transition-all ${activeInput === 'pickup' ? 'border-indigo-600 bg-white ring-4 ring-indigo-50' : 'border-transparent'}`}>
-                  <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />
-                  <input className="flex-1 text-sm font-bold bg-transparent outline-none" placeholder="Pickup location" value={pickup.address} onFocus={() => setActiveInput('pickup')} onChange={(e) => handleSearch(e.target.value, 'pickup')} />
-                </div>
+          {/* --- STEP: SEARCH --- */}
+{step === 'search' && (
+  /* Changed 'flex-col' to 'block' and moved 'overflow-y-auto' to the parent 
+     container to allow the entire content (Title + Inputs + List) to scroll together.
+  */
+  <div className="px-6 py-2 h-full overflow-y-auto no-scrollbar pb-20">
+    {/* 1. Header Section - Now part of the scroll flow */}
+    <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 backdrop-blur-md py-2 z-10">
+      <h2 className="text-2xl font-black text-slate-900 tracking-tight">Search</h2>
+      {isKeyboardVisible && (
+        <button 
+          onClick={() => (document.activeElement as HTMLElement)?.blur()} 
+          className="text-indigo-600 font-bold text-sm bg-indigo-50 px-3 py-1 rounded-full"
+        >
+          DONE
+        </button>
+      )}
+    </div>
+    
+    {/* 2. Inputs Section - These will now scroll up with the list */}
+    <div className="space-y-3 relative mb-6">
+      <div className={`flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border-2 transition-all ${activeInput === 'pickup' ? 'border-indigo-600 bg-white ring-4 ring-indigo-50' : 'border-transparent'}`}>
+        <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />
+        <input 
+          className="flex-1 text-sm font-bold bg-transparent outline-none" 
+          placeholder="Pickup location" 
+          value={pickup.address} 
+          onFocus={() => setActiveInput('pickup')} 
+          onChange={(e) => handleSearch(e.target.value, 'pickup')} 
+        />
+      </div>
 
-                <div className={`flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border-2 transition-all ${activeInput === 'dest' ? 'border-indigo-600 bg-white ring-4 ring-indigo-50' : 'border-transparent'}`}>
-                  <div className="w-2.5 h-2.5 border-2 border-slate-900 rounded-full" />
-                  <input className="flex-1 text-sm font-bold bg-transparent outline-none" placeholder="Where to?" value={destination.address} onFocus={() => setActiveInput('dest')} onChange={(e) => handleSearch(e.target.value, 'dest')} />
-                  {isSyncing ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <Search size={16} className="text-slate-400" />}
-                </div>
-              </div>
+      <div className={`flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border-2 transition-all ${activeInput === 'dest' ? 'border-indigo-600 bg-white ring-4 ring-indigo-50' : 'border-transparent'}`}>
+        <div className="w-2.5 h-2.5 border-2 border-slate-900 rounded-full" />
+        <input 
+          className="flex-1 text-sm font-bold bg-transparent outline-none" 
+          placeholder="Where to?" 
+          value={destination.address} 
+          onFocus={() => setActiveInput('dest')} 
+          onChange={(e) => handleSearch(e.target.value, 'dest')} 
+        />
+        {isSyncing ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <Search size={16} className="text-slate-400" />}
+      </div>
+    </div>
 
-              {/* Suggestions List */}
-              <div className="flex-1 overflow-y-auto mt-4 space-y-1 no-scrollbar pb-20">
-                {(suggestions.length > 0 ? suggestions : TRIPURA_HUBS).map((s: any, i) => (
-                  <button key={i} onClick={() => selectLocation(s)} className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left group">
-                    <div className={`p-3 rounded-xl transition-colors ${s.isHub ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400 group-hover:bg-indigo-100'}`}>
-                      {s.icon ? <s.icon size={20} /> : <MapPin size={20} />}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[15px] font-black text-slate-900 truncate leading-none mb-1">{s.name}</p>
-                      <p className="text-[11px] text-slate-400 font-bold truncate uppercase tracking-widest">{s.detail}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+    {/* 3. Suggestions List - No longer has its own internal scroll */}
+    <div className="space-y-1">
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-3">
+        {suggestions.length > 0 ? 'Search Results' : 'Popular Near You'}
+      </p>
+      
+      {(suggestions.length > 0 ? suggestions : TRIPURA_HUBS).map((s: any, i) => (
+        <button 
+          key={i} 
+          onClick={() => selectLocation(s)} 
+          className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left group active:scale-[0.98]"
+        >
+          <div className={`p-3 rounded-xl transition-colors ${s.isHub ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400 group-hover:bg-indigo-100'}`}>
+            {s.icon ? <s.icon size={20} /> : <MapPin size={20} />}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[15px] font-black text-slate-900 truncate leading-none mb-1">{s.name}</p>
+            <p className="text-[11px] text-slate-400 font-bold truncate uppercase tracking-widest">{s.detail}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 
           {/* --- STEP: SELECT VEHICLE --- */}
-          {step === 'select' && (
-            <div className="h-full flex flex-col overflow-hidden">
-              <div className="px-6 pb-4 border-b border-slate-50 flex-shrink-0">
-                <div className="flex justify-between items-end">
-                  <h3 className="text-xl font-black text-slate-900 italic uppercase">Select Ride</h3>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-indigo-600 uppercase">Trip Distance</p>
-                    <p className="text-lg font-black text-slate-900">{routeData?.distance.toFixed(1)} km</p>
-                  </div>
-                </div>
+           {step === 'select' && (
+  /* The parent now handles the scroll for everything inside it */
+  <div className="h-full flex flex-col bg-slate-50/50 overflow-y-auto no-scrollbar">
+    
+    {/* 1. ELEGANT HEADER - Now part of the scroll flow or sticky */}
+    <div className="sticky top-0 px-6 py-5 bg-white/90 backdrop-blur-xl border-b border-slate-100 z-30 flex justify-between items-center shrink-0">
+      <div>
+        <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none">Choose a Ride</h3>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Agartala Hub Active</p>
+        </div>
+      </div>
+      <div className="bg-slate-900 px-4 py-2 rounded-2xl shadow-lg shadow-slate-200">
+        <p className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter leading-none mb-0.5">Est. Distance</p>
+        <p className="text-sm font-black text-white">{routeData?.distance.toFixed(1)} <span className="text-[10px] opacity-60">KM</span></p>
+      </div>
+    </div>
+
+    {/* 2. PREMIUM VEHICLE CARDS - No longer its own scroll area */}
+    <div className="px-4 pt-4 space-y-4">
+      {VEHICLES.map((v) => {
+        const isSelected = selectedVehicle.id === v.id;
+        const price = Math.round(v.base + (routeData?.distance * v.perKm));
+        
+        return (
+          <button 
+            key={v.id} 
+            onClick={() => setSelectedVehicle(v)} 
+            className={`w-full relative flex items-center justify-between p-5 rounded-[2.2rem] transition-all duration-300 active:scale-[0.96] 
+              ${isSelected 
+                ? 'bg-white border-[3px] border-indigo-600 shadow-xl shadow-indigo-100' 
+                : 'bg-white/60 border-2 border-transparent shadow-sm'
+              }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`relative p-4 rounded-3xl transition-all duration-500 ${isSelected ? 'bg-indigo-600' : 'bg-slate-100'}`}>
+                <v.icon size={26} className={isSelected ? 'text-white' : 'text-slate-600'} />
               </div>
-
-              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 no-scrollbar pb-24">
-                {VEHICLES.map((v) => (
-                  <button 
-                    key={v.id} 
-                    onClick={() => setSelectedVehicle(v)} 
-                    className={`w-full flex items-center justify-between p-5 rounded-[2rem] border-2 transition-all active:scale-[0.98] ${selectedVehicle.id === v.id ? 'border-slate-900 bg-slate-900 text-white shadow-xl' : 'border-slate-50 bg-slate-50/50'}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-2xl transition-all ${selectedVehicle.id === v.id ? 'bg-white/10' : 'bg-white shadow-sm'}`}>
-                        <v.icon size={24} color={selectedVehicle.id === v.id ? 'white' : v.color} />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-black text-sm">{v.name}</p>
-                        <p className={`text-[9px] font-bold ${selectedVehicle.id === v.id ? 'text-white/40' : 'text-slate-400'}`}>{v.desc}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-black tracking-tighter italic leading-none">₹{Math.round(v.base + (routeData?.distance * v.perKm))}</p>
-                      <p className={`text-[9px] mt-1 font-bold ${selectedVehicle.id === v.id ? 'text-indigo-400' : 'text-slate-400'}`}>{v.eta} away</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* PAYMENT & SLIDER FOOTER */}
-              <div className="px-6 py-4 bg-white border-t border-slate-100 flex-shrink-0">
-                <div className="flex items-center justify-between mb-4 bg-slate-50 p-1.5 rounded-3xl">
-                  <button onClick={() => setPaymentMethod('cash')} className={`flex-1 py-2 rounded-2xl text-[11px] font-black uppercase transition-all ${paymentMethod === 'cash' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}>Cash</button>
-                  <button onClick={() => setPaymentMethod('online')} className={`flex-1 py-2 rounded-2xl text-[11px] font-black uppercase transition-all ${paymentMethod === 'online' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}>Online</button>
-                </div>
-
-                <div className="relative h-16 bg-slate-900 rounded-[2rem] overflow-hidden flex items-center">
-                  <div className="absolute inset-y-0 left-0 bg-indigo-600 transition-all duration-75" style={{ width: `${sliderPos}%` }} />
-                  <p className="w-full text-center text-xs font-black text-white/40 uppercase tracking-widest z-10 pointer-events-none">Swipe to Confirm</p>
-                  <input type="range" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" min="0" max="100" value={sliderPos}
-                    onChange={(e) => { const v = parseInt(e.target.value); setSliderPos(v); if (v > 95) confirmBooking(); }}
-                    onMouseUp={() => sliderPos < 95 && setSliderPos(0)} onTouchEnd={() => sliderPos < 95 && setSliderPos(0)}
-                  />
-                  <div className="absolute left-1 w-14 h-14 bg-white rounded-full flex items-center justify-center z-10 transition-all duration-75" style={{ left: `calc(${sliderPos}% - ${sliderPos > 10 ? 56 : 0}px)` }}>
-                    <ArrowRight className="text-slate-900" size={24} />
-                  </div>
-                </div>
+              <div className="text-left">
+                <p className={`font-black text-base tracking-tight ${isSelected ? 'text-slate-900' : 'text-slate-700'}`}>{v.name}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{v.eta} • {v.desc}</p>
               </div>
             </div>
-          )}
+            
+            <div className="text-right">
+              <p className={`text-2xl font-black italic tracking-tighter leading-none ${isSelected ? 'text-indigo-600' : 'text-slate-900'}`}>
+                ₹{price}
+              </p>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+
+    {/* 3. INTEGRATED BOTTOM SECTION - No longer 'fixed' */}
+    <div className="px-4 mt-8 pb-12 space-y-4">
+      <div className="border-t border-slate-200/60 pt-6 mb-2 text-center">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Payment & Confirmation</p>
+      </div>
+        
+      {/* Payment Selector */}
+      <div className="flex bg-white p-1.5 rounded-[2rem] border border-slate-200 shadow-sm">
+        <button 
+          onClick={() => setPaymentMethod('cash')} 
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[1.6rem] text-[11px] font-black uppercase transition-all duration-300
+            ${paymentMethod === 'cash' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+        >
+          <Wallet size={16} /> Cash
+        </button>
+        <button 
+          onClick={() => setPaymentMethod('online')} 
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[1.6rem] text-[11px] font-black uppercase transition-all duration-300
+            ${paymentMethod === 'online' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+        >
+          <CreditCard size={16} /> Online
+        </button>
+      </div>
+
+      {/* Swipe Button */}
+      <div className="relative group">
+        <div className="relative h-20 bg-slate-900 rounded-[2.2rem] overflow-hidden flex items-center p-2 border border-slate-800 shadow-2xl">
+          <div 
+            className="absolute inset-y-0 left-0 bg-indigo-600 transition-all duration-150" 
+            style={{ width: `${sliderPos}%` }} 
+          />
+          
+          <p className="w-full text-center text-[12px] font-black uppercase tracking-[0.3em] z-10 pointer-events-none text-white/40">
+            {sliderPos > 50 ? '' : 'Swipe to Confirm'}
+          </p>
+
+          <input 
+            type="range" 
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40" 
+            min="0" max="100" 
+            value={sliderPos}
+            onChange={(e) => {
+              const v = parseInt(e.target.value);
+              setSliderPos(v);
+              if (v > 94) confirmBooking();
+            }}
+            onMouseUp={() => sliderPos < 94 && setSliderPos(0)}
+            onTouchEnd={() => sliderPos < 94 && setSliderPos(0)}
+          />
+
+          <div 
+            className="absolute w-16 h-16 bg-white rounded-[1.8rem] flex items-center justify-center z-30 shadow-xl pointer-events-none transition-all duration-75" 
+            style={{ left: `calc(${sliderPos}% - ${sliderPos > 15 ? 64 : 0}px)` }}
+          >
+            <ArrowRight className="text-slate-900" size={28} strokeWidth={3} />
+          </div>
+        </div>
+      </div>
+
+      {/* App version or branding footer */}
+      <p className="text-center text-[9px] font-bold text-slate-300 uppercase tracking-widest pt-2">
+        TripuraFly Secure Booking
+      </p>
+    </div>
+  </div>
+)}
 
           {/* --- STEP: MATCHING --- */}
           {step === 'matching' && (
