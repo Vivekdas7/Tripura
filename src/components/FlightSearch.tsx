@@ -1,146 +1,136 @@
 import { useState, useEffect } from 'react';
-import { Search, Calendar as CalendarIcon, ArrowLeftRight, PlaneTakeoff, Info } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ArrowUpDown, PlaneTakeoff, PlaneLanding, Info } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function FlightSearch({ onSearch }: { onSearch: (f: any) => void }) {
+  // Get today's date in YYYY-MM-DD format for the 'min' attribute
+  const today = new Date().toISOString().split('T')[0];
+
   const [origin, setOrigin] = useState('IXA'); 
-  const [destination, setDestination] = useState('');
-  const [date, setDate] = useState('');
-  const [tripType, setTripType] = useState('oneway');
+  const [destination, setDestination] = useState('CCU');
+  const [date, setDate] = useState(today); // Default to today
   const [cheapestFare, setCheapestFare] = useState<string | null>(null);
-  const [loadingFare, setLoadingFare] = useState(false);
 
   useEffect(() => {
-    const fetchLowestPrice = async () => {
+    async function fetchMinPrice() {
       if (origin.length === 3 && destination.length === 3) {
-        setLoadingFare(true);
-        try {
-          const authResponse = await fetch("https://test.api.amadeus.com/v1/security/oauth2/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `grant_type=client_credentials&client_id=4n93Mpcjg4LYGmFkHHEUYlVAuEc18D1t&client_secret=KvSWiE1lTFsN7jxo`,
-          });
-          const { access_token } = await authResponse.json();
-
-          const priceResponse = await fetch(
-            `https://test.api.amadeus.com/v1/shopping/flight-destinations?origin=${origin.toUpperCase()}&oneWay=true`,
-            { headers: { Authorization: `Bearer ${access_token}` } }
-          );
-          const priceData = await priceResponse.json();
-
-          const routeInfo = priceData.data?.find(
-            (item: any) => item.destination === destination.toUpperCase()
-          );
-
-          if (routeInfo) {
-            let price = parseFloat(routeInfo.price.total);
-            let adjustedPrice = price > 7500 ? price * 0.6 : price;
-            setCheapestFare(Math.max(Math.round(adjustedPrice), 2900).toLocaleString('en-IN'));
-          } else {
-            setCheapestFare(null);
-          }
-        } catch (err) {
-          console.error("Fare fetch error:", err);
+        const { data } = await supabase
+          .from('flights')
+          .select('price')
+          .eq('origin', origin.toUpperCase())
+          .eq('destination', destination.toUpperCase())
+          .order('price', { ascending: true })
+          .limit(1);
+        
+        if (data?.[0]) {
+          setCheapestFare(Math.round(data[0].price).toLocaleString('en-IN'));
+        } else {
           setCheapestFare(null);
-        } finally {
-          setLoadingFare(false);
         }
       }
-    };
-
-    const debounceTimer = setTimeout(fetchLowestPrice, 800);
-    return () => clearTimeout(debounceTimer);
+    }
+    fetchMinPrice();
   }, [origin, destination]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (origin.length !== 3 || destination.length !== 3) {
-      alert("Please use 3-letter IATA codes (e.g., IXA, DEL, CCU)");
-      return;
-    }
-    onSearch({ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date, tripType });
-  };
-
   return (
-    <div className="w-full max-w-6xl mx-auto p-2">
-      {/* TRIP TYPE SELECTOR - Scrolled horizontally on very small screens if needed */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
-        <button 
-          onClick={() => setTripType('oneway')}
-          className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${tripType === 'oneway' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
-        >
-          One Way
-        </button>
-        <button disabled className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-50 text-slate-300 cursor-not-allowed border border-dashed border-slate-200 whitespace-nowrap">
-          Round Trip
-        </button>
+    <div className="w-full max-w-md mx-auto p-4 space-y-4">
+      {/* Trip Type Selector */}
+      <div className="flex bg-slate-100 p-1 rounded-2xl w-fit mx-auto">
+        <button type="button" className="px-6 py-2 bg-white rounded-xl text-[10px] font-black uppercase shadow-sm">One Way</button>
+        <button type="button" className="px-6 py-2 text-slate-400 text-[10px] font-black uppercase">Round Trip</button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-3">
-        {/* ROUTE INPUTS - Stacked on mobile, Grid on desktop */}
-        <div className="flex-grow grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center relative gap-2 md:gap-0">
-          <div className="relative">
-            <PlaneTakeoff className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              placeholder="From (IXA)" 
-              className="w-full p-4 pl-12 bg-slate-50 rounded-2xl md:rounded-r-none border-r-0 md:border-r border-slate-200 outline-none focus:ring-2 ring-indigo-500/20 font-bold uppercase placeholder:text-slate-300 transition-all"
-              value={origin} onChange={e => setOrigin(e.target.value)} maxLength={3}
-            />
-          </div>
+      <form 
+        onSubmit={(e) => { e.preventDefault(); onSearch({ origin, destination, date }); }}
+        className="space-y-3"
+      >
+        {/* ROUTE CARD */}
+        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-2 relative">
           
-          {/* Swap Button - Center of mobile and desktop */}
-          <div className="flex justify-center -my-4 md:my-0 z-10">
-            <button 
-              type="button" 
-              onClick={() => {setOrigin(destination); setDestination(origin)}} 
-              className="p-3 bg-white shadow-xl border border-slate-100 rounded-full hover:rotate-180 transition-all duration-500 group"
-            >
-              <ArrowLeftRight size={18} className="text-indigo-600 group-hover:scale-110" />
-            </button>
+          {/* Origin Input */}
+          <div className="flex items-center p-4 gap-4 border-b border-slate-50">
+            <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 shrink-0">
+              <PlaneTakeoff size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">From</p>
+              <input 
+                className="w-full bg-transparent outline-none font-black text-2xl text-slate-900"
+                value={origin}
+                onChange={e => setOrigin(e.target.value.toUpperCase())}
+                maxLength={3}
+                placeholder="Origin"
+              />
+            </div>
           </div>
 
-          <input 
-            placeholder="To (DEL)" 
-            className="w-full p-4 md:pl-8 bg-slate-50 rounded-2xl md:rounded-l-none outline-none focus:ring-2 ring-indigo-500/20 font-bold uppercase placeholder:text-slate-300 transition-all"
-            value={destination} onChange={e => setDestination(e.target.value)} maxLength={3}
-          />
+          {/* Floating Swap Button */}
+          <button 
+            type="button"
+            onClick={() => {setOrigin(destination); setDestination(origin)}}
+            className="absolute right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg border-4 border-white active:scale-90 transition-transform"
+          >
+            <ArrowUpDown size={20} />
+          </button>
+
+          {/* Destination Input */}
+          <div className="flex items-center p-4 gap-4">
+            <div className="w-10 h-10 bg-rose-50 rounded-full flex items-center justify-center text-rose-600 shrink-0">
+              <PlaneLanding size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">To</p>
+              <input 
+                className="w-full bg-transparent outline-none font-black text-2xl text-slate-900"
+                value={destination}
+                onChange={e => setDestination(e.target.value.toUpperCase())}
+                maxLength={3}
+                placeholder="Destination"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* DATE PICKER */}
-        <div className="relative group lg:w-72">
-          <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="date" 
-            className="w-full p-4 pl-12 bg-slate-50 rounded-2xl outline-none font-bold focus:ring-2 ring-indigo-500/20 transition-all"
-            value={date} onChange={e => setDate(e.target.value)} required
-          />
-          {cheapestFare && !loadingFare && (
-            <div className="absolute -top-3 right-4 bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded-md shadow-lg animate-in zoom-in duration-300">
-              BEST ₹{cheapestFare}
+        {/* DATE CARD */}
+        <div className="bg-white rounded-[2rem] shadow-lg border border-slate-100 p-5 flex items-center gap-4">
+          <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 shrink-0">
+            <CalendarIcon size={20} />
+          </div>
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Travel Date</p>
+              {cheapestFare && (
+                <span className="text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded">FROM ₹{cheapestFare}</span>
+              )}
             </div>
-          )}
-          {loadingFare && (
-            <div className="absolute -top-3 right-4 bg-slate-400 text-white text-[9px] font-black px-2 py-1 rounded-md animate-pulse">
-              CHECKING...
-            </div>
-          )}
+            <input 
+              type="date"
+              className="w-full bg-transparent outline-none font-black text-lg text-slate-900 appearance-none"
+              value={date}
+              min={today} // Prevents selection of past dates
+              onChange={e => setDate(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        {/* INFO BADGE */}
+        <div className="flex items-center gap-2 px-6 py-2">
+          <Info size={12} className="text-slate-400" />
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+            Direct flights from {origin} to {destination} available
+          </p>
         </div>
 
         {/* SEARCH BUTTON */}
-        <button type="submit" className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95">
-          <Search size={20} />
-          <span className="md:inline">Search Flights</span>
+        <button 
+          type="submit"
+          className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
+        >
+          <Search size={18} />
+          Search Flights
         </button>
       </form>
-
-      {/* DYNAMIC FOOTNOTE */}
-      {cheapestFare && (
-        <div className="mt-4 md:mt-3 flex items-start gap-2 text-slate-400 px-1">
-          <Info size={14} className="text-indigo-500 mt-0.5 shrink-0" />
-          <p className="text-[10px] font-bold uppercase tracking-tight leading-relaxed">
-            Real-time data: Lowest available fare for <span className="text-slate-900">{origin}-{destination}</span> this month is <span className="text-green-600">₹{cheapestFare}</span>.
-          </p>
-        </div>
-      )}
     </div>
   );
 }

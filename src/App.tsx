@@ -97,6 +97,7 @@ const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void 
   </div>
 );
 
+
 // --- PACKAGE MODAL ---
 const PackageModal = ({ pkg, onClose, onConfirm }: { pkg: any, onClose: () => void, onConfirm: (details: any) => void }) => {
   const [details, setDetails] = useState({ date: '', travelers: 1, phone: '' });
