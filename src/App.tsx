@@ -302,10 +302,15 @@ function App() {
                   <FlightSearch onSearch={handleSearch} />
                 </div>
               </div>
+              <div className='m-5 flex items-center justify-between'>
+                <TechnicalNotice/>
 
-              <main className="container mx-auto px-4 py-16">
+              </div>
+              
+
+              <main className="container mx-auto px-4 py-1">
                 {/* DYNAMIC FLIGHT LIST SECTION */}
-                <div className="mb-24">
+                <div className="mb-5">
                   {activeSearch ? (
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
@@ -316,7 +321,7 @@ function App() {
                       </div>
                       
                       {/* --- THE NOTICE MESSAGE --- */}
-                      <TechnicalNotice/>
+                      
                       
 
                       <FlightList 
