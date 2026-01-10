@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car } from 'lucide-react'; // Added icons for navigation
+import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane } from 'lucide-react'; // Added icons for navigation
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import FlightSearch from './components/FlightSearch';
@@ -67,19 +67,50 @@ const BottomNav = () => {
 
 
 // --- TECHNICAL NOTICE BANNER ---
-const TechnicalNotice = () => (
-  <div className="mb-6 bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-start gap-4 animate-in fade-in slide-in-from-top duration-500">
-    <div className="bg-orange-500 p-2 rounded-lg text-white mt-0.5">
-      <AlertTriangle size={18} />
+const TechnicalNotice = () => {
+ const scrollText = "✨ UNLOCK UNBEATABLE FARES FOR YOUR NEXT JOURNEY • BOOK UP TO 60 DAYS IN ADVANCE FOR MAXIMUM SAVINGS • THE SKY IS CALLING: AIR INDIA EXPRESS & INDIGO ROUTES NOW FULLY RESTORED • TRAVEL SMARTER, FLY CHEAPER • LIMITED SEATS AT BASE PRICES • ✨ ";
+
+  return (
+    <div className="mb-6 overflow-hidden bg-[#0A2351] rounded-2xl shadow-lg border border-white/10 group">
+      {/* Top Header - Static */}
+      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-[#0A2351] to-[#163a7a]">
+        <div className="flex items-center gap-2">
+          <div className="bg-orange-500 p-1.5 rounded-lg">
+            
+          </div>
+          <span className="text-[13px] font-black text-white uppercase tracking-tight">
+            Flash Sale <span className="text-orange-400">Live</span>
+          </span>
+        </div>
+        <Plane size={18} className="text-white/30 rotate-45" />
+      </div>
+
+      {/* Moving Text Loop (Marquee) */}
+      <div className="bg-white/5 py-2.5 border-t border-white/5 relative flex items-center">
+        <div className="flex whitespace-nowrap animate-marquee">
+          <span className="text-xs font-bold text-blue-100 uppercase tracking-widest px-4">
+            {scrollText}
+          </span>
+          <span className="text-xs font-bold text-blue-100 uppercase tracking-widest px-4">
+            {scrollText}
+          </span>
+        </div>
+      </div>
+
+      {/* CSS for the loop - Add this to your Global CSS or style tag */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: flex;
+          animation: marquee 25s linear infinite;
+        }
+      `}} />
     </div>
-    <div>
-      <h4 className="text-sm font-black text-orange-900 uppercase tracking-tight">System Update in Progress</h4>
-      <p className="text-xs text-orange-800 leading-relaxed font-medium mt-1">
-        Due to a technical outrage with our low-cost carrier partners, we are currently showing <span className="font-black">Air India</span> flights only. We apologize for the inconvenience and are working to restore IndiGo and other airlines shortly.
-      </p>
-    </div>
-  </div>
-);
+  );
+};
 
 // --- SUCCESS POPUP ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
@@ -285,7 +316,8 @@ function App() {
                       </div>
                       
                       {/* --- THE NOTICE MESSAGE --- */}
-                      <TechnicalNotice />
+                      <TechnicalNotice/>
+                      
 
                       <FlightList 
                         searchParams={activeSearch} 
@@ -300,6 +332,7 @@ function App() {
                     </div>
                   )}
                 </div>
+                 
 
                 {/* PACKAGES SECTION */}
                 <section className="mb-16 md:mb-24 px-0 md:px-0">
@@ -395,45 +428,7 @@ function App() {
                   </div>
                 </section>
 
-                {/* FEATURES SECTION */}
-                <section className="bg-indigo-950 rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 text-white overflow-hidden">
-                  <div className="grid lg:grid-cols-2 gap-10 md:gap-12 items-center">
-                    <div className="text-center lg:text-left">
-                      <h2 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 leading-tight">
-                        Why <span className="text-orange-500">TripuraFly?</span>
-                      </h2>
-                      <p className="text-indigo-200 text-sm md:text-base mb-6 md:mb-8 max-w-md mx-auto lg:mx-0">
-                        We are Tripura's local travel tech partner, offering fares integrated directly with regional carriers.
-                      </p>
-                      <button 
-                        onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} 
-                        className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-900/20"
-                      >
-                        Start Searching
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                      {[
-                        { icon: "🚀", title: "Instant", desc: "E-Tickets" },
-                        { icon: "🔒", title: "Secure", desc: "Payments" },
-                        { icon: "🎧", title: "24/7", desc: "Local Support" },
-                        { icon: "🎟️", title: "Best", desc: "Regional Fares" }
-                      ].map((feature, index) => (
-                        <div 
-                          key={index} 
-                          className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] hover:bg-white/10 transition-colors"
-                        >
-                          <div className="text-2xl md:text-3xl mb-2">{feature.icon}</div>
-                          <h4 className="text-white font-black text-sm md:text-lg leading-none">{feature.title}</h4>
-                          <p className="text-indigo-300 text-[10px] md:text-xs font-bold uppercase mt-1 tracking-tighter">
-                            {feature.desc}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </section>
+                
               </main>
             </>
           )} />

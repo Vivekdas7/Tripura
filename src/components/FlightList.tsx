@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Plane, User, Clock, ShieldCheck, Filter, AlertCircle } from 'lucide-react';
 import { supabase, type Flight } from '../lib/supabase';
 
-// Helper to get real logos based on airline name
 const getAirlineMeta = (name: string) => {
   const n = name.toLowerCase();
   if (n.includes('indigo')) return { code: '6E', color: '#001b94' };
@@ -13,6 +12,16 @@ const getAirlineMeta = (name: string) => {
   return { code: 'G8', color: '#000000' };
 };
 
+// Helper function to extract HH:mm directly from the DB string
+// Use this to bypass JavaScript Timezone manipulation
+const formatTimeDirectly = (dbString: string) => {
+  if (!dbString) return "--:--";
+  // database format is usually "2026-01-15 10:30:00" or "2026-01-15T10:30:00"
+  // We just want the part between the space/T and the last colon
+  const timePart = dbString.includes('T') ? dbString.split('T')[1] : dbString.split(' ')[1];
+  return timePart.substring(0, 5); // Returns "10:30"
+};
+
 export default function FlightList({ searchParams, onSelectFlight }: { searchParams: any, onSelectFlight: (f: Flight) => void }) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,137 +30,125 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
   useEffect(() => {
     async function fetchFlights() {
       if (!searchParams.origin || !searchParams.destination || !searchParams.date) return;
+      
       setLoading(true);
       setError(null);
 
       try {
-        const start = `${searchParams.date}T00:00:00.000Z`;
-        const end = `${searchParams.date}T23:59:59.999Z`;
+        const dateStr = searchParams.date; 
+        const dayStart = `${dateStr} 00:00:00`;
+        const dayEnd = `${dateStr} 23:59:59`;
 
         const { data, error: dbError } = await supabase
           .from('flights')
           .select('*')
           .eq('origin', searchParams.origin.toUpperCase())
           .eq('destination', searchParams.destination.toUpperCase())
-          .gte('departure_time', start)
-          .lte('departure_time', end)
-          .order('price', { ascending: true });
+          .gte('departure_time', dayStart)
+          .lte('departure_time', dayEnd)
+          .order('departure_time', { ascending: true });
 
         if (dbError) throw dbError;
         setFlights((data as Flight[]) || []);
       } catch (err: any) {
-        setError("Unable to reach servers. Check connection.");
+        setError("Unable to find flights.");
       } finally {
         setLoading(false);
       }
     }
     fetchFlights();
-  }, [searchParams]);
+  }, [searchParams.origin, searchParams.destination, searchParams.date, searchParams.timestamp]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-      <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Searching Best Fares...</p>
+    <div className="flex flex-col items-center justify-center py-24">
+      <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
+      <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Searching Database...</p>
     </div>
   );
 
-  if (error || (flights.length === 0 && !loading && searchParams.date)) return (
-    <div className="mx-4 mt-10 p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
-      <AlertCircle className="mx-auto text-slate-300 mb-3" size={40} />
-      <p className="text-slate-500 font-bold text-sm">No flights found for this route on {searchParams.date}.</p>
-      <button onClick={() => window.location.reload()} className="mt-4 text-indigo-600 font-black text-xs uppercase">Try Again</button>
+  if (flights.length === 0 && !loading) return (
+    <div className="mx-6 mt-10 p-10 bg-slate-50 rounded-[3rem] text-center border-2 border-dashed border-slate-200">
+      <AlertCircle className="mx-auto text-slate-300 mb-4" size={40} />
+      <p className="text-slate-500 font-black text-sm uppercase tracking-tighter">No Flights for {searchParams.date}</p>
     </div>
   );
 
   return (
-    <div className="px-3 pb-20 space-y-4 max-w-4xl mx-auto mt-6">
-      {/* Search Header for Mobile */}
-      <div className="flex items-center justify-between px-2 mb-6">
-        <h3 className="text-xl font-black text-slate-900">Available Flights</h3>
-        <button className="p-2 bg-slate-100 rounded-xl text-slate-600"><Filter size={18} /></button>
-      </div>
-
+    <div className="px-4 pb-24 space-y-5 max-w-2xl mx-auto mt-4">
       {flights.map((f) => {
         const meta = getAirlineMeta(f.airline);
-        const depTime = new Date(f.departure_time);
-        const arrTime = new Date(f.arrival_time);
-        const durationHr = Math.abs(arrTime.getTime() - depTime.getTime()) / 36e5;
 
         return (
-          <div key={f.id} className="bg-white rounded-[2.5rem] p-5 shadow-sm border border-slate-100 active:scale-[0.98] transition-transform">
-            {/* Top Row: Airline & Flight No */}
-            <div className="flex justify-between items-center mb-5">
+          <div 
+            key={f.id} 
+            onClick={() => onSelectFlight(f)}
+            className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 active:scale-[0.97] transition-all cursor-pointer"
+          >
+            {/* Top Row */}
+            <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <img 
-                  src={`https://pics.avs.io/200/200/${meta.code}.png`} 
-                  alt={f.airline}
-                  className="w-10 h-10 object-contain rounded-xl bg-slate-50 p-1 border border-slate-50"
-                />
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl p-2">
+                  <img src={`https://pics.avs.io/200/200/${meta.code}.png`} alt={f.airline} className="w-full h-full object-contain" />
+                </div>
                 <div>
                   <h4 className="font-black text-slate-900 text-sm leading-none">{f.airline}</h4>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{f.flight_number} • {f.aircraft_type}</span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">{f.flight_number}</p>
                 </div>
               </div>
-              <div className="bg-green-50 text-green-600 px-3 py-1 rounded-full flex items-center gap-1">
-                <ShieldCheck size={12} />
-                <span className="text-[10px] font-black uppercase tracking-tight">On Time</span>
+              <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <ShieldCheck size={12} strokeWidth={3} />
+                <span className="text-[9px] font-black uppercase">Confirmed Fare</span>
               </div>
             </div>
 
-            {/* Middle Row: The Journey */}
-            <div className="flex items-center justify-between bg-slate-50/80 p-5 rounded-[2rem] border border-slate-100 mb-5">
-              <div className="text-center">
-                <p className="text-2xl font-black text-slate-900">{f.origin}</p>
-                <p className="text-[11px] font-bold text-slate-500">{depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            {/* Middle Row - Journey with EXACT Time Strings */}
+            <div className="flex items-center justify-between px-2 mb-8">
+              <div className="text-left">
+                <p className="text-2xl font-black text-slate-900 leading-none">{f.origin}</p>
+                {/* EXACT TIME FROM DB */}
+                <p className="text-sm font-black text-indigo-600 mt-2">
+                  {formatTimeDirectly(f.departure_time)}
+                </p>
               </div>
 
-              <div className="flex-grow flex flex-col items-center px-4">
-                <span className="text-[9px] font-black text-slate-400 uppercase mb-1">{durationHr.toFixed(1)}h Direct</span>
-                <div className="w-full h-[2px] bg-slate-200 relative flex items-center justify-center">
-                  <div className="absolute w-2 h-2 bg-indigo-600 rounded-full border-2 border-white" />
-                  <div className="w-full border-t border-dashed border-slate-300" />
-                  <Plane size={14} className="absolute text-indigo-600 bg-slate-50 px-0.5 rotate-90" />
+              <div className="flex-1 px-4 flex flex-col items-center">
+                <span className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">{f.duration}</span>
+                <div className="w-full h-[1px] bg-slate-100 relative flex items-center justify-center">
+                  <Plane size={14} className="text-indigo-600 rotate-90 bg-white px-0.5" />
                 </div>
-                <span className="text-[9px] font-bold text-indigo-500 mt-1 uppercase tracking-tighter italic">Economy</span>
+                <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mt-2">Direct</span>
               </div>
 
-              <div className="text-center">
-                <p className="text-2xl font-black text-slate-900">{f.destination}</p>
-                <p className="text-[11px] font-bold text-slate-500">{arrTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <div className="text-right">
+                <p className="text-2xl font-black text-slate-900 leading-none">{f.destination}</p>
+                {/* EXACT TIME FROM DB */}
+                <p className="text-sm font-black text-indigo-600 mt-2">
+                  {formatTimeDirectly(f.arrival_time)}
+                </p>
               </div>
             </div>
 
-            {/* Bottom Row: Price & Action */}
-            <div className="flex items-center justify-between pl-2">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 text-orange-600 mb-0.5">
-                  <User size={10} strokeWidth={3} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">{f.available_seats} Seats Left</span>
+            {/* Bottom Row */}
+            <div className="flex items-center justify-between border-t border-slate-50 pt-5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500">
+                  <User size={14} />
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-bold text-slate-400 italic">₹</span>
-                  <span className="text-3xl font-black text-slate-900 tracking-tighter">
-                    {Number(f.price).toLocaleString('en-IN')}
-                  </span>
-                </div>
+                <p className="text-[9px] font-black text-slate-400 uppercase leading-none">
+                  {f.available_seats} Seats Left
+                </p>
               </div>
               
-              <button 
-                onClick={() => onSelectFlight(f)}
-                className="bg-slate-900 text-white px-10 py-4 rounded-[1.8rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-colors"
-              >
-                Select
-              </button>
+              <div className="text-right">
+                <div className="flex items-center gap-1">
+                   <span className="text-xs font-bold text-slate-900">₹</span>
+                   <span className="text-3xl font-black text-slate-900 tracking-tighter">{f.price.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           </div>
         );
       })}
-      
-      {/* Trust Badge for Mobile */}
-      <div className="py-6 flex items-center justify-center gap-2 opacity-40">
-        <ShieldCheck size={14} />
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Secure Database Booking</span>
-      </div>
     </div>
   );
 }
