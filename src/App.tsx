@@ -14,6 +14,7 @@ import { Flight, supabase } from './lib/supabase';
 import TripuraQuest from './components/TripuraQuest';
 import CabBooking from './components/CabBooking';
 import SupportPage from './components/Support';
+import AdminDashboard from './components/AdminDashboard';
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 // --- BOTTOM NAVIGATION COMPONENT ---
@@ -341,7 +342,7 @@ function App() {
                  
 
                 {/* PACKAGES SECTION */}
-                <section className="mb-16 md:mb-24 px-0 md:px-0">
+                <section className="mb-3 md:mb-24 px-0 md:px-0">
                   <div className="flex items-end justify-between mb-6 md:mb-8">
                     <div>
                       <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
@@ -434,7 +435,9 @@ function App() {
                   </div>
                 </section>
 
-                
+                 <p className="text-center text-slate-300 text-[10px] font-black uppercase tracking-widest">
+          TripuraFly v2.4.0 • Encrypted Connection
+        </p>
               </main>
             </>
           )} />
@@ -443,6 +446,7 @@ function App() {
           <Route path="/game" element={<TripuraQuest/>} />
           <Route path="/cab-booking" element={<CabBooking/>} />
           <Route path="/support" element={<SupportPage/>} />
+          <Route path="/admin-pannel-vivekdas" element={<AdminDashboard/>} />
         </Routes>
 
         {/* FOOTER */}

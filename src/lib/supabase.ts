@@ -36,6 +36,7 @@ export type Booking = {
 };
 
 export type Passenger = {
+  date_of_birth: string | number | readonly string[] | undefined;
   id?: string;
   booking_id?: string;
   first_name: string;
