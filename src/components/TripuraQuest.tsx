@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Phone, ShieldCheck, LogOut, ChevronRight, Plane, 
   Wallet, Settings, Bell, Save, Star, Armchair, Coffee, 
@@ -23,6 +24,7 @@ type TravelPrefs = {
 
 export default function MyProfile() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate(); // Navigation hook initialized
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState<ProfileStats>({ 
@@ -63,7 +65,6 @@ export default function MyProfile() {
         phone: data.phone || '',
         passport: data.passport || ''
       });
-      // Assuming preferences are stored in a jsonb column or separate table
       if (data.preferences) setPrefs(data.preferences);
     }
   };
@@ -81,9 +82,8 @@ export default function MyProfile() {
       const spent = data.reduce((sum, item) => sum + Number(item.total_price), 0);
       const count = data.length;
       
-      // Tier Logic & Progress Calculation
       let userTier: ProfileStats['tier'] = 'Explorer';
-      let progress = (count / 5) * 100; // Progress to Silver
+      let progress = (count / 5) * 100;
 
       if (count >= 10) {
         userTier = 'Platinum';
@@ -118,7 +118,6 @@ export default function MyProfile() {
       });
 
     if (!error) {
-       // Simple custom toast logic could go here
        console.log("Saved");
     }
     setSaving(false);
@@ -255,7 +254,6 @@ export default function MyProfile() {
           </div>
 
           <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 space-y-6">
-            {/* Seat Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
@@ -279,7 +277,6 @@ export default function MyProfile() {
               </div>
             </div>
 
-            {/* Meal Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
@@ -313,8 +310,17 @@ export default function MyProfile() {
           <div className="grid grid-cols-2 gap-4">
             <MenuButton icon={<History className="text-blue-500" />} label="History" />
             <MenuButton icon={<CreditCard className="text-purple-500" />} label="Cards" />
-            <MenuButton icon={<Globe className="text-emerald-500" />} label="Support" />
-            <MenuButton icon={<Lock className="text-rose-500" />} label="Privacy" />
+            <MenuButton 
+              icon={<Globe className="text-emerald-500" />} 
+              label="Support" 
+              onClick={() => navigate('/support')}
+            />
+            <MenuButton 
+             icon= {<Lock className="text-rose-500" />}
+              label="Privacy" 
+              onClick={() => navigate('/privacy')}
+            />
+           
           </div>
         </section>
 
@@ -334,14 +340,17 @@ export default function MyProfile() {
   );
 }
 
-// Reusable Menu Button Component
-function MenuButton({ icon, label }: { icon: React.ReactNode, label: string }) {
+// Reusable Menu Button Component - UPDATED to handle onClick
+function MenuButton({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick?: () => void }) {
   return (
-    <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex flex-col items-center gap-3 active:scale-95 transition-all shadow-sm">
+    <button 
+      onClick={onClick}
+      className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex flex-col items-center gap-3 active:scale-95 transition-all shadow-sm hover:border-indigo-100 hover:shadow-md w-full"
+    >
       <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center">
         {icon}
       </div>
       <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{label}</span>
-    </div>
+    </button>
   );
 }

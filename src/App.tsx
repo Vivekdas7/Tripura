@@ -13,6 +13,7 @@ import Privacy from './components/PrivacyPolicy';
 import { Flight, supabase } from './lib/supabase';
 import TripuraQuest from './components/TripuraQuest';
 import CabBooking from './components/CabBooking';
+import SupportPage from './components/Support';
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 // --- BOTTOM NAVIGATION COMPONENT ---
@@ -441,6 +442,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/game" element={<TripuraQuest/>} />
           <Route path="/cab-booking" element={<CabBooking/>} />
+          <Route path="/support" element={<SupportPage/>} />
         </Routes>
 
         {/* FOOTER */}
