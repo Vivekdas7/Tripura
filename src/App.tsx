@@ -212,12 +212,57 @@ const PackageModal = ({ pkg, onClose, onConfirm }: { pkg: any, onClose: () => vo
 };
 
 // --- LOADER ---
-const FullScreenLoader = () => (
-  <div className="fixed inset-0 z-[1200] flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-md">
-    <div className="w-24 h-24 border-4 border-white/20 border-t-orange-500 rounded-full animate-spin"></div>
-    <div className="mt-6 text-center text-white font-bold tracking-widest uppercase">Processing Request</div>
-  </div>
-);
+const FullScreenLoader = () => {
+  return (
+    <div className="fixed inset-0 z-[1200] flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-xl">
+      {/* Flight Path Container */}
+      <div className="relative w-64 h-1 bg-white/10 rounded-full overflow-hidden mb-8">
+        {/* The Animated Airbus A320 */}
+        <div className="absolute top-1/2 -translate-y-1/2 animate-fly-horizontal">
+          <Plane 
+            size={32} 
+            className="text-orange-500 fill-orange-500 rotate-90" 
+          />
+        </div>
+        
+        {/* Progress Glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent animate-pulse" />
+      </div>
+
+      {/* Loading Text */}
+      <div className="text-center">
+        <h2 className="text-white font-black tracking-[0.3em] uppercase text-sm animate-pulse">
+          Processing Request
+        </h2>
+        <p className="text-slate-500 text-[9px] font-bold uppercase mt-2 tracking-widest">
+          Preparing your boarding passes...
+        </p>
+      </div>
+
+      {/* Tailwind & CSS Animation injected for the Flight */}
+      <style>{`
+        @keyframes fly-horizontal {
+          0% {
+            left: -10%;
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            left: 110%;
+            opacity: 0;
+          }
+        }
+        .animate-fly-horizontal {
+          animation: fly-horizontal 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+      `}</style>
+    </div>
+  );}
 
 const FeatureCard = ({ icon, title, desc }: { icon: string, title: string, desc: string }) => (
   <div className="flex flex-col items-center text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-white/20 transition-all">
