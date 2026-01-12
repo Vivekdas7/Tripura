@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane, Gift } from 'lucide-react'; // Added icons for navigation
+import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane, Gift, Zap } from 'lucide-react'; // Added icons for navigation
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import FlightSearch from './components/FlightSearch';
@@ -75,47 +75,60 @@ const TechnicalNotice = () => {
   const scrollText = "✨ UNLOCK UNBEATABLE FARES FOR YOUR NEXT JOURNEY • BOOK UP TO 60 DAYS IN ADVANCE FOR MAXIMUM SAVINGS • THE SKY IS CALLING: AIR INDIA EXPRESS & INDIGO ROUTES NOW FULLY RESTORED • TRAVEL SMARTER, FLY CHEAPER • LIMITED SEATS AT BASE PRICES • ✨ ";
 
   return (
-    <div className="mb-6 overflow-hidden bg-[#0A2351] rounded-2xl shadow-lg border border-white/10 group">
-      {/* Top Header - Static */}
+    <div className="mx-4 md:mx-0 mb-6 overflow-hidden bg-[#0A2351] rounded-[1.5rem] md:rounded-2xl shadow-xl border border-white/10 group">
+      
+      {/* 1. Header Row - Responsive Flex */}
       <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-[#0A2351] to-[#163a7a]">
         <div className="flex items-center gap-2">
-          <div className="bg-orange-500 p-1.5 rounded-lg shadow-inner">
-             
+          <div className="bg-orange-500 p-1.5 rounded-lg shadow-lg">
+             <Zap size={14} className="text-white fill-white" />
           </div>
-          <span className="text-[13px] font-black text-white uppercase tracking-tight">
+          <span className="text-xs md:text-[13px] font-black text-white uppercase tracking-tight">
             Flash Sale <span className="text-orange-400">Live</span>
           </span>
         </div>
         
-        {/* NEW: Highlighted Offer Badge */}
-        <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/20 animate-pulse">
+        {/* Pulsing Reward Badge */}
+        <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full border border-white/20 animate-pulse">
           <Gift size={12} className="text-orange-400" />
-          <span className="text-[10px] font-black text-white uppercase tracking-wider">
+          <span className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-wider">
             Limited Reward
           </span>
         </div>
       </div>
 
-      {/* NEW: Highlighted Amazon Voucher Offer */}
-      <div className="px-4 py-4 bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-transparent border-y border-orange-500/20">
-        <p className="text-sm font-black text-white leading-tight">
-          <span className="text-orange-400">EXCITING CASHBACK:</span> BUY <span className="underline decoration-orange-500 underline-offset-4">5 TICKETS</span> A YEAR & GET A <span className="bg-orange-500 text-slate-900 px-2 py-0.5 rounded italic">FLAT ₹500/-</span> AMAZON GIFT VOUCHER! 🎟️✨
-        </p>
+      {/* 2. Amazon Voucher Section - Highly Highlighted */}
+      <div className="px-5 py-5 bg-gradient-to-br from-orange-500/20 via-orange-500/5 to-transparent border-y border-orange-500/20 relative">
+        {/* Subtle Background Glow for Mobile */}
+        <div className="absolute top-0 right-0 w-24 h-full bg-orange-500/10 blur-2xl rounded-full" />
+        
+        <div className="relative z-10">
+          <p className="text-[13px] md:text-sm font-black text-white leading-relaxed md:leading-tight">
+            <span className="text-orange-400 block mb-1 md:inline md:mb-0">
+              🔥 EXCITING CASHBACK:
+            </span>
+            {" "}BUY <span className="text-white border-b-2 border-orange-500 pb-0.5">5 TICKETS</span> A YEAR & GET A 
+            <span className="mx-2 bg-orange-500 text-slate-900 px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.4)] italic inline-block transform -rotate-1">
+              FLAT ₹500/-
+            </span> 
+            AMAZON GIFT VOUCHER! 🎟️
+          </p>
+        </div>
       </div>
 
-      {/* Moving Text Loop (Marquee) */}
-      <div className="bg-white/5 py-2.5 relative flex items-center">
-        <div className="flex whitespace-nowrap animate-marquee">
-          <span className="text-[11px] font-bold text-blue-100/60 uppercase tracking-widest px-4">
+      {/* 3. Moving Text Loop - Faster on Mobile, Smoother on Desktop */}
+      <div className="bg-black/20 py-3 relative flex items-center">
+        <div className="flex whitespace-nowrap animate-marquee group-hover:pause">
+          <span className="text-[10px] md:text-[11px] font-bold text-blue-100/40 uppercase tracking-[0.2em] px-4">
             {scrollText}
           </span>
-          <span className="text-[11px] font-bold text-blue-100/60 uppercase tracking-widest px-4">
+          <span className="text-[10px] md:text-[11px] font-bold text-blue-100/40 uppercase tracking-[0.2em] px-4">
             {scrollText}
           </span>
         </div>
       </div>
 
-      {/* CSS for the loop */}
+      {/* CSS Animations */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -123,12 +136,17 @@ const TechnicalNotice = () => {
         }
         .animate-marquee {
           display: flex;
-          animation: marquee 35s linear infinite;
+          animation: marquee 30s linear infinite;
+        }
+        .group-hover\\:pause:hover {
+          animation-play-state: paused;
         }
       `}} />
     </div>
   );
 };
+
+
 
 
 
