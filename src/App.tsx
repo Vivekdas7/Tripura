@@ -290,16 +290,90 @@ function App() {
             !user ? <AuthForm /> : (
             <>
               {/* HERO SECTION */}
-              <section className="relative min-h-[500px] md:h-[650px] flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                  <img src="https://img.staticmb.com/mbcontent/images/crop/uploads/2023/5/agartala-airport_0_1200.jpg" className="w-full h-full object-cover brightness-[0.35]" alt="Agartala" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-slate-900/90"></div>
-                </div>
-                <div className="relative z-10 container mx-auto px-4 text-center text-white">
-                  <span className="inline-block px-4 py-1.5 mb-6 bg-orange-600 text-xs font-bold uppercase tracking-[0.2em] rounded-full">Tripura's #1 Flight Provider</span>
-                  <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-6 tracking-tighter">Your Journey <br/> <span className="text-orange-500">Starts Here.</span></h1>
-                </div>
-              </section>
+                <section className="relative h-[90vh] md:h-[800px] flex items-center justify-center overflow-hidden bg-slate-950">
+  {/* Video Background Layer */}
+  <div className="absolute inset-0 z-0">
+    <video
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="w-full h-full object-cover scale-110"
+    >
+      <source src="assets/video.mp4" type="video/mp4" />
+    </video>
+    {/* Cinematic Overlays */}
+    <div className="absolute inset-0 bg-black/40" />
+    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80" />
+  </div>
+
+  {/* Center Content Container */}
+  <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
+    
+    {/* 1. Top Badge */}
+    <div className="mb-6 px-4 py-1.5 bg-orange-600/20 backdrop-blur-md border border-orange-500/30 rounded-full">
+      <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.3em]">
+        TripuraFly Exclusive
+      </span>
+    </div>
+
+    {/* 2. Hero Heading */}
+    <div className="text-center mb-8">
+      <h1 className="text-6xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter">
+        BEYOND<br/>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
+          CLOUDS.
+        </span>
+      </h1>
+    </div>
+
+    {/* 3. CENTER MARQUEE - Modern Pill Design */}
+    <div className="w-full max-w-[90vw] md:max-w-2xl bg-white/5 backdrop-blur-2xl border border-white/10 py-4 rounded-[2rem] overflow-hidden shadow-2xl relative">
+      <div className="flex whitespace-nowrap animate-marquee-center">
+        {[1, 2].map((_, i) => (
+          <div key={i} className="flex items-center gap-10 px-4">
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full shadow-[0_0_8px_#f97316]" />
+              Direct Flights to Agartala
+            </span>
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full shadow-[0_0_8px_#f97316]" />
+              Free Meal on 3rd Booking
+            </span>
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full shadow-[0_0_8px_#f97316]" />
+              Explore Unseen Tripura
+            </span>
+          </div>
+        ))}
+      </div>
+      
+      {/* Side Fades for Marquee Clarity */}
+      <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white/5 to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white/5 to-transparent z-10" />
+    </div>
+
+    {/* 4. Sub-caption */}
+    <p className="mt-8 text-white/40 text-[9px] font-bold uppercase tracking-[0.6em]">
+      Premium Travel Reimagined
+    </p>
+
+  </div>
+
+  {/* Bottom Interaction Hint */}
+ 
+
+  <style dangerouslySetInnerHTML={{ __html: `
+    @keyframes marquee-center {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee-center {
+      display: flex;
+      animation: marquee-center 20s linear infinite;
+    }
+  `}} />
+</section>
 
               {/* SEARCH BAR POSITIONED OVER HERO */}
               <div className="container mx-auto px-4 -mt-12 md:-mt-20 relative z-20">
