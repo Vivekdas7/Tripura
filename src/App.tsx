@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane } from 'lucide-react'; // Added icons for navigation
+import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane, Gift } from 'lucide-react'; // Added icons for navigation
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import FlightSearch from './components/FlightSearch';
@@ -69,37 +69,53 @@ const BottomNav = () => {
 
 
 // --- TECHNICAL NOTICE BANNER ---
+
+
 const TechnicalNotice = () => {
- const scrollText = "✨ UNLOCK UNBEATABLE FARES FOR YOUR NEXT JOURNEY • BOOK UP TO 60 DAYS IN ADVANCE FOR MAXIMUM SAVINGS • THE SKY IS CALLING: AIR INDIA EXPRESS & INDIGO ROUTES NOW FULLY RESTORED • TRAVEL SMARTER, FLY CHEAPER • LIMITED SEATS AT BASE PRICES • ✨ ";
+  const scrollText = "✨ UNLOCK UNBEATABLE FARES FOR YOUR NEXT JOURNEY • BOOK UP TO 60 DAYS IN ADVANCE FOR MAXIMUM SAVINGS • THE SKY IS CALLING: AIR INDIA EXPRESS & INDIGO ROUTES NOW FULLY RESTORED • TRAVEL SMARTER, FLY CHEAPER • LIMITED SEATS AT BASE PRICES • ✨ ";
 
   return (
     <div className="mb-6 overflow-hidden bg-[#0A2351] rounded-2xl shadow-lg border border-white/10 group">
       {/* Top Header - Static */}
       <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-[#0A2351] to-[#163a7a]">
         <div className="flex items-center gap-2">
-          <div className="bg-orange-500 p-1.5 rounded-lg">
-            
+          <div className="bg-orange-500 p-1.5 rounded-lg shadow-inner">
+             
           </div>
           <span className="text-[13px] font-black text-white uppercase tracking-tight">
             Flash Sale <span className="text-orange-400">Live</span>
           </span>
         </div>
-        <Plane size={18} className="text-white/30 rotate-45" />
+        
+        {/* NEW: Highlighted Offer Badge */}
+        <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/20 animate-pulse">
+          <Gift size={12} className="text-orange-400" />
+          <span className="text-[10px] font-black text-white uppercase tracking-wider">
+            Limited Reward
+          </span>
+        </div>
+      </div>
+
+      {/* NEW: Highlighted Amazon Voucher Offer */}
+      <div className="px-4 py-4 bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-transparent border-y border-orange-500/20">
+        <p className="text-sm font-black text-white leading-tight">
+          <span className="text-orange-400">EXCITING CASHBACK:</span> BUY <span className="underline decoration-orange-500 underline-offset-4">5 TICKETS</span> A YEAR & GET A <span className="bg-orange-500 text-slate-900 px-2 py-0.5 rounded italic">FLAT ₹500/-</span> AMAZON GIFT VOUCHER! 🎟️✨
+        </p>
       </div>
 
       {/* Moving Text Loop (Marquee) */}
-      <div className="bg-white/5 py-2.5 border-t border-white/5 relative flex items-center">
+      <div className="bg-white/5 py-2.5 relative flex items-center">
         <div className="flex whitespace-nowrap animate-marquee">
-          <span className="text-xs font-bold text-blue-100 uppercase tracking-widest px-4">
+          <span className="text-[11px] font-bold text-blue-100/60 uppercase tracking-widest px-4">
             {scrollText}
           </span>
-          <span className="text-xs font-bold text-blue-100 uppercase tracking-widest px-4">
+          <span className="text-[11px] font-bold text-blue-100/60 uppercase tracking-widest px-4">
             {scrollText}
           </span>
         </div>
       </div>
 
-      {/* CSS for the loop - Add this to your Global CSS or style tag */}
+      {/* CSS for the loop */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -107,12 +123,14 @@ const TechnicalNotice = () => {
         }
         .animate-marquee {
           display: flex;
-          animation: marquee 25s linear infinite;
+          animation: marquee 35s linear infinite;
         }
       `}} />
     </div>
   );
 };
+
+
 
 // --- SUCCESS POPUP ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
