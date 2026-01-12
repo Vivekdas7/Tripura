@@ -16,6 +16,14 @@ type ProfileStats = {
   nextTierProgress: number;
 };
 
+const handleSignOut = async () => {
+  const { error } = await supabase.auth.signOut({ scope: 'local' });
+  if (error) console.error("Sign out error:", error.message);
+  
+  // Optional: Manually redirect to ensure the UI resets
+  window.location.href = '/login'; 
+};
+
 type TravelPrefs = {
   seat: 'Window' | 'Aisle' | 'Extra Legroom';
   meal: 'Veg' | 'Non-Veg' | 'Vegan';
@@ -326,7 +334,7 @@ export default function MyProfile() {
 
         {/* 6. SIGN OUT */}
         <button 
-          onClick={() => signOut()}
+          onClick={() => handleSignOut()}
           className="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl shadow-slate-200"
         >
           <LogOut size={18} /> Secure Logout
