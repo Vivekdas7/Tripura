@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 /* Changed BrowserRouter to HashRouter below to fix Vercel 404 errors */
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane, Gift, Zap } from 'lucide-react'; // Added icons for navigation
+import { AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, Sparkles, ChevronRight, Plane, Gift, Zap, Utensils } from 'lucide-react'; // Added icons for navigation
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import FlightSearch from './components/FlightSearch';
@@ -69,8 +69,6 @@ const BottomNav = () => {
 
 
 // --- TECHNICAL NOTICE BANNER ---
-
-
 const TechnicalNotice = () => {
   const scrollText = "✨ UNLOCK UNBEATABLE FARES FOR YOUR NEXT JOURNEY • BOOK UP TO 60 DAYS IN ADVANCE FOR MAXIMUM SAVINGS • THE SKY IS CALLING: AIR INDIA EXPRESS & INDIGO ROUTES NOW FULLY RESTORED • TRAVEL SMARTER, FLY CHEAPER • LIMITED SEATS AT BASE PRICES • ✨ ";
 
@@ -84,39 +82,43 @@ const TechnicalNotice = () => {
              <Zap size={14} className="text-white fill-white" />
           </div>
           <span className="text-xs md:text-[13px] font-black text-white uppercase tracking-tight">
-            Flash Sale <span className="text-orange-400">Live</span>
+            Exclusive <span className="text-orange-400">Offer</span>
           </span>
         </div>
         
         {/* Pulsing Reward Badge */}
-        <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full border border-white/20 animate-pulse">
-          <Gift size={12} className="text-orange-400" />
-          <span className="text-[9px] md:text-[10px] font-black text-white uppercase tracking-wider">
-            Limited Reward
+        <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30 animate-pulse">
+          <Gift size={12} className="text-emerald-400" />
+          <span className="text-[9px] md:text-[10px] font-black text-emerald-400 uppercase tracking-wider">
+            Loyalty Perk
           </span>
         </div>
       </div>
 
-      {/* 2. Amazon Voucher Section - Highly Highlighted */}
-      <div className="px-5 py-5 bg-gradient-to-br from-orange-500/20 via-orange-500/5 to-transparent border-y border-orange-500/20 relative">
+      {/* 2. Free Meal Section - Highly Highlighted */}
+      <div className="px-5 py-5 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent border-y border-emerald-500/20 relative">
         {/* Subtle Background Glow for Mobile */}
-        <div className="absolute top-0 right-0 w-24 h-full bg-orange-500/10 blur-2xl rounded-full" />
+        <div className="absolute top-0 right-0 w-24 h-full bg-emerald-500/10 blur-2xl rounded-full" />
         
-        <div className="relative z-10">
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="hidden md:flex w-12 h-12 bg-emerald-500 rounded-2xl items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+            <Utensils size={24} className="text-white" />
+          </div>
+          
           <p className="text-[13px] md:text-sm font-black text-white leading-relaxed md:leading-tight">
-            <span className="text-orange-400 block mb-1 md:inline md:mb-0">
-              🔥 EXCITING CASHBACK:
+            <span className="text-emerald-400 block mb-1 md:inline md:mb-0">
+              🍱 LOYALTY REWARD:
             </span>
-            {" "}BUY <span className="text-white border-b-2 border-orange-500 pb-0.5">5 TICKETS</span> A YEAR & GET A 
-            <span className="mx-2 bg-orange-500 text-slate-900 px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.4)] italic inline-block transform -rotate-1">
-              FLAT ₹500/-
+            {" "}COMPLETE YOUR <span className="text-white border-b-2 border-emerald-500 pb-0.5">3RD BOOKING</span> AND UNLOCK A 
+            <span className="mx-2 bg-emerald-500 text-slate-900 px-3 py-1 rounded shadow-[0_0_15px_rgba(16,185,129,0.4)] italic inline-block transform -rotate-1">
+              FREE DELUXE MEAL
             </span> 
-            AMAZON GIFT VOUCHER! 🎟️
+            ON YOUR NEXT FLIGHT! ✈️
           </p>
         </div>
       </div>
 
-      {/* 3. Moving Text Loop - Faster on Mobile, Smoother on Desktop */}
+      {/* 3. Moving Text Loop */}
       <div className="bg-black/20 py-3 relative flex items-center">
         <div className="flex whitespace-nowrap animate-marquee group-hover:pause">
           <span className="text-[10px] md:text-[11px] font-bold text-blue-100/40 uppercase tracking-[0.2em] px-4">
@@ -136,7 +138,7 @@ const TechnicalNotice = () => {
         }
         .animate-marquee {
           display: flex;
-          animation: marquee 30s linear infinite;
+          animation: marquee 35s linear infinite;
         }
         .group-hover\\:pause:hover {
           animation-play-state: paused;
@@ -145,10 +147,6 @@ const TechnicalNotice = () => {
     </div>
   );
 };
-
-
-
-
 
 // --- SUCCESS POPUP ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
