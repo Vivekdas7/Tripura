@@ -16,14 +16,6 @@ type ProfileStats = {
   nextTierProgress: number;
 };
 
-const handleSignOut = async () => {
-  const { error } = await supabase.auth.signOut({ scope: 'local' });
-  if (error) console.error("Sign out error:", error.message);
-  
-  // Optional: Manually redirect to ensure the UI resets
-  window.location.href = '/'; 
-};
-
 type TravelPrefs = {
   seat: 'Window' | 'Aisle' | 'Extra Legroom';
   meal: 'Veg' | 'Non-Veg' | 'Vegan';
@@ -31,22 +23,20 @@ type TravelPrefs = {
 };
 
 export default function MyProfile() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate(); // Navigation hook initialized
+  const { user, signOut } = useAuth(); // Using signOut from context
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState<ProfileStats>({ 
     totalBookings: 0, totalSpent: 0, tier: 'Explorer', nextTierProgress: 0 
   });
   
-  // Profile Form State
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
     passport: ''
   });
 
-  // Preferences State
   const [prefs, setPrefs] = useState<TravelPrefs>({
     seat: 'Window',
     meal: 'Veg',
@@ -122,13 +112,19 @@ export default function MyProfile() {
         phone: formData.phone,
         passport: formData.passport,
         preferences: prefs,
+        tier: stats.tier, // Syncing the calculated tier to the database
         updated_at: new Date()
       });
 
     if (!error) {
-       console.log("Saved");
+       console.log("Profile and Tier saved successfully");
     }
     setSaving(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   if (loading) {
@@ -205,8 +201,6 @@ export default function MyProfile() {
       </div>
 
       <div className="px-6 mt-10 space-y-8">
-        
-        {/* 3. PERSONAL INFORMATION */}
         <section className="space-y-4">
           <div className="flex justify-between items-center px-2">
             <div className="flex items-center gap-2">
@@ -254,7 +248,6 @@ export default function MyProfile() {
           </div>
         </section>
 
-        {/* 4. TRAVEL PREFERENCES */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-2">
             <Heart size={18} className="text-rose-500" />
@@ -308,7 +301,6 @@ export default function MyProfile() {
           </div>
         </section>
 
-        {/* 5. QUICK MENU & SECURITY */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-2">
             <Smartphone size={18} className="text-slate-900" />
@@ -328,13 +320,11 @@ export default function MyProfile() {
               label="Privacy" 
               onClick={() => navigate('/privacy')}
             />
-           
           </div>
         </section>
 
-        {/* 6. SIGN OUT */}
         <button 
-          onClick={() => handleSignOut()}
+          onClick={handleSignOut}
           className="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl shadow-slate-200"
         >
           <LogOut size={18} /> Secure Logout
@@ -348,7 +338,6 @@ export default function MyProfile() {
   );
 }
 
-// Reusable Menu Button Component - UPDATED to handle onClick
 function MenuButton({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick?: () => void }) {
   return (
     <button 
