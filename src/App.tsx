@@ -137,33 +137,7 @@ const BottomNav = () => {
 };
 
 // --- ADDITIONAL UI: LOYALTY COMPONENT ---
-const LoyaltyBanner = () => (
-  <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-black rounded-[2.5rem] p-8 relative overflow-hidden border border-white/5 mb-12">
-    <div className="absolute top-0 right-0 p-8 opacity-10">
-      <Star size={120} className="text-white rotate-12" />
-    </div>
-    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-      <div className="w-20 h-20 bg-orange-500 rounded-3xl flex items-center justify-center shadow-2xl rotate-3">
-        <Sparkles size={40} className="text-white" />
-      </div>
-      <div className="text-center md:text-left">
-        <h3 className="text-white text-2xl font-black mb-2">TripuraFly Silver Member</h3>
-        <p className="text-slate-400 text-sm max-w-md">You're just 2 bookings away from Gold Tier. Unlock lounge access at MBB Airport and free priority check-in.</p>
-      </div>
-      <div className="flex-1 flex justify-end w-full">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-3xl w-full md:w-64">
-          <div className="flex justify-between text-[10px] font-black text-white uppercase tracking-widest mb-2">
-            <span>Progress</span>
-            <span>60%</span>
-          </div>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-500 w-[60%] rounded-full shadow-[0_0_10px_#f97316]" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+
 
 // --- IMPROVED SUCCESS POPUP ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
@@ -350,7 +324,7 @@ function App() {
                     )}
                   </div>
 
-                  <LoyaltyBanner />
+                 
 
                   {/* PACKAGE SHOWCASE */}
                   <section className="mb-24 overflow-hidden">
