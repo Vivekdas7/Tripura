@@ -459,7 +459,7 @@ function App() {
                 </main>
 
                 {/* PREMIUM FOOTER */}
-                <footer className="bg-slate-950 pt-24 pb-40 md:pb-12 text-white">
+                {/* <footer className="bg-slate-950 pt-24 pb-40 md:pb-12 text-white">
                   <div className="container mx-auto px-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
                       <div className="col-span-1 md:col-span-2 space-y-8">
@@ -510,7 +510,7 @@ function App() {
                       </div>
                     </div>
                   </div>
-                </footer>
+                </footer> */}
             </div>
           )} />
           
