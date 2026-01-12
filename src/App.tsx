@@ -310,6 +310,8 @@ function App() {
                   </div>
                 </section>
 
+                
+
                 {/* SEARCH INTERFACE */}
                 <div className="container mx-auto px-4 -mt-16 md:-mt-24 relative z-20">
                   <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.1)] border border-slate-100">
@@ -443,7 +445,7 @@ function App() {
                   {/* STATS SECTION */}
                   <section className="grid grid-cols-2 md:grid-cols-4 gap-8 py-20 border-t border-slate-100">
                     {[
-                      { val: "12K+", label: "Happy Flyers" },
+                      { val: "10+", label: "Happy Flyers" },
                       { val: "4.9/5", label: "User Rating" },
                       { val: "100%", label: "Safe Booking" },
                       { val: "24/7", label: "Local Support" }
@@ -526,9 +528,13 @@ function App() {
         {showBookingModal && selectedFlight && (
           <BookingModal flight={selectedFlight} onClose={() => setShowBookingModal(false)} onBookingComplete={() => setShowBookingModal(false)} />
         )}
-        {bookingPackage && (
-          <Package pkg={bookingPackage} onClose={() => setBookingPackage(null)} onConfirm={confirmPackageBooking} />
-        )}
+       {bookingPackage && (
+  <PackageModal 
+    pkg={bookingPackage} 
+    onClose={() => setBookingPackage(null)} 
+    onConfirmSubmit={confirmPackageBooking} // Change from onConfirm to onConfirmSubmit
+  />
+)}
         {showSuccess && completedBooking && (
           <SuccessPopup details={completedBooking} onClose={() => setShowSuccess(false)} />
         )}
