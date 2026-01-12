@@ -21,7 +21,7 @@ const handleSignOut = async () => {
   if (error) console.error("Sign out error:", error.message);
   
   // Optional: Manually redirect to ensure the UI resets
-  window.location.href = '/login'; 
+  window.location.href = '/'; 
 };
 
 type TravelPrefs = {
