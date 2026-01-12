@@ -6,7 +6,8 @@ import {
   AlertTriangle, Info, Home, Ticket, Gamepad2, Shield, User, Car, 
   Sparkles, ChevronRight, Plane, Gift, Zap, Utensils, Star, 
   Clock, MapPin, Phone, Mail, Globe, ArrowRight, ShieldCheck, 
-  Navigation, CreditCard, Heart, Search, Menu, X, Trash2, Camera
+  Navigation, CreditCard, Heart, Search, Menu, X, Trash2, Camera,
+  Package
 } from 'lucide-react'; 
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
@@ -526,7 +527,7 @@ function App() {
           <BookingModal flight={selectedFlight} onClose={() => setShowBookingModal(false)} onBookingComplete={() => setShowBookingModal(false)} />
         )}
         {bookingPackage && (
-          <PackageModal pkg={bookingPackage} onClose={() => setBookingPackage(null)} onConfirm={confirmPackageBooking} />
+          <Package pkg={bookingPackage} onClose={() => setBookingPackage(null)} onConfirm={confirmPackageBooking} />
         )}
         {showSuccess && completedBooking && (
           <SuccessPopup details={completedBooking} onClose={() => setShowSuccess(false)} />
