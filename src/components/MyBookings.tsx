@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import TechnicalNotice from './TechnicalNotice';
 
 type BookingWithFlight = {
   id: string;
@@ -66,8 +67,11 @@ export default function MyBookings() {
           <div>
             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-1">Your Journey</p>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight italic">My Bookings</h2>
+
+            
           </div>
           <div className="flex flex-col items-end">
+            
              <div className="bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-black">
                {bookings.length} TRIPS
              </div>
