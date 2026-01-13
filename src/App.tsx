@@ -116,23 +116,39 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-slate-900/90 backdrop-blur-3xl border border-white/10 z-[100] rounded-[2.5rem] px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-      <div className="flex justify-around items-center">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link key={item.path} to={item.path} className="flex flex-col items-center group">
-              <div className={`w-14 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-orange-500 text-white scale-110 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : 'text-slate-500 hover:text-white'}`}>
-                {item.icon}
-              </div>
-              <span className={`text-[8px] mt-1.5 font-black uppercase tracking-widest transition-opacity duration-300 ${isActive ? 'opacity-100 text-orange-500' : 'opacity-40 text-white'}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+    /* OUTER WRAPPER: 
+       Positioned at the true bottom (0).
+       Uses safe-area-inset-bottom to push the content above system buttons.
+    */
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pointer-events-none">
+      <nav className="pointer-events-auto max-w-lg mx-auto bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] px-2 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <div className="flex justify-around items-center">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                className="flex flex-col items-center group min-w-[64px]"
+              >
+                <div className={`w-12 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+                  isActive 
+                  ? 'bg-orange-500 text-white scale-110 shadow-[0_0_20px_rgba(249,115,22,0.4)]' 
+                  : 'text-slate-500'
+                }`}>
+                  {item.icon}
+                </div>
+                <span className={`text-[8px] mt-1.5 font-black uppercase tracking-widest transition-opacity duration-300 ${
+                  isActive ? 'opacity-100 text-orange-500' : 'opacity-40 text-white'
+                }`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
   );
 };
 
