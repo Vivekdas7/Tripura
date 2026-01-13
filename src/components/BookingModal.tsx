@@ -103,7 +103,7 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
     const totalPrice = selectedFare.price * numPassengers;
 
     const options = {
-      key: "rzp_test_S1BdtCVZVrDIDS", 
+      key: "rzp_test_S3FjWJ4FfvIzCb", 
       amount: totalPrice * 100, 
       currency: "INR",
       name: "TripuraFly",
