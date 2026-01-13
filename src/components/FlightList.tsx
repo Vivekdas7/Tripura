@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Plane, User, Clock, ShieldCheck, Filter, AlertCircle, Lock } from 'lucide-react';
-import { supabase, type Flight } from '../lib/supabase';
+import { Plane, User, Clock, ShieldCheck, Filter, AlertCircle, Lock, MapPin } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+// --- Updated Interface to include DB changes ---
+export interface Flight {
+  id: string;
+  airline: string;
+  flight_number: string;
+  origin: string;
+  destination: string;
+  via?: string | null;      // NEW: Stoppage airport
+  stops: number;            // NEW: Number of stops
+  departure_time: string;
+  arrival_time: string;
+  price: number;
+  duration: string;
+  available_seats: number;
+  total_seats: number;
+}
 
 const getAirlineMeta = (name: string) => {
   const n = name.toLowerCase();
@@ -14,6 +31,7 @@ const getAirlineMeta = (name: string) => {
 
 const formatTimeDirectly = (dbString: string) => {
   if (!dbString) return "--:--";
+  // Handles both ISO strings (T) and standard space separators
   const timePart = dbString.includes('T') ? dbString.split('T')[1] : dbString.split(' ')[1];
   return timePart.substring(0, 5);
 };
@@ -74,6 +92,7 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
       {flights.map((f) => {
         const meta = getAirlineMeta(f.airline);
         const isSoldOut = f.available_seats <= 0;
+        const hasStops = f.stops > 0;
 
         return (
           <div 
@@ -93,7 +112,7 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
               </div>
             )}
 
-            {/* Top Row */}
+            {/* Top Row: Airline Info & Badge */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl p-2">
@@ -106,15 +125,15 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
               </div>
               <div className={`${isSoldOut ? 'bg-slate-100 text-slate-400' : 'bg-emerald-50 text-emerald-600'} px-3 py-1.5 rounded-full flex items-center gap-1.5`}>
                 <ShieldCheck size={12} strokeWidth={3} />
-                <span className="text-[9px] font-black uppercase">
+                <span className="text-[9px] font-black uppercase tracking-tight">
                   {isSoldOut ? 'Unavailable' : 'Confirmed Fare'}
                 </span>
               </div>
             </div>
 
-            {/* Middle Row */}
+            {/* Middle Row: Route & Stoppage Logic */}
             <div className="flex items-center justify-between px-2 mb-8">
-              <div className="text-left">
+              <div className="text-left w-20">
                 <p className="text-2xl font-black text-slate-900 leading-none">{f.origin}</p>
                 <p className={`text-sm font-black mt-2 ${isSoldOut ? 'text-slate-400' : 'text-indigo-600'}`}>
                   {formatTimeDirectly(f.departure_time)}
@@ -124,12 +143,24 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
               <div className="flex-1 px-4 flex flex-col items-center">
                 <span className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">{f.duration}</span>
                 <div className="w-full h-[1px] bg-slate-100 relative flex items-center justify-center">
-                  <Plane size={14} className={`${isSoldOut ? 'text-slate-300' : 'text-indigo-600'} rotate-90 bg-white px-0.5`} />
+                  <div className={`absolute w-1.5 h-1.5 rounded-full z-10 ${hasStops ? 'bg-orange-500' : 'bg-slate-200'}`} />
+                  <Plane size={14} className={`${isSoldOut ? 'text-slate-300' : 'text-indigo-600'} rotate-90 bg-white px-0.5 z-20`} />
                 </div>
-                <span className={`text-[8px] font-black uppercase tracking-widest mt-2 ${isSoldOut ? 'text-slate-300' : 'text-indigo-400'}`}>Direct</span>
+                
+                {/* Dynamic Stop Text */}
+                <div className={`flex items-center gap-1 mt-2 font-black uppercase tracking-[0.1em] text-[8px] ${isSoldOut ? 'text-slate-300' : hasStops ? 'text-orange-500' : 'text-indigo-400'}`}>
+                  {hasStops ? (
+                    <>
+                      <MapPin size={8} />
+                      {f.stops} {f.stops === 1 ? 'Stop' : 'Stops'} {f.via ? `via ${f.via}` : ''}
+                    </>
+                  ) : (
+                    'Non-Stop'
+                  )}
+                </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right w-20">
                 <p className="text-2xl font-black text-slate-900 leading-none">{f.destination}</p>
                 <p className={`text-sm font-black mt-2 ${isSoldOut ? 'text-slate-400' : 'text-indigo-600'}`}>
                   {formatTimeDirectly(f.arrival_time)}
@@ -137,24 +168,30 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
               </div>
             </div>
 
-            {/* Bottom Row */}
+            {/* Bottom Row: Price & Seats */}
             <div className="flex items-center justify-between border-t border-slate-50 pt-5">
               <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSoldOut ? 'bg-slate-100 text-slate-400' : 'bg-orange-50 text-orange-500'}`}>
                   {isSoldOut ? <Lock size={14} /> : <User size={14} />}
                 </div>
-                <p className={`text-[9px] font-black uppercase leading-none ${isSoldOut ? 'text-red-500' : 'text-slate-400'}`}>
-                  {isSoldOut ? 'Sold Out' : `${f.available_seats} Seats Left`}
-                </p>
+                <div>
+                  <p className={`text-[9px] font-black uppercase leading-none ${isSoldOut ? 'text-red-500' : 'text-slate-400'}`}>
+                    {isSoldOut ? 'Sold Out' : `${f.available_seats} Seats Left`}
+                  </p>
+                  {f.available_seats < 10 && !isSoldOut && (
+                    <p className="text-[7px] text-orange-600 font-black uppercase mt-1 animate-pulse">Filling Fast</p>
+                  )}
+                </div>
               </div>
               
               <div className="text-right">
                 <div className="flex items-center gap-1">
                    <span className="text-xs font-bold text-slate-900">₹</span>
-                   <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                   <span className="text-3xl font-black text-slate-900 tracking-tighter leading-none">
                     {f.price.toLocaleString()}
                    </span>
                 </div>
+                <p className="text-[7px] font-black text-slate-300 uppercase mt-1">Per Adult</p>
               </div>
             </div>
           </div>
