@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@cashfreepayments/cashfree-js": "^1.0.5",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.13.2",
     "leaflet": "^1.9.4",
