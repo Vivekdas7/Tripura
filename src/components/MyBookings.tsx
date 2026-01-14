@@ -1,264 +1,283 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
-  Ticket, Plane, Calendar, Users, CheckCircle, XCircle, MapPin, 
-  IndianRupee, ArrowRight, ShieldCheck, RefreshCcw, 
-  Wallet, Clock, Phone, Mail, ChevronRight, AlertCircle, 
-  Headphones, Info, ExternalLink, Zap
+  X, User, Mail, Phone, Calendar as CalendarIcon, CreditCard, Info, 
+  ChevronRight, Plane, CheckCircle2, Ticket, ArrowRight, ShieldCheck, 
+  Smartphone, Zap, Clock, AlertCircle, PhoneCall, Mail as MailIcon,
+  QrCode, Copy, Check, Loader2, Sparkles, IndianRupee
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Flight, Passenger, supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import TechnicalNotice from './TechnicalNotice';
 
-type BookingWithFlight = {
-  id: string;
-  booking_reference: string;
-  status: string;
-  total_passengers: number;
-  total_price: number;
-  booking_date: string;
-  airline: string;
-  flight_number: string;
-  origin: string;
-  destination: string;
-  departure_time: string;
-  arrival_time: string;
+type FareOption = { type: string; price: number; baggage: string; };
+
+type BookingModalProps = {
+  flight: Flight & { fare_options?: FareOption[] };
+  onClose: () => void;
+  onBookingComplete: () => void;
 };
 
-export default function MyBookings() {
+export default function BookingModal({ flight, onClose, onBookingComplete }: BookingModalProps) {
   const { user } = useAuth();
-  const [bookings, setBookings] = useState<BookingWithFlight[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // --- STATE ---
+  const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [selectedFare, setSelectedFare] = useState<FareOption>(
+    flight.fare_options?.[0] || { type: 'Value', price: flight.price, baggage: '15kg Check-in' }
+  );
+  const [numPassengers, setNumPassengers] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [bookingRef, setBookingRef] = useState('');
+  const [currentBookingId, setCurrentBookingId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(900);
 
+  const [passengers, setPassengers] = useState<Passenger[]>([
+    {
+      first_name: '', last_name: '', email: '', phone: '',
+      date_of_birth: undefined
+    }
+  ]);
+
+  // --- UPI CONSTANTS ---
+  const UPI_ID = "9366159066@ptaxis"; 
+  const MERCHANT_NAME = "VIVEK DAS";
+  const TOTAL_AMOUNT = selectedFare.price * numPassengers;
+  
+  // Generated Transaction ID to prevent confusion in Admin Dashboard
+  const [transactionId] = useState(() => `TXN${Math.floor(100000 + Math.random() * 900000)}`);
+
+  // STRICT UPI LINK: Includes Merchant Code (MC) and Transaction Ref (TR)
+  // This ensures GPay/PhonePe/Paytm open instead of generic apps
+  const upiIntentUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${TOTAL_AMOUNT}&cu=INR&tr=${transactionId}&mc=0000&mode=02&purpose=00`;
+
+  // --- TIMER ---
   useEffect(() => {
-    if (user) fetchBookings();
-  }, [user]);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const fetchBookings = async () => {
+  // --- REAL-TIME VERIFICATION TRIGGER ---
+  useEffect(() => {
+    if (!currentBookingId) return;
+
+    // SUBSCRIBE TO SUPABASE REALTIME
+    const channel = supabase
+      .channel(`realtime_booking_${currentBookingId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `id=eq.${currentBookingId}` },
+        (payload) => {
+          // If admin marks as 'confirmed' or 'is_fulfilled'
+          if (payload.new.status === 'confirmed' || payload.new.is_fulfilled === true) {
+            setBookingRef(payload.new.booking_reference);
+            setShowSuccess(true);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [currentBookingId]);
+
+  // --- HANDLERS ---
+  const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
+    const updated = [...passengers];
+    updated[index] = { ...updated[index], [field]: value };
+    setPassengers(updated);
+  };
+
+  const handleInitiateBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      const { data, error } = await supabase
+      const generatedRef = 'TF' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      
+      // 1. Save pending booking to Supabase
+      const { data: booking, error: bError } = await supabase
         .from('bookings')
-        .select(`id, booking_reference, status, total_passengers, total_price, booking_date, airline, flight_number, origin, destination, departure_time, arrival_time`)
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false });
+        .insert({
+          user_id: user!.id,
+          flight_id: String(flight.id),
+          booking_reference: generatedRef,
+          status: 'pending', // Waiting for manual verify
+          total_passengers: numPassengers,
+          total_price: TOTAL_AMOUNT,
+          airline: flight.airline,
+          flight_number: flight.flight_number,
+          origin: flight.origin,
+          destination: flight.destination,
+          departure_time: flight.departure_time,
+          arrival_time: flight.arrival_time,
+          internal_note: `UPI Transaction ID: ${transactionId}`, // Admin sees this
+          is_fulfilled: false
+        })
+        .select().single();
 
-      if (error) throw error;
-      setBookings(data || []);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
+      if (bError) throw bError;
+
+      // 2. Save passengers
+      const passengersData = passengers.map(p => ({
+        booking_id: booking.id,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        email: p.email,
+        phone: p.phone
+      }));
+      await supabase.from('passengers').insert(passengersData);
+
+      setCurrentBookingId(booking.id);
+      setStep('payment');
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[80vh]">
-      <div className="relative">
-        <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-        <Plane className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-600" size={20} />
+  const copyUpi = () => {
+    navigator.clipboard.writeText(UPI_ID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 bg-white z-[2000] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+        <div className="w-24 h-24 bg-emerald-500 text-white rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-200 animate-bounce">
+          <CheckCircle2 size={48} />
+        </div>
+        <h2 className="text-3xl font-black text-slate-900 italic">Flight Secured!</h2>
+        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em] mt-2 mb-10">Ref: {bookingRef}</p>
+        
+        <div className="w-full max-w-sm bg-slate-900 rounded-[3rem] p-8 text-left relative overflow-hidden">
+           <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles size={60} className="text-white"/></div>
+           <p className="text-indigo-400 font-black text-[10px] uppercase tracking-widest mb-2">Manifest Status</p>
+           <p className="text-white text-sm font-bold leading-relaxed">
+             Your payment has been verified in Realtime. We are now generating your PNR and E-Ticket. Check your WhatsApp in 5 minutes.
+           </p>
+        </div>
+        
+        <button onClick={() => { onBookingComplete(); onClose(); }} className="w-full max-w-sm bg-indigo-600 text-white py-6 rounded-3xl font-black mt-10 uppercase tracking-widest text-xs shadow-xl shadow-indigo-100">Go to My Bookings</button>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFF] pb-20">
-      {/* --- MOBILE HEADER --- */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl px-6 pt-12 pb-6 border-b border-slate-50">
-        <div className="flex justify-between items-end">
-          <div>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-1">Your Journey</p>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight italic">My Bookings</h2>
-
-            
-          </div>
-          <div className="flex flex-col items-end">
-            
-             <div className="bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-black">
-               {bookings.length} TRIPS
-             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-5 mt-6 space-y-10">
-        {/* --- TICKET CARDS --- */}
-        {bookings.length > 0 ? (
-          <div className="space-y-8">
-            {bookings.map((booking) => (
-              <div key={booking.id} className="relative group active:scale-[0.98] transition-transform duration-200">
-                {/* Background Shadow Glow */}
-                <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-[3rem] -z-10" />
-                
-                <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-                  
-                  {/* Top Bar: Airline & Status */}
-                  <div className="px-6 py-4 flex justify-between items-center border-b border-dashed border-slate-100 bg-slate-50/30">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-slate-100">
-                        <Zap size={18} className="text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Flight Number</p>
-                        <p className="text-xs font-black text-slate-900">{booking.flight_number}</p>
-                      </div>
-                    </div>
-                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${
-                      booking.status === 'confirmed' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
-                    }`}>
-                      {booking.status}
-                    </div>
-                  </div>
-
-                  {/* Main Journey Section */}
-                  <div className="p-6">
-                    <div className="flex justify-between items-center relative mb-8 px-2">
-                      <div className="flex-1">
-                        <h4 className="text-4xl font-black text-slate-900 tracking-tighter">{booking.origin}</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Departure</p>
-                      </div>
-
-                      <div className="flex flex-col items-center justify-center px-4">
-                        <div className="w-12 h-px bg-slate-200 relative mb-1">
-                          <Plane size={12} className="absolute -top-1.5 right-0 text-indigo-600 rotate-90" />
-                        </div>
-                        <span className="text-[8px] font-black text-slate-300 uppercase">Non-Stop</span>
-                      </div>
-
-                      <div className="flex-1 text-right">
-                        <h4 className="text-4xl font-black text-slate-900 tracking-tighter">{booking.destination}</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Arrival</p>
-                      </div>
-                    </div>
-
-                    {/* Data Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      <div className="bg-slate-50 p-4 rounded-3xl">
-                         <div className="flex items-center gap-2 mb-1">
-                            <Calendar size={12} className="text-indigo-600" />
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Date</span>
-                         </div>
-                         <p className="text-xs font-black text-slate-800">
-                           {new Date(booking.departure_time).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                         </p>
-                      </div>
-                      <div className="bg-slate-50 p-4 rounded-3xl">
-                         <div className="flex items-center gap-2 mb-1">
-                            <Users size={12} className="text-indigo-600" />
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Travelers</span>
-                         </div>
-                         <p className="text-xs font-black text-slate-800">{booking.total_passengers} Pax</p>
-                      </div>
-                    </div>
-
-                    {/* Bottom Info Bar */}
-                    <div className="flex justify-between items-end pt-5 border-t border-slate-50">
-                      <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
-                        <div className="flex items-baseline gap-0.5">
-                          <span className="text-sm font-bold text-slate-900">₹</span>
-                          <span className="text-xl font-black text-slate-900">{booking.total_price.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Booking Ref</p>
-                        <p className="text-[11px] font-mono font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">
-                          {booking.booking_reference}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Perforation Notches */}
-                <div className="absolute left-[-10px] top-[60px] w-5 h-10 bg-[#FDFDFF] rounded-r-full border-y border-r border-slate-100" />
-                <div className="absolute right-[-10px] top-[60px] w-5 h-10 bg-[#FDFDFF] rounded-l-full border-y border-l border-slate-100" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-[3rem] p-10 text-center border-2 border-dashed border-slate-100">
-             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                <Ticket size={32} />
-             </div>
-             <p className="text-sm font-black text-slate-900">No trips booked yet</p>
-             <p className="text-xs font-bold text-slate-400 mt-1">Your flight history will appear here.</p>
-          </div>
-        )}
-
-        {/* --- REFUND POLICY (MOBILE TABS) --- */}
-        <div className="space-y-5 pt-4">
-           <div className="flex items-center gap-2 px-2">
-              <RefreshCcw size={16} className="text-amber-500" />
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Refund Policy</h3>
-           </div>
-
-           <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 space-y-6">
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><Clock size={16} /></div>
-                   <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
-                     Refunds are processed <span className="text-white font-black underline underline-offset-4 decoration-indigo-500">within 72 working hours</span> after receipt from the airline.
-                   </p>
-                </div>
-                <div className="flex gap-4">
-                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><Wallet size={16} /></div>
-                   <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
-                     All booking cancellations are credited to the <span className="text-indigo-400 font-black">UPI/Bank Transfer</span> and cannot be withdrawn to bank accounts.
-                   </p>
-                </div>
-                <div className="flex gap-4">
-                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><ShieldCheck size={16} /></div>
-                   <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
-                     Failed payments/bookings are refunded to the original source within 7-10 working days.
-                   </p>
-                </div>
-              </div>
-              
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Pro Tip</p>
-                <p className="text-[10px] font-medium text-slate-400">Refunds to credit cards may take up to 72 working hours due to banking procedures.</p>
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[1000] flex items-end md:items-center justify-center">
+      <div className="absolute inset-0" onClick={onClose} />
+      
+      <div className="relative bg-white w-full max-w-xl md:rounded-[3.5rem] rounded-t-[3.5rem] flex flex-col h-[94vh] md:h-auto overflow-hidden shadow-2xl">
+        
+        {/* HEADER */}
+        <div className="px-8 pt-10 pb-6 flex justify-between items-center border-b border-slate-50">
+           <div>
+              <h2 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">
+                {step === 'details' ? 'Passenger Info' : 'UPI Verification'}
+              </h2>
+              <div className="flex items-center gap-2 mt-2">
+                 <div className={`w-2 h-2 rounded-full ${timeLeft < 300 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Session: {Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2, '0')}</span>
               </div>
            </div>
+           <button onClick={onClose} className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><X size={20} /></button>
         </div>
 
-        {/* --- CUSTOMER SUPPORT CARDS --- */}
-        <div className="space-y-4">
-           <div className="flex items-center gap-2 px-2">
-              <Headphones size={16} className="text-indigo-600" />
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Support Center</h3>
-           </div>
+        <div className="flex-1 overflow-y-auto p-8 no-scrollbar pb-40">
+          {step === 'details' ? (
+            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Select Fare Type</p>
+                {flight.fare_options?.map((fare) => (
+                  <button key={fare.type} onClick={() => setSelectedFare(fare)} className={`w-full p-6 rounded-[2rem] border-2 transition-all flex justify-between items-center ${selectedFare.type === fare.type ? 'border-indigo-600 bg-indigo-50/20' : 'border-slate-50'}`}>
+                    <div className="text-left">
+                      <p className="text-xs font-black text-slate-900">{fare.type} Bundle</p>
+                      <p className="text-[10px] font-bold text-slate-400">{fare.baggage}</p>
+                    </div>
+                    <p className="text-lg font-black text-slate-900">₹{fare.price}</p>
+                  </button>
+                ))}
+              </div>
 
-           <div className="grid grid-cols-1 gap-3">
-              <a href="tel:9366159066" className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm active:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600"><Phone size={22} /></div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase">24/7 Helpline</p>
-                    <p className="text-base font-black text-slate-900 tracking-tight">+91 9366159066</p>
+              <form id="booking-form" onSubmit={handleInitiateBooking} className="space-y-6">
+                 {passengers.map((p, i) => (
+                   <div key={i} className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                      <p className="text-[10px] font-black text-slate-400 uppercase">Primary Traveler</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input required placeholder="First Name" className="p-4 bg-white rounded-2xl text-xs font-bold border-transparent focus:border-indigo-600 outline-none" value={p.first_name} onChange={e => handlePassengerChange(i, 'first_name', e.target.value)} />
+                        <input required placeholder="Last Name" className="p-4 bg-white rounded-2xl text-xs font-bold border-transparent focus:border-indigo-600 outline-none" value={p.last_name} onChange={e => handlePassengerChange(i, 'last_name', e.target.value)} />
+                      </div>
+                      <input required type="tel" placeholder="WhatsApp Number" className="w-full p-4 bg-white rounded-2xl text-xs font-bold outline-none" value={p.phone} onChange={e => handlePassengerChange(i, 'phone', e.target.value)} />
+                      <input required type="email" placeholder="Email Address" className="w-full p-4 bg-white rounded-2xl text-xs font-bold outline-none" value={p.email} onChange={e => handlePassengerChange(i, 'email', e.target.value)} />
+                   </div>
+                 ))}
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-8 animate-in zoom-in-95 duration-500">
+               <div className="text-center bg-slate-50 py-8 rounded-[3rem] border border-slate-100">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Payable</p>
+                  <h3 className="text-5xl font-black text-slate-900 tracking-tighter">₹{TOTAL_AMOUNT.toLocaleString()}</h3>
+                  <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-100">
+                    <Loader2 size={12} className="animate-spin text-indigo-600" />
+                    <span className="text-[9px] font-black text-slate-600 uppercase">Awaiting Bank Signal</span>
                   </div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300"><ChevronRight size={18} /></div>
-              </a>
+               </div>
 
-              <a href="mailto:tripurafly.helpdesk@gmail.com" className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm active:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600"><Mail size={22} /></div>
-                  <div className="overflow-hidden">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Official Email</p>
-                    <p className="text-xs font-black text-slate-900 truncate">tripurafly.helpdesk@gmail.com</p>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300"><ChevronRight size={18} /></div>
-              </a>
-           </div>
+               {/* QR CODE */}
+               <div className="mx-auto w-64 h-64 bg-white border-[8px] border-slate-900 rounded-[3.5rem] p-6 shadow-2xl relative group">
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiIntentUrl)}`} className="w-full h-full object-contain" alt="UPI" />
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-4 py-1.5 rounded-full whitespace-nowrap uppercase tracking-widest">Scan with GPay / PhonePe</div>
+               </div>
+
+               {/* REDIRECTION BUTTONS */}
+               <div className="space-y-3">
+                  <a href={upiIntentUrl} className="flex items-center justify-center gap-3 w-full bg-slate-900 text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                    <Smartphone size={18} /> Open UPI Apps
+                  </a>
+
+                  <button onClick={copyUpi} className="w-full p-5 bg-indigo-50 rounded-[2rem] border border-indigo-100 flex justify-between items-center group">
+                    <div className="text-left">
+                       <p className="text-[8px] font-black text-indigo-400 uppercase mb-0.5">Copy UPI ID</p>
+                       <p className="text-xs font-bold text-indigo-900">{UPI_ID}</p>
+                    </div>
+                    {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} className="text-indigo-300" />}
+                  </button>
+               </div>
+
+               <div className="p-6 bg-slate-900 text-white rounded-[2.5rem] flex gap-4 items-start shadow-xl">
+                  <ShieldCheck size={24} className="text-indigo-400 shrink-0" />
+                  <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
+                    <span className="text-white font-black uppercase">Realtime Active:</span> Stay on this page after payment. Once you pay in GPay/PhonePe, our dashboard will sync and this screen will change automatically.
+                  </p>
+               </div>
+            </div>
+          )}
         </div>
 
-        {/* --- APP FOOTER --- */}
-        <div className="py-10 text-center space-y-2">
-           <div className="inline-flex items-center gap-2 bg-slate-100 px-4 py-1.5 rounded-full">
-              <ShieldCheck size={14} className="text-slate-400" />
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Encrypted TripuraFly Portal</span>
-           </div>
-           <p className="text-[8px] font-bold text-slate-300 uppercase tracking-[0.4em]">Designed for Seamless Travel</p>
+        {/* FOOTER */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-50 p-8 shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
+          {step === 'details' ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-end px-2">
+                 <div>
+                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Final Price</p>
+                   <p className="text-3xl font-black text-slate-900">₹{TOTAL_AMOUNT.toLocaleString()}</p>
+                 </div>
+                 <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[9px] font-black">0% TAX</div>
+              </div>
+              <button form="booking-form" type="submit" disabled={loading} className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 disabled:opacity-50">
+                {loading ? <Loader2 className="animate-spin mx-auto"/> : 'Proceed to Payment'}
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setStep('details')} className="w-full text-center text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-rose-500 transition-colors">
+              Cancel & Modify Info
+            </button>
+          )}
         </div>
       </div>
     </div>

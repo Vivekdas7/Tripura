@@ -52,8 +52,8 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
   ];
 
   // UPI Configuration
-  const UPI_ID = "tripurafly@okicici"; 
-  const MERCHANT_NAME = "TripuraFly";
+  const UPI_ID = "9366159066@ptaxis"; 
+  const MERCHANT_NAME = "VIVEK DAS";
   const TOTAL_AMOUNT = selectedFare.price * numPassengers;
   
   // UPI Intent URL for Mobile Redirect
