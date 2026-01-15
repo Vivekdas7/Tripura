@@ -22,6 +22,7 @@ import CabBooking from './components/CabBooking';
 import SupportPage from './components/Support';
 import AdminDashboard from './components/AdminDashboard';
 import TechnicalNotice from './components/TechnicalNotice';
+import PaymentSuccess from './components/PaymentSuccess';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -509,7 +510,10 @@ function App() {
           <Route path="/game" element={<TripuraQuest/>} />
           <Route path="/cab-booking" element={<CabBooking/>} />
           <Route path="/support" element={<SupportPage/>} />
+          <Route path="/payment-success" element={<PaymentSuccess/>} />
+          
           <Route path="/admin-pannel-vivekdas" element={<AdminDashboard/>} />
+          
         </Routes>
 
         <BottomNav />
