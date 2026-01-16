@@ -5,11 +5,11 @@ import {
   Mail, Ticket, Download, Filter, ChevronRight, X, 
   ArrowUpRight, IndianRupee, Hash, Plane, LayoutDashboard,
   ExternalLink, Bell, Settings, CheckSquare, Square, Save, MessageSquare,
-  UserCheck, CreditCard, MapPin, Info
+  UserCheck, CreditCard, MapPin, Info, Wallet // Added Wallet icon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-// --- INTERFACES ---
+// --- UPDATED INTERFACES ---
 interface Passenger {
   id?: string;
   first_name: string;
@@ -26,13 +26,14 @@ interface Booking {
   origin: string;
   destination: string;
   departure_time: string;
-  status: string;
+  status: string; // Will now handle 'pending_verification'
   total_price: number;
   total_passengers: number;
   created_at: string;
   is_fulfilled: boolean; 
   internal_note: string;
-  passengers: Passenger[]; // Ensure this matches the join result
+  payment_id?: string; // Added field for manual payment ref
+  passengers: Passenger[];
 }
 
 export default function MobileAdminDashboard() {
@@ -41,7 +42,9 @@ export default function MobileAdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending_action" | "fulfilled">("all");
+  
+  // UPDATED: Added "awaiting_payment" filter
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending_action" | "fulfilled" | "awaiting_payment">("all");
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { 
@@ -51,7 +54,6 @@ export default function MobileAdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // FIXED QUERY: Explicitly naming columns and verifying join
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -80,17 +82,23 @@ export default function MobileAdminDashboard() {
     fetchData();
   };
 
+  // UPDATED: Toggle status to 'confirmed' when fulfilled
   const toggleFulfillment = async (id: string, currentState: boolean) => {
+    const newStatus = !currentState ? 'confirmed' : 'pending_verification';
+    
     const { error } = await supabase
       .from('bookings')
-      .update({ is_fulfilled: !currentState })
+      .update({ 
+        is_fulfilled: !currentState,
+        status: newStatus 
+      })
       .eq('id', id);
 
     if (!error) {
-      const updated = bookings.map(b => b.id === id ? { ...b, is_fulfilled: !currentState } : b);
+      const updated = bookings.map(b => b.id === id ? { ...b, is_fulfilled: !currentState, status: newStatus } : b);
       setBookings(updated);
       if (selectedBooking?.id === id) {
-        setSelectedBooking({...selectedBooking, is_fulfilled: !currentState});
+        setSelectedBooking({...selectedBooking, is_fulfilled: !currentState, status: newStatus});
       }
     }
   };
@@ -102,7 +110,6 @@ export default function MobileAdminDashboard() {
 
   const filteredData = useMemo(() => {
     return bookings.filter(b => {
-      // Safe check for passengers array
       const passenger = b.passengers?.[0];
       const fullName = passenger ? `${passenger.first_name} ${passenger.last_name}`.toLowerCase() : "";
       const pnr = b.booking_reference?.toLowerCase() || "";
@@ -111,6 +118,7 @@ export default function MobileAdminDashboard() {
       
       if (filterStatus === "pending_action") return matchesSearch && !b.is_fulfilled;
       if (filterStatus === "fulfilled") return matchesSearch && b.is_fulfilled;
+      if (filterStatus === "awaiting_payment") return matchesSearch && b.status === 'pending_verification';
       return matchesSearch;
     });
   }, [bookings, searchTerm, filterStatus]);
@@ -153,7 +161,7 @@ export default function MobileAdminDashboard() {
           <nav className="space-y-1.5 flex-1">
             <NavItem icon={<LayoutDashboard size={18}/>} label="Dashboard" active />
             <NavItem icon={<Users size={18}/>} label="Passenger Manifest" />
-            <NavItem icon={<Bell size={18}/>} label="System Alerts" count={3} />
+            <NavItem icon={<Bell size={18}/>} label="System Alerts" count={bookings.filter(b => b.status === 'pending_verification').length} />
             <NavItem icon={<CreditCard size={18}/>} label="Payments" />
             <div className="pt-4 pb-2 text-[10px] font-black text-slate-600 uppercase tracking-widest px-4">Management</div>
             <NavItem icon={<Settings size={18}/>} label="Portal Settings" />
@@ -182,6 +190,7 @@ export default function MobileAdminDashboard() {
               </p>
             </div>
             <div className="flex gap-3">
+               <StatBox label="Verify" value={bookings.filter(b => b.status === 'pending_verification').length} color="text-amber-500" />
                <StatBox label="Active" value={bookings.filter(b => !b.is_fulfilled).length} color="text-orange-500" />
                <StatBox label="Done" value={bookings.filter(b => b.is_fulfilled).length} color="text-emerald-500" />
             </div>
@@ -199,9 +208,10 @@ export default function MobileAdminDashboard() {
               />
             </div>
             <div className="flex gap-2 p-1.5 bg-[#0F172A] rounded-[1.5rem] border border-white/5 overflow-x-auto no-scrollbar">
-              <FilterBtn active={filterStatus === 'all'} label="All Bookings" onClick={() => setFilterStatus('all')} />
-              <FilterBtn active={filterStatus === 'pending_action'} label="To Process" onClick={() => setFilterStatus('pending_action')} />
-              <FilterBtn active={filterStatus === 'fulfilled'} label="Completed" onClick={() => setFilterStatus('fulfilled')} />
+              <FilterBtn active={filterStatus === 'all'} label="All" onClick={() => setFilterStatus('all')} />
+              <FilterBtn active={filterStatus === 'awaiting_payment'} label="Verify Pay" onClick={() => setFilterStatus('awaiting_payment')} />
+              <FilterBtn active={filterStatus === 'pending_action'} label="To Issue" onClick={() => setFilterStatus('pending_action')} />
+              <FilterBtn active={filterStatus === 'fulfilled'} label="Done" onClick={() => setFilterStatus('fulfilled')} />
             </div>
           </div>
 
@@ -221,7 +231,6 @@ export default function MobileAdminDashboard() {
               </div>
             ) : (
               <>
-                {/* Header Desktop */}
                 <div className="hidden lg:grid grid-cols-5 px-8 py-4 text-[10px] font-black uppercase text-slate-600 tracking-[0.2em]">
                   <div>Status</div>
                   <div>Primary Passenger</div>
@@ -231,28 +240,31 @@ export default function MobileAdminDashboard() {
                 </div>
 
                 {filteredData.map((b) => {
-                  const p = b.passengers?.[0]; // Access joined passenger
+                  const p = b.passengers?.[0]; 
                   return (
                     <div 
                       key={b.id} 
                       className={`group grid grid-cols-1 lg:grid-cols-5 items-center p-6 rounded-[2.5rem] border transition-all duration-500 ${
                         b.is_fulfilled 
                           ? 'bg-emerald-500/[0.02] border-emerald-500/10 hover:border-emerald-500/30' 
-                          : 'bg-[#0F172A] border-white/5 hover:border-orange-500/30 hover:translate-x-1'
+                          : b.status === 'pending_verification' 
+                            ? 'bg-amber-500/[0.02] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                            : 'bg-[#0F172A] border-white/5 hover:border-orange-500/30 hover:translate-x-1'
                       }`}
                     >
-                      {/* Fulfillment Status */}
                       <div className="flex items-center justify-between lg:block mb-6 lg:mb-0">
                         <button 
                           onClick={() => toggleFulfillment(b.id, b.is_fulfilled)}
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
                             b.is_fulfilled 
                               ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
-                              : 'bg-slate-800 text-slate-400 hover:text-white'
+                              : b.status === 'pending_verification'
+                                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20 animate-pulse'
+                                : 'bg-slate-800 text-slate-400 hover:text-white'
                           }`}
                         >
-                          {b.is_fulfilled ? <CheckSquare size={14}/> : <Square size={14}/>}
-                          {b.is_fulfilled ? 'Booked' : 'Pending'}
+                          {b.is_fulfilled ? <CheckSquare size={14}/> : b.status === 'pending_verification' ? <Wallet size={14}/> : <Square size={14}/>}
+                          {b.is_fulfilled ? 'Booked' : b.status === 'pending_verification' ? 'Check Pay' : 'Pending'}
                         </button>
                         <span className="lg:hidden text-[10px] font-black text-slate-600">#{b.booking_reference}</span>
                       </div>
@@ -260,7 +272,7 @@ export default function MobileAdminDashboard() {
                       {/* Passenger Profile */}
                       <div className="mb-6 lg:mb-0">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-xs font-black text-orange-500">
+                          <div className={`w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-xs font-black ${b.status === 'pending_verification' ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-800 text-orange-500'}`}>
                             {p ? p.first_name[0] : '?'}
                           </div>
                           <div>
@@ -298,7 +310,7 @@ export default function MobileAdminDashboard() {
                       <div className="flex justify-end gap-2">
                          <button 
                           onClick={() => setSelectedBooking(b)}
-                          className="flex-1 lg:flex-none h-12 px-6 lg:w-12 lg:px-0 bg-slate-900 rounded-2xl flex items-center justify-center hover:bg-orange-600 text-slate-400 hover:text-white transition-all border border-white/5"
+                          className={`flex-1 lg:flex-none h-12 px-6 lg:w-12 lg:px-0 rounded-2xl flex items-center justify-center transition-all border ${b.status === 'pending_verification' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-slate-900 border-white/5 text-slate-400 hover:bg-orange-600 hover:text-white'}`}
                          >
                            <span className="lg:hidden text-xs font-black uppercase tracking-widest mr-3">Manage Manifest</span>
                            <ChevronRight size={18}/>
@@ -316,56 +328,55 @@ export default function MobileAdminDashboard() {
       {/* DETAIL DRAWER */}
       {selectedBooking && (
         <div className="fixed inset-0 z-[200] flex justify-end">
-          <div 
-            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300" 
-            onClick={() => setSelectedBooking(null)} 
-          />
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedBooking(null)} />
           <div className="relative w-full max-w-lg bg-[#0F172A] h-full flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-right duration-500">
              
-             {/* Drawer Header */}
              <div className="p-8 border-b border-white/5 flex justify-between items-center bg-slate-900/30">
                 <div>
                   <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-none">Manifest Details</h2>
                   <p className="text-[10px] font-black text-slate-500 uppercase mt-2 tracking-[0.2em]">Ref ID: {selectedBooking.booking_reference}</p>
                 </div>
-                <button 
-                  onClick={() => setSelectedBooking(null)} 
-                  className="w-12 h-12 bg-slate-800 hover:bg-red-500/20 hover:text-red-500 rounded-2xl flex items-center justify-center transition-all"
-                >
-                  <X size={20}/>
-                </button>
+                <button onClick={() => setSelectedBooking(null)} className="w-12 h-12 bg-slate-800 hover:bg-red-500/20 hover:text-red-500 rounded-2xl flex items-center justify-center transition-all"><X size={20}/></button>
              </div>
 
              <div className="flex-1 overflow-y-auto p-8 space-y-10 no-scrollbar">
                 
                 {/* Fulfillment Control */}
-                <div className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+                <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden ${selectedBooking.status === 'pending_verification' ? 'bg-amber-500/5 border-amber-500/10' : 'bg-gradient-to-br from-slate-900 to-slate-950 border-white/5'}`}>
                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                      <ShieldCheck size={80} className="text-orange-500" />
+                      {selectedBooking.status === 'pending_verification' ? <Wallet size={80} className="text-amber-500" /> : <ShieldCheck size={80} className="text-orange-500" />}
                    </div>
                    <div className="relative z-10">
-                     <p className="text-[10px] font-black text-orange-500 uppercase mb-4 tracking-widest flex items-center gap-2">
-                       <ShieldCheck size={14}/> Booking Fulfillment
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest flex items-center gap-2 ${selectedBooking.status === 'pending_verification' ? 'text-amber-500' : 'text-orange-500'}`}>
+                       {selectedBooking.status === 'pending_verification' ? <Wallet size={14}/> : <ShieldCheck size={14}/>} 
+                       {selectedBooking.status === 'pending_verification' ? 'Awaiting Payment' : 'Booking Fulfillment'}
                      </p>
-                     <h4 className="text-white text-lg font-black italic mb-2 tracking-tight">External Verification</h4>
+                     <h4 className="text-white text-lg font-black italic mb-2 tracking-tight">
+                        {selectedBooking.status === 'pending_verification' ? 'Verify UPI/Bank Credit' : 'External Verification'}
+                     </h4>
                      <p className="text-xs text-slate-500 mb-8 font-bold leading-relaxed max-w-[80%]">
-                       By toggling this, you confirm that tickets have been issued via the airline portal and GDS sync is complete.
+                       {selectedBooking.status === 'pending_verification' 
+                        ? 'Check your business account for a credit matching the amount below. Once confirmed, finalize to issue ticket.'
+                        : 'By toggling this, you confirm that tickets have been issued via the airline portal.'}
                      </p>
+                     
                      <button 
                       onClick={() => toggleFulfillment(selectedBooking.id, selectedBooking.is_fulfilled)}
                       className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] flex items-center justify-center gap-3 transition-all ${
                         selectedBooking.is_fulfilled 
                           ? 'bg-emerald-600 text-white shadow-2xl shadow-emerald-500/30' 
-                          : 'bg-orange-600 text-white shadow-2xl shadow-orange-600/30'
+                          : selectedBooking.status === 'pending_verification'
+                            ? 'bg-amber-500 text-black shadow-2xl shadow-amber-500/20'
+                            : 'bg-orange-600 text-white shadow-2xl shadow-orange-600/30'
                       }`}
                      >
                        {selectedBooking.is_fulfilled ? <UserCheck size={18}/> : <Clock size={18}/>}
-                       {selectedBooking.is_fulfilled ? 'BOOKING FINALIZED' : 'MARK AS FINALIZED'}
+                       {selectedBooking.is_fulfilled ? 'BOOKING FINALIZED' : 'VERIFY & ISSUE TICKET'}
                      </button>
                    </div>
                 </div>
 
-                {/* Passenger Contact Info - FIXED FETCHED DATA DISPLAY */}
+                {/* Passenger Contact Info */}
                 <div className="space-y-4">
                   <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-2">
                     <Users size={14}/> Passenger Manifest ({selectedBooking.passengers?.length || 0})
@@ -376,16 +387,14 @@ export default function MobileAdminDashboard() {
                       {selectedBooking.passengers.map((pass, idx) => (
                         <div key={idx} className="bg-slate-900/40 p-6 rounded-[2rem] border border-white/5 space-y-4">
                            <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                              <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center font-black">
-                                {pass.first_name[0]}
-                              </div>
+                              <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center font-black">{pass.first_name[0]}</div>
                               <div>
                                 <p className="text-sm font-black text-white uppercase italic">{pass.first_name} {pass.last_name}</p>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase">Primary Traveller</p>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase">Traveller {idx + 1}</p>
                               </div>
                            </div>
                            <DetailItem icon={<Mail size={14}/>} label="Email Address" value={pass.email} />
-                           <DetailItem icon={<Phone size={14}/>} label="Contact Number" value={pass.phone || 'Not Provided'} />
+                           <DetailItem icon={<Phone size={14}/>} label="Contact (WhatsApp)" value={pass.phone || 'Not Provided'} />
                         </div>
                       ))}
                     </div>
@@ -418,8 +427,8 @@ export default function MobileAdminDashboard() {
                       <p className="text-xs font-bold text-white uppercase tracking-widest">{selectedBooking.airline} - {selectedBooking.flight_number}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Total Paid</p>
-                      <p className="text-xs font-black text-emerald-500">₹{selectedBooking.total_price.toLocaleString('en-IN')}</p>
+                      <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Payment Amount</p>
+                      <p className="text-xs font-black text-emerald-500 underline decoration-emerald-500/30 underline-offset-4">₹{selectedBooking.total_price.toLocaleString('en-IN')}</p>
                     </div>
                   </div>
                 </div>
@@ -432,7 +441,7 @@ export default function MobileAdminDashboard() {
                    <div className="relative group">
                       <textarea 
                         className="w-full bg-slate-950 border border-white/10 rounded-[2rem] p-8 text-sm text-slate-300 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 outline-none h-44 transition-all resize-none shadow-inner placeholder:text-slate-700"
-                        placeholder="Log internal details here (e.g., 'Paid via Corporate Card', 'Customer called for infant meal')..."
+                        placeholder="Log internal details here (e.g., 'Payment received on Google Pay @ 2:30 PM')..."
                         defaultValue={selectedBooking.internal_note}
                         onBlur={(e) => updateInternalNote(selectedBooking.id, e.target.value)}
                       />
@@ -448,43 +457,21 @@ export default function MobileAdminDashboard() {
         </div>
       )}
 
-      {/* FOOTER SPACER MOBILE */}
       <div className="h-20 lg:hidden" />
     </div>
   );
 }
 
-// --- REUSABLE UI SUB-COMPONENTS ---
-
+// --- SUB-COMPONENTS (Keep the same) ---
 const NavItem = ({ icon, label, active = false, count = 0 }: any) => (
-  <button className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 ${
-    active 
-      ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/20' 
-      : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
-  }`}>
-    <div className="flex items-center gap-3">
-      {icon} 
-      <span className={active ? 'italic font-black tracking-tight' : ''}>{label}</span>
-    </div>
-    {count > 0 && (
-      <span className="w-5 h-5 bg-indigo-500 text-white text-[10px] font-black rounded-lg flex items-center justify-center shadow-lg">
-        {count}
-      </span>
-    )}
+  <button className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 ${active ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/20' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}>
+    <div className="flex items-center gap-3">{icon}<span className={active ? 'italic font-black tracking-tight' : ''}>{label}</span></div>
+    {count > 0 && <span className="w-5 h-5 bg-amber-500 text-black text-[10px] font-black rounded-lg flex items-center justify-center shadow-lg">{count}</span>}
   </button>
 );
 
 const FilterBtn = ({ active, label, onClick }: any) => (
-  <button 
-    onClick={onClick}
-    className={`whitespace-nowrap px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
-      active 
-        ? 'bg-orange-600 text-white shadow-xl shadow-orange-600/30 translate-y-[-2px]' 
-        : 'text-slate-500 hover:text-slate-300'
-    }`}
-  >
-    {label}
-  </button>
+  <button onClick={onClick} className={`whitespace-nowrap px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${active ? 'bg-orange-600 text-white shadow-xl shadow-orange-600/30 translate-y-[-2px]' : 'text-slate-500 hover:text-slate-300'}`}>{label}</button>
 );
 
 const StatBox = ({ label, value, color }: any) => (
@@ -496,9 +483,7 @@ const StatBox = ({ label, value, color }: any) => (
 
 const DetailItem = ({ icon, label, value }: any) => (
   <div className="flex items-start gap-4">
-    <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
-      {icon}
-    </div>
+    <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">{icon}</div>
     <div className="overflow-hidden">
       <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-0.5">{label}</p>
       <p className="text-xs font-bold text-white truncate lowercase">{value}</p>
