@@ -3,7 +3,8 @@ import {
   X, User, Mail, Phone, Calendar as CalendarIcon, CreditCard, Info, 
   ChevronRight, Plane, CheckCircle2, Ticket, ArrowRight, ShieldCheck, 
   Headphones, Globe, Smartphone, Zap, Clock, AlertCircle, Briefcase, 
-  Star, ShieldAlert, MessageSquare, Mail as MailIcon, PhoneCall, Wallet, QrCode
+  Star, ShieldAlert, MessageSquare, Mail as MailIcon, PhoneCall, Wallet, QrCode,
+  Download, Camera, Share2, Copy, ExternalLink, ArrowDownCircle
 } from 'lucide-react';
 import { Flight, Passenger, supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,6 +36,7 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
+  const [copied, setCopied] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState(900);
   const [isExpired, setIsExpired] = useState(false);
@@ -64,6 +66,12 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
     const updated = [...passengers];
     updated[index] = { ...updated[index], [field]: value };
@@ -80,7 +88,6 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
     setPassengers(updated);
   };
 
-  // UPDATED: Now creates a pending booking and moves to Payment QR screen
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isExpired) return;
@@ -98,7 +105,7 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
           user_id: user!.id,
           flight_id: String(flight.id),
           booking_reference: bookingReference,
-          status: 'pending_verification', // New Status for Admin to see
+          status: 'pending_verification',
           total_passengers: numPassengers,
           total_price: totalPrice,
           airline: flight.airline,
@@ -134,189 +141,242 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
     }
   };
 
-  // SUCCESS SCREEN (NOW THE PAYMENT QR VIEW)
+  // --- PAYMENT SUCCESS SCREEN ---
   if (showSuccess) {
     const totalPrice = selectedFare.price * numPassengers;
-    // Replace with your actual UPI ID
     const upiId = "9366159066@ptaxis"; 
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${upiId}%26pn=TripuraFly%26am=${totalPrice}%26cu=INR%26tn=${bookingRef}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=${upiId}%26pn=TripuraFly%26am=${totalPrice}%26cu=INR%26tn=${bookingRef}`;
 
     return (
-      <div className="fixed inset-0 bg-white z-[2000] flex flex-col items-center p-6 text-center overflow-y-auto no-scrollbar">
+      <div className="fixed inset-0 bg-white z-[2000] flex flex-col items-center p-6 overflow-y-auto no-scrollbar pb-20">
         <div className="w-full max-w-md pt-8 space-y-6">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-4">
+          
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-4 shadow-inner">
               <QrCode size={32} />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">Scan & Pay</h2>
+            <h2 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">Scan to Pay</h2>
             <p className="text-slate-400 font-bold uppercase text-[9px] tracking-[0.2em] mt-1">Ref ID: {bookingRef}</p>
           </div>
 
-          {/* QR CODE CARD */}
-          <div className="bg-slate-900 rounded-[3rem] p-8 shadow-2xl shadow-indigo-200 relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-             
-             <div className="bg-white p-4 rounded-[2rem] inline-block mb-6">
+          {/* QR CARD */}
+          <div className="bg-slate-900 rounded-[3rem] p-8 shadow-2xl shadow-indigo-100 relative overflow-hidden text-center">
+             <div className="bg-white p-5 rounded-[2.5rem] inline-block mb-6 shadow-xl">
                 <img src={qrUrl} alt="UPI QR" className="w-48 h-48" />
              </div>
-
              <div className="space-y-1">
                 <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Total Amount</p>
-                <p className="text-4xl font-black text-white italic">₹{totalPrice.toLocaleString()}</p>
-             </div>
-
-             <div className="flex justify-center gap-4 mt-6 opacity-60">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png" className="h-4 grayscale invert" alt="UPI" />
-                <img src="https://cdn.worldvectorlogo.com/logos/google-pay-2.svg" className="h-4 grayscale invert" alt="GPay" />
-                <img src="https://cdn.worldvectorlogo.com/logos/phonepe-1.svg" className="h-4 grayscale invert" alt="PhonePe" />
+                <p className="text-4xl font-black text-white italic tracking-tighter">₹{totalPrice.toLocaleString()}</p>
              </div>
           </div>
-          
-          <div className="w-full bg-amber-50 border-2 border-dashed border-amber-200 rounded-[2.5rem] p-6 space-y-4 text-left">
-             <div className="flex gap-3">
-                <div className="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-amber-200">
-                  <Zap size={18} />
+
+          {/* STEP BY STEP INSTRUCTIONS */}
+          <div className="w-full bg-amber-50 border-2 border-dashed border-amber-200 rounded-[2.5rem] p-6 space-y-5 text-left">
+             <div className="flex gap-4">
+                <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-200 animate-pulse">
+                  <Zap size={22} fill="currentColor" />
                 </div>
                 <div>
-                   <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1">How to complete?</p>
-                   <p className="text-[11px] font-bold text-amber-700 leading-relaxed">
-                     1. Pay using any UPI App.<br/>
-                     2. Your payment is verified automatically via Ref ID.<br/>
-                     3. Ticket will be sent to <strong>{passengers[0].phone}</strong> via WhatsApp.
-                   </p>
+                   <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5">Action Required</p>
+                   <p className="text-sm font-black text-amber-900 italic tracking-tight">How to complete booking?</p>
+                </div>
+             </div>
+
+             <div className="space-y-4 pl-1">
+                <div className="flex items-start gap-4">
+                  <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center text-[11px] font-black text-amber-800 shrink-0 mt-0.5">1</div>
+                  <p className="text-[12px] font-bold text-amber-700 leading-relaxed">
+                    Complete the payment of <span className="text-amber-900 font-black">₹{totalPrice.toLocaleString()}</span> using any UPI App.
+                  </p>
+                </div>
+                <div className="flex items-start gap-4 bg-white/50 p-3 rounded-2xl border border-amber-200">
+                  <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[11px] font-black text-white shrink-0 mt-0.5">2</div>
+                  <p className="text-[12px] font-black text-indigo-900 leading-relaxed italic">
+                    IMPORTANT: Take a <span className="underline decoration-2">Screenshot</span> of your successful payment page now.
+                  </p>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center text-[11px] font-black text-amber-800 shrink-0 mt-0.5">3</div>
+                  <p className="text-[12px] font-bold text-amber-700 leading-relaxed">
+                    Click the Green button below to send that screenshot to our WhatsApp.
+                  </p>
                 </div>
              </div>
           </div>
 
-          <div className="space-y-3">
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Need Help?</p>
-             <div className="flex flex-col gap-2">
-               <a href={`https://wa.me/919366159066?text=Payment Done for Ref: ${bookingRef}`} className="flex items-center justify-center gap-3 p-4 bg-emerald-500 text-white rounded-2xl shadow-lg shadow-emerald-100 transition-transform active:scale-95">
-                  <MessageSquare size={18} className="fill-current" />
+          {/* WHATSAPP ACTION */}
+          <div className="space-y-4 pt-2">
+             <a 
+               href={`https://wa.me/919366159066?text=Payment Done for Ref: ${bookingRef}. Sending Screenshot...`} 
+               target="_blank"
+               className="flex flex-col items-center justify-center gap-1 w-full bg-[#25D366] text-white py-5 rounded-[2rem] shadow-xl shadow-green-100 active:scale-[0.97] transition-all"
+             >
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={20} className="fill-current" />
                   <span className="text-xs font-black uppercase tracking-widest">I have paid (WhatsApp)</span>
-               </a>
-             </div>
+                </div>
+                <p className="text-[8px] font-black text-white/70 uppercase">Send Screenshot in Chat</p>
+             </a>
+
+             <button 
+                onClick={() => { onBookingComplete(); onClose(); }} 
+                className="w-full py-4 text-slate-400 font-black uppercase tracking-widest text-[10px] hover:text-indigo-600 transition-colors"
+             >
+                Check Status in My Bookings
+             </button>
           </div>
-          
-          <button 
-            onClick={() => { onBookingComplete(); onClose(); }} 
-            className="w-full text-slate-400 py-4 font-black uppercase tracking-widest text-[10px] hover:text-slate-600 transition-colors"
-          >
-            Check Status Later
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[1000] flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[1000] flex items-end md:items-center justify-center">
       <div className="absolute inset-0" onClick={onClose} />
       
-      <div className="relative bg-white w-full max-w-2xl md:rounded-[3rem] rounded-t-[3rem] flex flex-col h-[92vh] md:h-auto md:max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="relative bg-[#F8FAFC] w-full max-w-2xl md:rounded-[3.5rem] rounded-t-[3.5rem] flex flex-col h-[94vh] md:h-auto md:max-h-[92vh] overflow-hidden shadow-2xl">
         
         {/* HEADER */}
-        <div className="shrink-0 bg-white px-6 pt-8 pb-4 flex justify-between items-center border-b border-slate-50">
+        <div className="shrink-0 bg-white px-8 pt-10 pb-6 flex justify-between items-center border-b border-slate-100">
            <div>
-              <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tight">Traveller Info</h2>
+              <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tighter flex items-center gap-2">
+                <User size={20} className="text-indigo-600" /> Traveller Details
+              </h2>
               <div className={`flex items-center gap-2 mt-1 ${timeLeft < 120 ? 'text-rose-500' : 'text-indigo-600'}`}>
-                 <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${timeLeft < 120 ? 'bg-rose-500' : 'bg-indigo-600'}`} />
+                 <Clock size={12} className="animate-spin-slow" />
                  <span className="text-[9px] font-black uppercase tracking-widest">Time Remaining: {formatTime(timeLeft)}</span>
               </div>
            </div>
-           <button onClick={onClose} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors"><X size={20} /></button>
+           <button onClick={onClose} className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all"><X size={22} /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar pb-32">
+        <div className="flex-1 overflow-y-auto p-8 space-y-10 no-scrollbar pb-40">
           
-          {/* FARES */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {/* TIER SELECTION */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {fares.map((fare) => (
               <button
                 key={fare.type}
                 onClick={() => setSelectedFare(fare)}
-                className={`p-4 rounded-3xl border-2 text-left transition-all ${
-                  selectedFare.type === fare.type ? 'border-indigo-600 bg-indigo-50/20' : 'border-slate-50 bg-slate-50/30'
+                className={`p-5 rounded-[2rem] border-2 text-left transition-all ${
+                  selectedFare.type === fare.type ? 'border-indigo-600 bg-white shadow-xl shadow-indigo-50' : 'border-slate-100 bg-white'
                 }`}
               >
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{fare.type}</p>
-                <p className="text-lg font-black text-slate-900 italic">₹{fare.price.toLocaleString()}</p>
-                <p className="text-[9px] font-bold text-slate-500 mt-1 leading-none">{fare.baggage}</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{fare.type}</p>
+                <p className="text-xl font-black text-slate-900 italic">₹{fare.price.toLocaleString()}</p>
+                <div className="flex items-center gap-1 mt-2 opacity-50">
+                  <Briefcase size={10} />
+                  <p className="text-[8px] font-bold text-slate-500 uppercase">{fare.baggage}</p>
+                </div>
               </button>
             ))}
           </div>
 
           {/* PASSENGER COUNT */}
-          <div className="space-y-3">
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Number of Guests</p>
+          <div className="space-y-4">
+             <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest px-1">How many guests?</p>
              <div className="flex gap-2">
                {[1, 2, 3, 4].map(n => (
-                 <button key={n} onClick={() => handleNumPassengersChange(n)} className={`flex-1 py-4 rounded-2xl font-black text-xs transition-all ${numPassengers === n ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{n}</button>
+                 <button 
+                  key={n} 
+                  onClick={() => handleNumPassengersChange(n)} 
+                  className={`flex-1 py-4 rounded-2xl font-black text-[11px] transition-all ${numPassengers === n ? 'bg-slate-900 text-white shadow-xl shadow-slate-200 scale-[1.05]' : 'bg-white border border-slate-100 text-slate-400'}`}
+                 >
+                   0{n}
+                 </button>
                ))}
              </div>
           </div>
 
-          {/* FORMS */}
-          <form id="booking-form" onSubmit={handlePayment} className="space-y-6">
+          {/* DYNAMIC FORMS */}
+          <form id="booking-form" onSubmit={handlePayment} className="space-y-8">
             {passengers.map((p, i) => (
-              <div key={i} className="p-6 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 space-y-4">
+              <div key={i} className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-sm space-y-5">
                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-black shadow-sm text-indigo-600">0{i+1}</div>
+                   <div className="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-[11px] font-black italic">0{i+1}</div>
                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Guest Information</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <input required placeholder="First Name" className="p-4 bg-white rounded-2xl text-xs font-bold border border-transparent focus:border-indigo-600 outline-none transition-all shadow-sm" value={p.first_name} onChange={e => handlePassengerChange(i, 'first_name', e.target.value)} />
-                  <input required placeholder="Last Name" className="p-4 bg-white rounded-2xl text-xs font-bold border border-transparent focus:border-indigo-600 outline-none transition-all shadow-sm" value={p.last_name} onChange={e => handlePassengerChange(i, 'last_name', e.target.value)} />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input required placeholder="First Name" className="w-full p-5 bg-slate-50 rounded-2xl text-[11px] font-bold text-slate-900 placeholder:text-slate-300 border-none outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-inner" value={p.first_name} onChange={e => handlePassengerChange(i, 'first_name', e.target.value)} />
+                  <input required placeholder="Last Name" className="w-full p-5 bg-slate-50 rounded-2xl text-[11px] font-bold text-slate-900 placeholder:text-slate-300 border-none outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-inner" value={p.last_name} onChange={e => handlePassengerChange(i, 'last_name', e.target.value)} />
                 </div>
-                <input required type="tel" placeholder="WhatsApp Number" className="w-full p-4 bg-white rounded-2xl text-xs font-bold border border-transparent focus:border-indigo-600 outline-none transition-all shadow-sm" value={p.phone} onChange={e => handlePassengerChange(i, 'phone', e.target.value)} />
-                <input required type="email" placeholder="Email Address" className="w-full p-4 bg-white rounded-2xl text-xs font-bold border border-transparent focus:border-indigo-600 outline-none transition-all shadow-sm" value={p.email} onChange={e => handlePassengerChange(i, 'email', e.target.value)} />
+                
+                <div className="relative group">
+                  <Phone size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input required type="tel" placeholder="WhatsApp Number" className="w-full p-5 pl-12 bg-slate-50 rounded-2xl text-[11px] font-bold text-slate-900 border-none outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-inner" value={p.phone} onChange={e => handlePassengerChange(i, 'phone', e.target.value)} />
+                </div>
+                
+                <div className="relative group">
+                  <MailIcon size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input required type="email" placeholder="Email Address" className="w-full p-5 pl-12 bg-slate-50 rounded-2xl text-[11px] font-bold text-slate-900 border-none outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-inner" value={p.email} onChange={e => handlePassengerChange(i, 'email', e.target.value)} />
+                </div>
               </div>
             ))}
 
-            {/* DISCLAIMER */}
-            <div className="p-6 bg-indigo-50/50 rounded-[2.5rem] border border-indigo-100 space-y-4">
-               <div className="flex gap-3">
-                  <ShieldCheck size={18} className="text-indigo-600 shrink-0" />
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest leading-none">Safe & Trusted Booking</p>
-                    <p className="text-[11px] font-bold text-indigo-800/70 leading-relaxed">
-                      Your booking is encrypted. Our experts will manually issue your PNR within minutes for the lowest price guarantee.
-                    </p>
-                  </div>
+            {/* TRUST BANNER */}
+            <div className="p-8 bg-indigo-900 rounded-[3rem] shadow-2xl shadow-indigo-100 flex items-center gap-6 relative overflow-hidden group">
+               <ShieldCheck size={120} className="absolute -right-5 -top-5 text-white/5 rotate-12" />
+               <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/10 backdrop-blur-md">
+                  <ShieldCheck size={28} className="text-indigo-300" />
+               </div>
+               <div className="space-y-1 relative z-10">
+                 <p className="text-[10px] font-black text-white uppercase tracking-widest">SkySecure™ Booking</p>
+                 <p className="text-[11px] font-bold text-indigo-100/70 leading-relaxed italic">
+                   Expert manual verification for every ticket. PNR issued within minutes of payment confirmation.
+                 </p>
                </div>
             </div>
           </form>
         </div>
 
         {/* STICKY FOOTER */}
-        <div className="shrink-0 bg-white border-t border-slate-100 p-6 md:p-8 flex flex-col gap-3">
-          <div className="flex justify-between items-center">
+        <div className="shrink-0 bg-white border-t border-slate-100 p-8 flex flex-col gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative z-[1100]">
+          <div className="flex justify-between items-end">
             <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Grand Total</p>
-              <p className="text-3xl font-black text-slate-900 italic">₹{(selectedFare.price * numPassengers).toLocaleString()}</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Fare</p>
+              <p className="text-4xl font-black text-slate-950 italic tracking-tighter">
+                ₹{(selectedFare.price * numPassengers).toLocaleString()}
+              </p>
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full mb-1">
-                 <ShieldCheck size={12} className="text-emerald-600" />
-                 <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Verified</span>
+              <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 mb-1 shadow-sm shadow-emerald-100">
+                 <Zap size={10} fill="currentColor" />
+                 <span className="text-[9px] font-black uppercase tracking-tighter">Best Price</span>
               </div>
-              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Secure Manual Flow</p>
+              <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Inc. Taxes</p>
             </div>
           </div>
+          
           <button 
             form="booking-form"
             type="submit" 
             disabled={loading || isExpired} 
-            className="w-full bg-indigo-600 text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full bg-slate-950 text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-300 disabled:opacity-40 transition-all transform active:scale-95 flex items-center justify-center gap-3"
           >
-            {loading ? 'Generating QR...' : (
+            {loading ? (
+              <div className="flex items-center gap-2">
+                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                 <span>Verifying...</span>
+              </div>
+            ) : (
               <>
-                Confirm Booking <ArrowRight size={16} />
+                Confirm Booking <ArrowRight size={18} />
               </>
             )}
           </button>
         </div>
       </div>
+      
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
