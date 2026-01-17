@@ -7,7 +7,8 @@ import {
   Sparkles, ChevronRight, Plane, Gift, Zap, Utensils, Star, 
   Clock, MapPin, Phone, Mail, Globe, ArrowRight, ShieldCheck, 
   Navigation, CreditCard, Heart, Search, Menu, X, Trash2, Camera,
-  Package
+  Package,
+  Train
 } from 'lucide-react'; 
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
@@ -23,6 +24,8 @@ import SupportPage from './components/Support';
 import AdminDashboard from './components/AdminDashboard';
 import TechnicalNotice from './components/TechnicalNotice';
 import PaymentSuccess from './components/PaymentSuccess';
+import TrainBookingPage from './components/TrainBookingPage';
+import ReferralPage from './components/ReferralPage';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -114,6 +117,7 @@ const BottomNav = () => {
     { path: '/bookings', icon: <Ticket size={22} />, label: 'Bookings' },
     { path: '/cab-booking', icon: <Car size={22} />, label: 'Cabs' },
     { path: '/game', icon: <User size={22} />, label: 'Profile' },
+    // {path:'/train-booking',icon:<Train size={22}/>,label:'Train'}
   ];
 
   return (
@@ -510,6 +514,9 @@ function App() {
           <Route path="/game" element={<TripuraQuest/>} />
           <Route path="/cab-booking" element={<CabBooking/>} />
           <Route path="/support" element={<SupportPage/>} />
+           <Route path="/ref" element={<ReferralPage/>} />
+          
+          <Route path='/train-booking'element={<TrainBookingPage/>}/>
           <Route path="/payment-success" element={<PaymentSuccess/>} />
           
           <Route path="/admin-pannel-vivekdas" element={<AdminDashboard/>} />

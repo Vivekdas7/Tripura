@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabase';
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  // Updated: signUp now accepts an optional referralCode
+  signUp: (email: string, password: string, referralCode?: string | null) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 };
@@ -17,23 +18,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Initial session check
+    const initializeAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       setLoading(false);
-    });
+    };
 
+    initializeAuth();
+
+    // Listen for auth changes (Login, Logout, Signup)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-      })();
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return { error };
+  // 1. UPDATED SIGNUP: Stores the referral code in User Metadata
+  const signUp = async (email: string, password: string, referralCode?: string | null) => {
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        // This 'data' object is stored in auth.users.raw_user_meta_data
+        data: {
+          referred_by: referralCode || null,
+          full_name: email.split('@')[0], // Optional: sets a default name
+        }
+      }
+    });
+    return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -47,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
