@@ -119,7 +119,7 @@ export default function FlightTracker() {
     <div className="fixed inset-0 bg-black text-white flex flex-col overflow-hidden font-sans">
       
       {/* HEADER & SEARCH BAR */}
-      <div className="absolute top-0 left-0 right-0 z-[2000] p-4 pt-12 md:pt-4 pointer-events-none">
+      <div className="absolute mt-8 top-0 left-0 right-0 z-[2000] p-4 pt-12 md:pt-4 pointer-events-none">
         <div className="max-w-md mx-auto w-full flex flex-col gap-3 pointer-events-auto">
           
           <div className="bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 flex items-center shadow-2xl">
