@@ -383,7 +383,70 @@ _Sent from TripuraFly Mobile App_`;
                     )}
                   </div>
 
-                 
+                 {/* 2. THE TRACKER HERO (MIDDLE) */}
+                   <div className="w-full bg-white py-12 md:py-20 px-4 md:px-6 relative overflow-hidden">
+      
+      {/* Background Decor: Subtle Radar rings visible on white */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] md:opacity-[0.05]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[800px] border-[10px] md:border-[40px] border-slate-900 rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] md:w-[500px] md:h-[500px] border-[1px] border-slate-900 rounded-full animate-pulse" />
+      </div>
+
+      {/* TRACKER CARD: Mobile Responsive Widths */}
+      <div className="max-w-[100%] md:max-w-md mx-auto relative z-10 bg-slate-950 rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        
+        {/* LIVE STATUS */}
+        <div className="flex items-center gap-2 mb-6">
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+            Live Satellite Radar Active
+          </span>
+        </div>
+
+        {/* TITLE: Adjusted for mobile text wrap */}
+        <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter text-white leading-[0.85] mb-6">
+          TRACK THE <br />
+          <span className="text-blue-500">INDIAN SKY</span>
+        </h1>
+
+        <p className="text-slate-400 text-[11px] md:text-xs font-bold leading-relaxed mb-8 md:mb-10 opacity-80 uppercase tracking-wide">
+          Real-time flight paths, altitude data, and <br className="hidden md:block" />
+          airline tracking across the subcontinent.
+        </p>
+
+        {/* STATS GRID: Mobile Friendly (Side by Side) */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 md:mb-10">
+          <div className="bg-white/5 p-3 md:p-4 rounded-3xl border border-white/5 flex items-center gap-2 md:gap-3">
+            <Navigation className="text-blue-400 shrink-0" size={18} />
+            <div>
+              <p className="text-white font-black text-base md:text-lg leading-none">800+</p>
+              <p className="text-[8px] text-slate-500 font-bold uppercase">Flights</p>
+            </div>
+          </div>
+          <div className="bg-white/5 p-3 md:p-4 rounded-3xl border border-white/5 flex items-center gap-2 md:gap-3">
+            <ShieldCheck className="text-orange-400 shrink-0" size={18} />
+            <div>
+              <p className="text-white font-black text-base md:text-lg leading-none">100%</p>
+              <p className="text-[8px] text-slate-500 font-bold uppercase">Real Data</p>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA BUTTON: High contrast on dark card */}
+        <Link 
+          to="/flight-tracking"
+          className="group flex items-center justify-between w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white p-5 md:p-6 rounded-3xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20"
+        >
+          <div className="flex items-center gap-3">
+            <Plane size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            Launch Live Radar
+          </div>
+          <ArrowRight size={18} />
+        </Link>
+      </div>
+
+    </div>
+  
 
                   {/* PACKAGE SHOWCASE */}
                   <section className="mb-24 overflow-hidden">
