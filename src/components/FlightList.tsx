@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plane, User, Clock, ShieldCheck, AlertCircle, Lock, ChevronRight } from 'lucide-react';
+import { Plane, User, Clock, ShieldCheck, AlertCircle, Lock, ChevronRight, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export interface Flight {
@@ -95,6 +95,7 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
       {flights.map((f) => {
         const meta = getAirlineMeta(f.airline);
         const isSoldOut = f.available_seats <= 0;
+        const isLowAvailability = f.available_seats > 0 && f.available_seats <= 7;
         const hasStops = f.stops > 0;
 
         return (
@@ -121,11 +122,19 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">{f.flight_number}</p>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
+                
+                {/* Status Badges */}
+                <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-1.5 text-indigo-600 bg-indigo-50/50 px-3 py-1.5 rounded-full border border-indigo-100">
                     <ShieldCheck size={12} strokeWidth={3} />
                     <span className="text-[10px] font-black uppercase">Confirmed</span>
                   </div>
+                  {isLowAvailability && !isSoldOut && (
+                    <div className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-lg animate-pulse">
+                      <Zap size={10} fill="currentColor" />
+                      <span className="text-[8px] font-black uppercase">Fast Filling</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -161,11 +170,9 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
 
             {/* BOARDING PASS TEAR-OFF DIVIDER */}
             <div className="relative h-10 flex items-center bg-transparent overflow-visible">
-               {/* The Concave Circles (Notches) */}
                <div className="absolute -left-[18px] w-9 h-9 bg-[#f8fafc] rounded-full border border-slate-100 z-10 shadow-[inset_-4px_0_8px_-4px_rgba(0,0,0,0.05)]" />
                <div className="absolute -right-[18px] w-9 h-9 bg-[#f8fafc] rounded-full border border-slate-100 z-10 shadow-[inset_4px_0_8px_-4px_rgba(0,0,0,0.05)]" />
                
-               {/* The Dashed Line inside the divider bg */}
                <div className="w-full h-full bg-white border-x border-slate-100 flex items-center">
                   <div className="w-full border-t-2 border-dashed border-slate-100 mx-6 opacity-60" />
                </div>
@@ -176,17 +183,27 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSoldOut ? 'bg-red-50 text-red-400' : 'bg-orange-50 text-orange-500'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSoldOut ? 'bg-red-50 text-red-400' : isLowAvailability ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-500'}`}>
                       {isSoldOut ? <Lock size={14} /> : <User size={14} />}
                     </div>
                     <div>
-                      <p className={`text-[10px] font-black uppercase tracking-tight ${isSoldOut ? 'text-red-500' : 'text-slate-900'}`}>
-                        {isSoldOut ? 'Sold Out' : `${f.available_seats} Seats Available`}
+                      <p className={`text-[10px] font-black uppercase tracking-tight ${isSoldOut ? 'text-red-500' : isLowAvailability ? 'text-red-600' : 'text-slate-900'}`}>
+                        {isSoldOut ? 'Sold Out' : isLowAvailability ? `Only ${f.available_seats} left!` : `${f.available_seats} Seats Left`}
                       </p>
                       <div className="flex gap-0.5 mt-1">
-                        {[...Array(5)].map((_, i) => (
-                           <div key={i} className={`h-1 w-3 rounded-full ${i < (f.available_seats / f.total_seats * 5) ? 'bg-orange-400' : 'bg-slate-100'}`} />
-                        ))}
+                        {[...Array(5)].map((_, i) => {
+                           const progress = (f.available_seats / f.total_seats) * 5;
+                           return (
+                             <div 
+                               key={i} 
+                               className={`h-1 w-3 rounded-full ${
+                                 i < progress 
+                                   ? (isLowAvailability ? 'bg-red-500' : 'bg-orange-400') 
+                                   : 'bg-slate-100'
+                               }`} 
+                             />
+                           );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -209,7 +226,6 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
                 </div>
               </div>
               
-              {/* Bottom Barcode Decorative Element */}
               <div className="mt-6 flex justify-center gap-[3px] opacity-10 h-6 overflow-hidden">
                 {[...Array(40)].map((_, i) => (
                   <div key={i} className={`bg-black rounded-full`} style={{ width: `${Math.random() * 4 + 1}px`, height: '100%' }} />
