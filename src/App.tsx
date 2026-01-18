@@ -8,7 +8,9 @@ import {
   Clock, MapPin, Phone, Mail, Globe, ArrowRight, ShieldCheck, 
   Navigation, CreditCard, Heart, Search, Menu, X, Trash2, Camera,
   Package,
-  Train
+  Train,
+  CheckCircle2,
+  Calendar
 } from 'lucide-react'; 
 import AuthForm from './components/AuthForm';
 import Header from './components/Header';
@@ -26,6 +28,7 @@ import TechnicalNotice from './components/TechnicalNotice';
 import PaymentSuccess from './components/PaymentSuccess';
 import TrainBookingPage from './components/TrainBookingPage';
 import ReferralPage from './components/ReferralPage';
+import PackageModal from './components/PackageModal';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -93,6 +96,38 @@ const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
     </div>
   );
 };
+
+
+const handleWhatsAppRedirect = (pkg: any) => {
+  // CONFIGURATION
+  const phoneNumber = "919366159066"; // Your WhatsApp Number
+  
+  // CUSTOM TEMPLATE
+  const messageTemplate = 
+`👋 *NEW TRIPURA PACKAGE INQUIRY*
+
+*Package Name:* ${pkg.title}
+*Price:* ₹${pkg.price}
+*Duration:* ${pkg.duration}
+
+Hi TripuraFly! I saw this special package and I'm interested in booking it. Can you please share the availability and more details?
+
+_Sent from TripuraFly Mobile App_`;
+
+  // Encode the message for URL
+  const encodedMessage = encodeURIComponent(messageTemplate);
+  
+  // Open WhatsApp
+  const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  window.open(whatsappURL, '_blank');
+  
+  // Close the modal
+  setBookingPackage(null);
+};
+
+
+
+
 
 // --- NAVIGATION COMPONENTS ---
 const BottomNav = () => {
@@ -205,31 +240,33 @@ function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [completedBooking, setCompletedBooking] = useState<any>(null);
 
-  const confirmPackageBooking = async (details: any) => {
-    if (!user) return;
-    setLoading(true);
-    const bookingData = {
-      user_id: user.id,
-      package_name: bookingPackage.title,
-      travelers: details.travelers,
-      phone: details.phone,
-      total_price: parseFloat(bookingPackage.price.replace(',', '')) * details.travelers,
-      travel_date: details.date,
-      created_at: new Date()
-    };
+ const handleWhatsAppRedirect = (pkg: any) => {
+  // CONFIGURATION
+  const phoneNumber = "919366159066"; // Your WhatsApp Number
+  
+  // CUSTOM TEMPLATE
+  const messageTemplate = 
+`👋 *NEW TRIPURA PACKAGE INQUIRY*
 
-    try {
-      const { error } = await supabase.from('package_bookings').insert([bookingData]);
-      if (error) throw error;
-      setCompletedBooking(bookingData);
-      setBookingPackage(null);
-      setShowSuccess(true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+*Package Name:* ${pkg.title}
+*Price:* ₹${pkg.price}
+*Duration:* ${pkg.duration}
+
+Hi TripuraFly! I saw this special package and I'm interested in booking it. Can you please share the availability and more details?
+
+_Sent from TripuraFly Mobile App_`;
+
+  // Encode the message for URL
+  const encodedMessage = encodeURIComponent(messageTemplate);
+  
+  // Open WhatsApp
+  const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  window.open(whatsappURL, '_blank');
+  
+  // Close the modal
+  setBookingPackage(null);
+};
+
 
   // Pre-loader effect
   if (!appReady && !authLoading) {
@@ -529,11 +566,11 @@ function App() {
         {showBookingModal && selectedFlight && (
           <BookingModal flight={selectedFlight} onClose={() => setShowBookingModal(false)} onBookingComplete={() => setShowBookingModal(false)} />
         )}
-       {bookingPackage && (
+      {bookingPackage && (
   <PackageModal 
     pkg={bookingPackage} 
     onClose={() => setBookingPackage(null)} 
-    onConfirmSubmit={confirmPackageBooking} // Change from onConfirm to onConfirmSubmit
+    onConfirmSubmit={handleWhatsAppRedirect} 
   />
 )}
         {showSuccess && completedBooking && (
