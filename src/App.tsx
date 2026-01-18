@@ -373,7 +373,7 @@ _Sent from TripuraFly Mobile App_`;
                         />
                       </div>
                     ) : (
-                      <div className="bg-slate-50 border-4 border-dashed border-slate-200 rounded-[3.5rem] py-24 text-center group">
+                      <div className="bg-[#f8fafc] border-4 border-dashed border-slate-200 rounded-[3.5rem] py-24 text-center group">
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl group-hover:scale-110 transition-transform duration-500">
                            <Search className="text-slate-300" size={40} />
                         </div>
@@ -384,7 +384,7 @@ _Sent from TripuraFly Mobile App_`;
                   </div>
 
                  {/* 2. THE TRACKER HERO (MIDDLE) */}
-                   <div className="w-full bg-white py-12 md:py-20 px-4 md:px-6 relative overflow-hidden">
+                   <div className="w-full bg-[#f8fafc] py-12 md:py-20 px-4 md:px-6 relative overflow-hidden">
       
       {/* Background Decor: Subtle Radar rings visible on white */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] md:opacity-[0.05]">
