@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, Plane, Mail, Lock, ArrowRight } from 'lucide-react';
+import { LogIn, Plane, Mail, Lock, ArrowRight, Gift } from 'lucide-react';
+// 1. Import useSearchParams to read the URL
+import { useSearchParams } from 'react-router-dom';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,15 +11,20 @@ export default function AuthForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  
+  // 2. Initialize search params
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    // 3. Pass the referralCode to the signUp function
     const { error } = isLogin
       ? await signIn(email, password)
-      : await signUp(email, password);
+      : await signUp(email, password, referralCode); // Pass ref here
 
     if (error) {
       setError(error.message);
@@ -32,7 +39,7 @@ export default function AuthForm() {
   return (
     <div className="min-h-screen bg-white flex overflow-hidden">
       
-      {/* --- LEFT SIDE: THEMATIC VISUAL (Hidden on Mobile) --- */}
+      {/* --- LEFT SIDE: THEMATIC VISUAL --- */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-indigo-950 items-center justify-center p-12">
         <div className="absolute inset-0 z-0">
           <img 
@@ -74,13 +81,25 @@ export default function AuthForm() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-[#f8fafc]">
         <div className="w-full max-w-md">
           
-          {/* Mobile Logo Only */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <div className="bg-orange-600 p-1.5 rounded-lg">
               <Plane size={24} className="text-white transform -rotate-45" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 italic tracking-tighter">TripuraFly</h1>
           </div>
+
+          {/* Referral Banner - Shows if user came from a link */}
+          {!isLogin && referralCode && (
+            <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center gap-3">
+              <div className="bg-indigo-600 p-2 rounded-lg text-white">
+                <Gift size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-indigo-900 uppercase">Referral Applied</p>
+                <p className="text-[10px] text-indigo-600 font-bold">You're helping a friend earn ₹50!</p>
+              </div>
+            </div>
+          )}
 
           <div className="mb-10 text-center lg:text-left">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3">
@@ -164,12 +183,6 @@ export default function AuthForm() {
               </button>
             </p>
           </div>
-
-          <footer className="mt-12 pt-8 border-t border-slate-100 hidden lg:block">
-            <p className="text-slate-400 text-xs font-medium">
-              By continuing, you agree to TripuraFly's Terms of Service and Privacy Policy. Secure 256-bit SSL encrypted connection.
-            </p>
-          </footer>
         </div>
       </div>
     </div>
