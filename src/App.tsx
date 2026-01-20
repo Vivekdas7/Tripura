@@ -30,6 +30,7 @@ import TrainBookingPage from './components/TrainBookingPage';
 import ReferralPage from './components/ReferralPage';
 import PackageModal from './components/PackageModal';
 import FlightTracker from './components/FlightTracker';
+import RefundPage from './components/Refund';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -617,7 +618,7 @@ _Sent from TripuraFly Mobile App_`;
           <Route path="/support" element={<SupportPage/>} />
            <Route path="/ref" element={<ReferralPage/>} />
            <Route path="/flight-tracking" element={<FlightTracker/>} />
-          
+          <Route path="/refund" element={<RefundPage/>} />
           <Route path='/train-booking'element={<TrainBookingPage/>}/>
           <Route path="/payment-success" element={<PaymentSuccess/>} />
           
