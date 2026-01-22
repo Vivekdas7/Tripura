@@ -389,7 +389,7 @@ _Sent from TripuraFly Mobile App_`;
   
 
                   {/* PACKAGE SHOWCASE */}
-                  <section className="mb-24 overflow-hidden">
+                  <section className="mb-5 overflow-hidden">
   {/* Header Section - Kept consistent */}
   <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
     <div className="space-y-2">
@@ -398,177 +398,186 @@ _Sent from TripuraFly Mobile App_`;
         Tripura <span className="text-indigo-600">Specials.</span>
       </h2>
     </div>
-    <Link to="/support" className="flex items-center gap-3 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-indigo-600 transition-colors">
-      View All Packages <ChevronRight size={16} />
-    </Link>
+    
   </div>
 
   {/* SLIDER CONTAINER */}
 {/* Parent Container: Handles the Main Package Swipe */}
 <div className="flex md:grid md:grid-cols-2 gap-6 md:gap-10 overflow-x-auto md:overflow-visible no-scrollbar snap-x snap-mandatory px-6 md:px-0 pb-12">
-  {
-    [
-      {
-        "packageTitle": "The Grand Tripura Odyssey",
-        "totalPrice": "14,999",
-        "totalDuration": "7D/6N",
-        "tag": "Ultimate Combo",
-        "description": "A luxury circuit covering the Royal Heritage, Rock carvings of Unakoti, and the island magic of Dumboor.",
-        "itinerary": [
-          { 
-            "day": "Day 1",
-            "title": "Agartala Arrival", 
-            "hotel": "Hotel Polo Tower (5-Star)",
-            "img": "https://imgs.search.brave.com/VKlKADSNjxB9inPbUnYd4Q6YsqlnVmVYZ-OWl306I6o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zN2Fw/MS5zY2VuZTcuY29t/L2lzL2ltYWdlL2lu/Y3JlZGlibGVpbmRp/YS9FeHBsb3Jpbmct/SGVyaXRhZ2UtYW5k/LVJlbGlnaW91cy1H/ZW1zLW9mLUFnYXJ0/YWxhLTEtcG9wdWxh/cj9xbHQ9ODImdHM9/MTcyNjY1MTA2NzY1/MA", 
-            "highlights": ["Ujjayanta Palace", "Heritage Walk"]
-          },
-          { 
-            "day": "Day 2",
-            "title": "Heritage & Water", 
-            "hotel": "Sagar Mahal Tourist Lodge",
-            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
-            "highlights": ["Matabari Temple", "Neermahal Boat Trip"]
-          },
-          { 
-            "day": "Day 3",
-            "title": "Island Paradise", 
-            "hotel": "Narikel Kunju Log Huts",
-            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Dumboor%20Lake.jpg", 
-            "highlights": ["Dumboor Lake", "Island Stay"]
-          },
-          { 
-            "day": "Day 4",
-            "title": "Unakoti Spirits", 
-            "hotel": "Unakoti Tourist Lodge",
-            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Unakoti.jpg", 
-            "highlights": ["Rock Carvings", "Ancient Caves"]
-          },
-          { 
-            "day": "Day 5-6",
-            "title": "Misty Peaks", 
-            "hotel": "Eden Tourist Lodge (Jampui)",
-            "img": "https://imgs.search.brave.com/mKJ0y5ZiRvtsZbkf3TmY_bfP3SORyg-zt2K9cvyEzOA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9KYW1w/dWktSGlsbC1Bcy1T/ZWVuLUZyb20tdGhl/LVdhdGNoLVRvd2Vy/LmpwZw", 
-            "highlights": ["Sunrise Point", "Orange Gardens"]
-          },
-          { 
-            "day": "Day 7",
-            "title": "Wildlife Safari", 
-            "hotel": "Departure",
-            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Sepahijala.jpg", 
-            "highlights": ["Sepahijala Zoo", "Botanical Garden"]
-          }
-        ],
-        "inclusions": ["Innova Crysta", "Daily Breakfast", "Entry Fees", "Guide"]
-      },
-      {
-        "packageTitle": "Spiritual South Circuit",
-        "totalPrice": "8,499",
-        "totalDuration": "4D/3N",
-        "tag": "Pilgrimage",
-        "description": "A focused journey through Tripura's most sacred temples and the iconic Neermahal Water Palace.",
-        "itinerary": [
-          { 
-            "day": "Day 1",
-            "title": "Matabari Blessing", 
-            "hotel": "Gomati Tourist Lodge",
-            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
-            "highlights": ["Sundari Temple", "Kalyan Sagar"]
-          },
-          { 
-            "day": "Day 2",
-            "title": "Royal Neermahal", 
-            "hotel": "Sagar Mahal Lodge",
-            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
-            "highlights": ["Rudrasagar Lake", "Architecture Tour"]
-          }
-        ],
-        "inclusions": ["AC Sedan", "Temple VIP Entry", "Breakfast", "Boat Charges"]
-      }
-    ].map((item, i) => (
-      /* Outer Card: snap-center allows for the horizontal flicking effect */
-      <div 
-        key={i} 
-        className="min-w-[85vw] md:min-w-full snap-center bg-slate-900 rounded-[3rem] overflow-hidden shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] border border-white/5 flex flex-col"
-      >
-        {/* TOP HERO SECTION */}
-        <div className="relative h-[240px] md:h-[300px] w-full shrink-0">
-          <img 
-            src={item.itinerary[0].img} 
-            className="w-full h-full object-cover opacity-60 transition-transform duration-700 hover:scale-110" 
-            alt="Hero" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/20" />
-          
-          <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
-            <span className="bg-orange-600 text-white text-[8px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
+  {[
+    {
+      "packageTitle": "Explore Tripura",
+      "totalPrice": "15,500",
+      "totalDuration": "8D/7N",
+      "tag": "All-in-One",
+      "description": "The complete Tripura experience from Agartala heritage to the misty Jampui Hills and sacred Unakoti.",
+      "itinerary": [
+        { "day": "Day 1", "title": "Arrival & Heritage", "hotel": "Geetanjali Tourism Guest House", "img": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0d/e9/9d/a6/20161123-112144-largejpg.jpg?w=1800&h=-1&s=1", "highlights": ["Ujjayanta Palace", "State Museum", "Light & Sound Show"] },
+        { "day": "Day 2", "title": "Cultural Circuit", "hotel": "Eden Tourist Lodge (Vanghmun)", "img": "https://imgs.search.brave.com/rOmdx0g3IlKWS5-VGVs-RWf8Z2FGjqn6rDVNsV0U4K4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jb250/ZW50LmpkbWFnaWNi/b3guY29tL2NvbXAv/bm9ydGgtdHJpcHVy/YS93Mi85OTk5cDM4/MjQuMzgyNC4xODEx/MjgwMDQwMDcuaDR3/Mi9jYXRhbG9ndWUv/ZWRlbi10b3VyaXN0/LWxvZGdlLWphbXB1/aS1ub3J0aC10cmlw/dXJhLWxvZGdpbmct/c2VydmljZXMtcjRh/Nmh1ZTVtcS5qcGc_/dz0zODQwJnE9NzU", "highlights": ["14 Gods Temple", "Khumulwng Eco Park", "Baramura Eco Park"] },
+        { "day": "Day 3", "title": "Misty Jampui Hills", "hotel": "Eden Tourist Lodge (Vanghmun)", "img": "https://imgs.search.brave.com/mKJ0y5ZiRvtsZbkf3TmY_bfP3SORyg-zt2K9cvyEzOA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9KYW1w/dWktSGlsbC1Bcy1T/ZWVuLUZyb20tdGhl/LVdhdGNoLVRvd2Vy/LmpwZw", "highlights": ["Jampui Hill Sightseeing", "Sunrise Point"] },
+        { "day": "Day 4", "title": "Sacred Rock Carvings", "hotel": "Geetanjali Tourism Guest House", "img": "https://tripuratourism.gov.in/images/tour/1661754729/35.jpg", "highlights": ["Unakoti Rock Carvings", "Surmacherrra Waterfalls"] },
+        { "day": "Day 5", "title": "Wildlife & Water", "hotel": "Sagarika Parjatan Niwas", "img": "https://imgs.search.brave.com/0GPVTtJBy8HepcP9L4tJYXnWVUNKb95qAzVbU_IFhZE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWct/Y2RuLnRoZXB1Ymxp/dmUuY29tL2ZpbHRl/cnM6Zm9ybWF0KHdl/YnApL3ByYXRpZGlu/L21lZGlhL3Bvc3Rf/YXR0YWNobWVudHMv/cHJhdGlkaW50aW1l/LzIwMjMtMDUvYzBj/MDc5NGQtNmVmMy00/ZWZiLWI3ZGYtNDUy/MWFhN2NjM2UwL0Nv/cHlfb2ZfUHJhdGlk/aW5fVGVtcGxhdGVf/XzY0Xy53ZWJw", "highlights": ["Sepahijala Zoo", "Neermahal Palace", "Tripurasundari Temple"] },
+        { "day": "Day 6", "title": "Dumboor Lake Magic", "hotel": "Sagarika Parjatan Niwas", "img": "https://cdn.s3waas.gov.in/s3e4a6222cdb5b34375400904f03d8e6a5/uploads/2023/12/2023121668.jpeg", "highlights": ["Chabimura Boat Ride", "Dumboor Lake Island"] },
+        { "day": "Day 7", "title": "Final Heritage Walk", "hotel": "Geetanjali Tourism Guest House", "img": "https://cdn.s3waas.gov.in/s39fe8593a8a330607d76796b35c64c600/uploads/2018/06/2018061959.jpg", "highlights": ["Pilak Excavations", "Heritage Park"] },
+        { "day": "Day 8", "title": "Departure", "hotel": "None", "img": "https://imgs.search.brave.com/5MVrnGx28WFpcgSsLbiX3k-z2YZtDq2M9u8eoyNtn94/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbS5o/dW50LmluL2NnL2Fn/YXJ0YWxhL0NpdHkt/R3VpZGUvQWdhcnRh/bGFfU3RhdGlvbi5q/cGc", "highlights": ["Drop to Airport/Rail Station"] }
+      ],
+      "inclusions": ["AC Transportation", "TTDCL Accommodation", "Complimentary Breakfast", "Station/Airport Transfers"],
+      "exclusions": ["Air/Rail Fare", "Lunch & Dinner", "Entry Fees", "Camera Fees"],
+      "hotelDisclaimer": "Accommodation is provided on a twin-sharing basis. Specific lodges are subject to availability."
+    },
+    {
+      "packageTitle": "Pilgrim Tour",
+      "totalPrice": "6,500",
+      "totalDuration": "4D/3N",
+      "tag": "Spiritual",
+      "description": "A holy circuit connecting the most revered temples of Tripura including Matabari and the 14 Gods Temple.",
+      "itinerary": [
+        { "day": "Day 1", "title": "City of Temples", "hotel": "Geetanjali Tourism Guest House", "img": "https://imgs.search.brave.com/LTSIpJYiuZyKbLqiRIqM1ces_XtFUAjPIsXQjK55COo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jb250/ZW50LmpkbWFnaWNi/b3guY29tL2NvbXAv/YWdhcnRhbGEvYzMv/OTk5OXB4MzgxLngz/ODEuMTQxMjI2MTQw/NjA2LmE1YzMvY2F0/YWxvZ3VlL2phZ2Fu/bmF0aC10ZW1wbGUt/YWdhcnRhbGEtaG8t/YWdhcnRhbGEtdG91/cmlzdC1hdHRyYWN0/aW9uLTNjYTh2cngu/anBnP3c9Mzg0MCZx/PTc1", "highlights": ["Jagannath Temple", "Laxminarayan Temple", "14 Gods Temple"] },
+        { "day": "Day 2", "title": "Sacred Shaktipeeth", "hotel": "Sagarika Parjatan Niwas", "img": "https://imgs.search.brave.com/3U_e59idmkOeFKz6_CkAxU7kvvxGEOfb5nEIXXBmHPs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jb250/ZW50LmpkbWFnaWNi/b3guY29tL2NvbXAv/c291dGgtdHJpcHVy/YS9tNy85OTk5cDM4/MjMuMzgyMy4xNDEy/MjQxNjQ3MDIuaTNt/Ny9jYXRhbG9ndWUv/bWF0YWJhcmktdGVt/cGxlLXVkYWlwdXIt/Y291cnQtc291dGgt/dHJpcHVyYS10b3Vy/aXN0LWF0dHJhY3Rp/b24teHUwNjZiLmpw/Zz93PTM4NDAmcT03/NQ", "highlights": ["Matabari Temple", "Kamalasagar", "Boxanagar"] },
+        { "day": "Day 3", "title": "Ancient Echoes", "hotel": "Geetanjali Tourism Guest House", "img": "https://imgs.search.brave.com/i_kBBm5XZnBvnNitmUyKpAasTzlDTD9tMbuseTKLVcE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9NYWhp/c2hhc3VybWFyZGlu/aS1TdGF0dWUtYXQt/Q2hhYmltdXJhLWFz/LXNlZW4tZnJvbS1k/aXN0YW5jZS5qcGc", "highlights": ["Chabimura", "Gunabati Group of Temples", "Bhubaneswari Temple"] },
+        { "day": "Day 4", "title": "Departure", "hotel": "None", "img": "https://imgs.search.brave.com/5MVrnGx28WFpcgSsLbiX3k-z2YZtDq2M9u8eoyNtn94/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbS5o/dW50LmluL2NnL2Fn/YXJ0YWxhL0NpdHkt/R3VpZGUvQWdhcnRh/bGFfU3RhdGlvbi5q/cGc", "highlights": ["Drop to Airport/Rail Station"] }
+      ],
+      "inclusions": ["AC Sedan", "TTDCL Guest House Stay", "Daily Breakfast", "Sightseeing"],
+      "exclusions": ["Prasad/Personal Offerings", "Lunch & Dinner", "Laundry", "GST"],
+      "hotelDisclaimer": "Temple area lodges are subject to availability during festival seasons."
+    },
+    {
+      "packageTitle": "Eco Tourism Package",
+      "totalPrice": "8,500",
+      "totalDuration": "5D/4N",
+      "tag": "Nature Escape",
+      "description": "Explore the lush green side of Tripura, from botanical sanctuaries to the highest mountain ranges.",
+      "itinerary": [
+        { "day": "Day 1", "title": "Lush Agartala", "hotel": "Geetanjali Tourism Guest House", "img": "https://tripuratourism.gov.in/images/tour/1701244635/2.jpg", "highlights": ["Durgabari Tea Garden", "Heritage Park", "Akhaura Checkpost"] },
+        { "day": "Day 2", "title": "Mountain Bound", "hotel": "Eden Tourist Lodge", "img": "https://tripuratourism.gov.in/images/tour/1661756009/86.jpg", "highlights": ["Baramura Eco Park", "Khumulwng Eco Park"] },
+        { "day": "Day 3", "title": "Jampui Exploration", "hotel": "Eden Tourist Lodge", "img": "https://tripuratourism.gov.in/images/tour/1661756901/71.jpg", "highlights": ["Orange Orchards", "Betlingshib Peak View"] },
+        { "day": "Day 4", "title": "Waterfalls & Valleys", "hotel": "Geetanjali Tourism Guest House", "img": "https://tripuratourism.gov.in/images/tour/1661773484/198.jpg", "highlights": ["Unakoti", "Surmacherrra Waterfalls"] },
+        { "day": "Day 5", "title": "Farewell", "hotel": "None", "img": "https://imgs.search.brave.com/5MVrnGx28WFpcgSsLbiX3k-z2YZtDq2M9u8eoyNtn94/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbS5o/dW50LmluL2NnL2Fn/YXJ0YWxhL0NpdHkt/R3VpZGUvQWdhcnRh/bGFfU3RhdGlvbi5q/cGc", "highlights": ["Airport/Station Transfer"] }
+      ],
+      "inclusions": ["AC SUV", "Eco Lodge Stays", "Breakfast", "Guide Support"],
+      "exclusions": ["Entry to Sanctuary", "Meals other than Breakfast", "GST", "Insurance"],
+      "hotelDisclaimer": "Eden Tourist Lodge Jampui is subject to strict availability during Sep-Apr."
+    },
+    {
+      "packageTitle": "Archaeological Tour",
+      "totalPrice": "8,500",
+      "totalDuration": "4D/3N",
+      "tag": "History",
+      "description": "A deep dive into the stone-carved history and archaeological marvels of ancient Tripura.",
+      "itinerary": [
+        { "day": "Day 1", "title": "Dynasty & Divinity", "hotel": "Sagarika Parjatan Niwas", "img": "https://tripuratourism.gov.in/images/tour/1661767443/9.png", "highlights": ["Boxanagar Buddhist Ruins", "Gunabati Temples"] },
+        { "day": "Day 2", "title": "Royal Archives", "hotel": "Geetanjali Tourism Guest House", "img": "https://tripuratourism.gov.in/images/tour/1661772923/131.jpg", "highlights": ["Chabimura Rock Carvings", "Ujjayanta Palace"] },
+        { "day": "Day 3", "title": "Unakoti Marvel", "hotel": "Geetanjali Tourism Guest House", "img": "https://tripuratourism.gov.in/images/tour/1661754729/35.jpg", "highlights": ["Unakoti Full Day Trip", "Ancient Sculptures"] },
+        { "day": "Day 4", "title": "Departure", "hotel": "None", "img": "https://imgs.search.brave.com/5MVrnGx28WFpcgSsLbiX3k-z2YZtDq2M9u8eoyNtn94/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbS5o/dW50LmluL2NnL2Fn/YXJ0YWxhL0NpdHkt/R3VpZGUvQWdhcnRh/bGFfU3RhdGlvbi5q/cGc", "highlights": ["Drop to Airport/Rail Station"] }
+      ],
+      "inclusions": ["AC Car", "Heritage Stays", "Breakfast", "Archaeological Site Entry"],
+      "exclusions": ["Professional Guide Fees", "GST 5%", "Lunch", "Personal Tipping"],
+      "hotelDisclaimer": "Itinerary and night halt may be subject to alteration under exceptional circumstances."
+    }
+  ].map((item, i) => (
+    <div 
+      key={i} 
+      className="min-w-[85vw] md:min-w-0 snap-center bg-slate-950 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col transition-all duration-300 hover:border-orange-500/30"
+    >
+      {/* HERO SECTION */}
+      <div className="relative h-[200px] md:h-[260px] w-full shrink-0 overflow-hidden">
+        <img 
+          src={item.itinerary[0].img} 
+          className="w-full h-full object-cover opacity-60 transition-transform duration-1000 hover:scale-105" 
+          alt={item.packageTitle} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        
+        {/* Badges */}
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+          <div className="flex flex-col gap-1.5">
+            <span className="bg-orange-600 text-white text-[7px] md:text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
               {item.tag}
             </span>
-            <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
-              <span className="text-white text-[9px] font-bold tracking-wider">{item.totalDuration}</span>
-            </div>
+            <span className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[6px] md:text-[7px] font-bold px-3 py-1 rounded-full uppercase tracking-tight w-fit">
+              TTDCL Approved
+            </span>
           </div>
-
-          <div className="absolute bottom-6 left-8 right-8">
-            <h3 className="text-white text-2xl md:text-3xl font-black leading-tight tracking-tighter italic uppercase">
-              {item.packageTitle}
-            </h3>
+          <div className="bg-black/50 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
+            <span className="text-white text-[9px] font-black tracking-tighter uppercase">{item.totalDuration}</span>
           </div>
         </div>
 
-        {/* INNER CONTENT AREA */}
-        <div className="p-6 space-y-6 flex-1 flex flex-col justify-between">
-          <div className="space-y-4">
-            <h4 className="text-white/40 text-[9px] font-black uppercase tracking-[0.3em] italic">Itinerary Highlights</h4>
+        <div className="absolute bottom-5 left-6 right-6">
+          <h3 className="text-white text-xl md:text-3xl font-black leading-tight tracking-tighter italic uppercase drop-shadow-xl">
+            {item.packageTitle}
+          </h3>
+        </div>
+      </div>
 
-            {/* Internal Horizontal Swipe: Itinerary Days */}
-            <div className="flex overflow-x-auto gap-3 no-scrollbar -mx-2 px-2 snap-x">
-              {item.itinerary.map((step, idx) => (
-                <div 
-                  key={idx} 
-                  className="min-w-[200px] snap-start bg-white/5 border border-white/10 rounded-[1.8rem] p-4 relative overflow-hidden"
-                >
-                  <span className="text-orange-500 text-[9px] font-black uppercase mb-1 block">{step.day}</span>
-                  <h5 className="text-white text-sm font-bold truncate mb-2">{step.title}</h5>
-                  <div className="flex items-center gap-2 bg-black/30 p-1.5 rounded-lg border border-white/5">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                    <span className="text-slate-400 text-[8px] font-medium truncate uppercase tracking-tighter">{step.hotel}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* CONTENT AREA */}
+      <div className="p-5 md:p-6 space-y-5 flex-1 flex flex-col">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-white/30 text-[8px] font-black uppercase tracking-[0.2em]">Route Highlights</h4>
+            <div className="h-[1px] flex-1 bg-white/5 ml-3" />
           </div>
 
-          {/* PRICING & CTA BLOCK */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
-             <div className="flex flex-wrap gap-2">
-                {item.inclusions.slice(0, 3).map((inc, ii) => (
-                  <span key={ii} className="text-emerald-400 text-[7px] font-black uppercase tracking-widest border border-emerald-500/20 px-2 py-1 rounded-md">
-                    ✓ {inc}
-                  </span>
-                ))}
-             </div>
-
-            <div className="bg-white rounded-[2rem] p-2 flex items-center justify-between shadow-2xl">
-              <div className="pl-4">
-                <p className="text-slate-400 text-[8px] font-bold uppercase leading-none mb-1">Total Package</p>
-                <p className="text-slate-900 text-xl font-black italic tracking-tighter leading-none">₹{item.totalPrice}</p>
-              </div>
-              <button 
-                onClick={() => setBookingPackage(item)} 
-                className="bg-slate-900 text-white px-6 py-4 rounded-[1.6rem] font-black text-[9px] uppercase tracking-[0.15em] active:scale-95 transition-all"
+          {/* Day Horizontal Scroller */}
+          <div className="flex overflow-x-auto gap-3 no-scrollbar -mx-1 px-1 snap-x">
+            {item.itinerary.map((step, idx) => (
+              <div 
+                key={idx} 
+                className="min-w-[180px] md:min-w-[200px] snap-start bg-white/[0.03] border border-white/5 rounded-2xl p-2.5 flex gap-3 items-center"
               >
-                Book Now
-              </button>
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                  <img src={step.img} className="w-full h-full object-cover opacity-70" alt="Day" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-orange-500 text-[7px] font-black uppercase">{step.day}</span>
+                  <h5 className="text-white text-[10px] font-bold truncate tracking-tight">{step.title}</h5>
+                  <p className="text-slate-500 text-[7px] font-medium truncate uppercase mt-0.5 italic">
+                    {step.hotel !== "None" ? `Stay: ${step.hotel.split(' ')[0]}` : "Departure"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* BOTTOM ACTION BAR */}
+        <div className="mt-auto pt-5 space-y-4 border-t border-white/5">
+           <div className="flex flex-wrap gap-2">
+              {item.inclusions.slice(0, 3).map((inc, ii) => (
+                <div key={ii} className="flex items-center gap-1.5 bg-white/[0.03] border border-white/10 px-2 py-1 rounded-md">
+                  <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
+                  <span className="text-slate-300 text-[7px] font-bold uppercase tracking-tighter">
+                    {inc}
+                  </span>
+                </div>
+              ))}
+           </div>
+
+          <div className="bg-white rounded-[1.8rem] p-1.5 flex items-center justify-between shadow-xl">
+            <div className="pl-4">
+              <p className="text-slate-400 text-[7px] font-black uppercase tracking-widest mb-0.5 leading-none">Total Package</p>
+              <div className="flex items-baseline">
+                <span className="text-slate-900 text-[9px] font-bold mr-0.5">₹</span>
+                <span className="text-slate-900 text-xl md:text-2xl font-black italic tracking-tighter leading-none">
+                  {item.totalPrice}
+                </span>
+              </div>
             </div>
+            
+            <button 
+              onClick={() => setBookingPackage(item)} 
+              className="bg-slate-950 text-white px-5 md:px-7 h-11 md:h-13 rounded-[1.5rem] font-black text-[9px] uppercase tracking-[0.15em] flex items-center gap-2 active:scale-95 transition-all shadow-lg"
+            >
+              Book
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+            </button>
           </div>
         </div>
       </div>
-    ))
-  }
+    </div>
+  ))}
   
-  {/* Spacer to handle end-padding on mobile swipe */}
   <div className="min-w-[20px] md:hidden" />
-
   <style dangerouslySetInnerHTML={{ __html: `
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -581,7 +590,10 @@ _Sent from TripuraFly Mobile App_`;
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   `}} />
 </section>
-
+                
+       {/* ALL-INDIA */}
+                
+ 
                   {/* STATS SECTION */}
                   <section className="grid grid-cols-2 md:grid-cols-4 gap-8 py-20 border-t border-slate-100">
                     {[
