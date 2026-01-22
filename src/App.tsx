@@ -600,6 +600,258 @@ _Inquiry via TripuraFly Verified App_`;
 </section>
                 
        {/* ALL-INDIA */}
+
+            <section className="mb-24 overflow-hidden">
+  {/* Header Section - Kept consistent */}
+  <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+    <div className="space-y-2">
+      <span className="text-orange-500 font-black text-xs uppercase tracking-[0.4em]">incredible india</span>
+      <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter italic">
+        INDIA <span className="text-indigo-600">Specials.</span>
+      </h2>
+    </div>
+    
+  </div>
+
+  {/* SLIDER CONTAINER */}
+{/* Parent Container: Handles the Main Package Swipe */}
+<div className="flex md:grid md:grid-cols-2 gap-6 md:gap-10 overflow-x-auto md:overflow-visible no-scrollbar snap-x snap-mandatory px-6 md:px-0 pb-12">
+  {[
+    {
+  "packageTitle": "Exotic Odisha",
+  "totalPrice": "14,490",
+  "totalDuration": "3D/2N",
+  "tag": "Temple & Coastal",
+  "description": "A journey through the 'Exotic' heritage of Odisha, spanning the ancient temples of Bhubaneswar, the spiritual coast of Puri, and the natural wonder of Chilika Lake. [cite: 325, 326]",
+  "itinerary": [
+    {
+      "day": "Day 1",
+      "title": "Bhubaneswar to Puri via Konark",
+      "hotel": "Hotel Shreehari / Similar",
+      "img": "https://imgs.search.brave.com/tKRfp-dBMgp3uMElQ8LbP4b_gDmwcqooYHguWdfSyLk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9rb25h/cmstc3VuLXRlbXBs/ZS1idWlsdC10aC1j/ZW50dXJ5LWhpbmR1/LW9kaXNoYS1pbmRp/YS1jZS1raWxvbWV0/cmVzLW5vcnRoZWFz/dC1wdXJpLWNpdHkt/Y29hc3RsaW5lLTQw/MDg3NDI5MC5qcGc",
+      "highlights": [
+        "Konark Sun Temple",
+        "Chandra Bhaga Beach",
+        "Puri Drop-off"
+      ]
+    },
+    {
+      "day": "Day 2",
+      "title": "Puri Darshan & Chilika Lake",
+      "hotel": "Hotel Shreehari / Similar",
+      "img": "https://imgs.search.brave.com/STGKUjKg4ArwoV4cukmNUGIhkcX-Rg2TAL1eqBmLzNg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9tYWlu/LXRlbXBsZS1kb21l/LWphZ2FubmF0aC1m/YW1vdXMtaGluZHUt/ZGVkaWNhdGVkLXRv/LWxvcmQtdmlzaG51/LWNvYXN0YWwtdG93/bi1wdXJpLW9yaXNz/YS1pbmRpYS0yMzU0/ODgxMjIuanBn",
+      "highlights": [
+        "Lord Jagannath Temple Darshan",
+        "Satapada Boat Ride (Sea Mouth)",
+        "Alarnath Temple Visit"
+      ]
+    },
+    {
+      "day": "Day 3",
+      "title": "Bhubaneswar Temple Trail",
+      "hotel": "None",
+      "img": "https://imgs.search.brave.com/hiztP3kua1wPPBHKaq3YrYtgQzsqJf_6VWUpOfQvoyU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/ZGhhdWxpLm5ldC9p/bWFnZXMvc2hhbnRp/LXN0dXBhLWRoYXVs/aS5qcGc",
+      "highlights": [
+        "Dhauli Stupa & Lingaraj Temple",
+        "Udaigiri & Khandagiri Caves",
+        "Mukteshwar Temple"
+      ]
+    }
+  ],
+  "inclusions": [
+    "AC Accommodation at Puri",
+    "02 Breakfasts & 02 Dinners",
+    "AC Vehicle (Seat in Coach basis)",
+    "Travel Insurance",
+    "Toll & Parking Charges"
+  ],
+  "exclusions": [
+    "Air/Rail Fare",
+    "Lunch Expenses",
+    "Chilika Boating Charges",
+    "Entry Fees & Guide Charges",
+    "Special Darshan Fees"
+  ],
+  "hotelDisclaimer": "Check-in time is 12:00 Noon. Early check-in is subject to hotel policy and additional payment. [cite: 340, 363]"
+},{
+  "packageTitle": "Devbhoomi Haridwar - Rishikesh",
+  "totalPrice": "16,900",
+  "totalDuration": "4N/5D",
+  "tag": "Pilgrimage",
+  "description": "A spiritual journey to the 'Gateway to Vishnu', covering the sacred Ganga Aarti in Haridwar and the iconic hanging bridges of Rishikesh.",
+  "itinerary": [
+    {
+      "day": "Day 1",
+      "title": "Departure from Sabarmati",
+      "hotel": "Train Journey",
+      "img": "https://imgs.search.brave.com/OnBbz8PWKyKRwedDi0uD1dr-RRZuLF5DFivvnC14mGg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNTIx/MDA0MjMwL3Bob3Rv/L2hhci1raS1wYXVy/aS1oYXJpZHdhci5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/RmkySTV4T01lcnN1/a3RtMlBmanJBWVhl/aGhuVnZQd1hJS2xB/a1BDa2hWMD0",
+      "highlights": ["Departure at 11:25 hrs", "Yoga Express (19031)", "Overnight Train Journey"]
+    },
+    {
+      "day": "Day 2",
+      "title": "Haridwar Arrival & Ganga Aarti",
+      "hotel": "Sarovar Portico or similar",
+      "img": "https://imgs.search.brave.com/smlTozL-Oz38QHtoxhYM1jzDr0RHehILih4zx_yZnFE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTAy/MjM2NDU5Mi9waG90/by9oYXIta2ktcGF1/cmktZ2hhdC5qcGc_/cz02MTJ4NjEyJnc9/MCZrPTIwJmM9S2V0/aXlIbkJicGFoOGtL/MVNyTVFJZjRmZEZR/azJXLXpxWUdKbVRv/X0tsWT0",
+      "highlights": ["Arrival at 11:20 hrs", "Hotel Check-in", "Evening Ganga Aarti at Har Ki Pauri"]
+    },
+    {
+      "day": "Day 3",
+      "title": "Temples of Haridwar",
+      "hotel": "Sarovar Portico or similar",
+      "img": "https://imgs.search.brave.com/NFnGfHIjfyLENYIFO7lPfr6IJmSo0BujYxriyEmmgVU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90LmV1/Y2RuLmluL3RvdXJp/c20vbGcvbWFuc2Et/ZGV2aS10ZW1wbGUt/NDEwMjAzOS53ZWJw",
+      "highlights": ["Mansa Devi Temple", "Chandi Devi Temple", "Local Sightseeing"]
+    },
+    {
+      "day": "Day 4",
+      "title": "Rishikesh Exploration",
+      "hotel": "Train Journey",
+      "img": "https://imgs.search.brave.com/vuvlvXqcPnV5DjlYy6xwuqT3IgZWatPuHgpwmD5-hLE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zN2Fw/MS5zY2VuZTcuY29t/L2lzL2ltYWdlL2lu/Y3JlZGlibGVpbmRp/YS9yYW0tamh1bGEt/cmlzaGlrZXNoLXV0/dGFyYWtoYW5kLTMt/YXR0ci1hYm91dD9x/bHQ9ODImdHM9MTcy/NjY0NjE3NzE0NA",
+      "highlights": ["Ram Jhula", "Lakshman Jhula", "Departure for Sabarmati at 14:55 hrs"]
+    },
+    {
+      "day": "Day 5",
+      "title": "Arrival at Sabarmati",
+      "hotel": "None",
+      "img": "https://imgs.search.brave.com/mtYUgDuRMz6RKlomPqJ2l4F4mzMXBtnruzz8nZOaSWU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jb250/ZW50LmpkbWFnaWNi/b3guY29tL3YyL2Nv/bXAvYWhtZWRhYmFk/L3MzLzA3OXB4eDc5/Lnh4NzkuMDAwMTQ3/NTM0MjM1LmU0czMv/Y2F0YWxvZ3VlL3Nh/YmFybWF0aS1yYWls/d2F5LXN0YXRpb24t/c2FiYXJtYXRpLWFo/bWVkYWJhZC1yYWls/d2F5LWVucXVpcnkt/c2VydmljZXMtYmUw/ZmJodzJ6MC5qcGc_/dz0zODQwJnE9NzU",
+      "highlights": ["Arrival at 15:00 hrs", "Tour Ends"]
+    }
+  ],
+  "inclusions": [
+    "Return Train Fare (3AC/SL)",
+    "Railway Station Transfers",
+    "Meals (2 Breakfast + 2 Dinners)",
+    "AC Land Transfers (SIC Basis)",
+    "Travel Insurance"
+  ],
+  "exclusions": [
+    "Onboard Meals",
+    "Entry Tickets & Cable Car",
+    "Personal Expenses",
+    "Tips & Gratuities",
+    "Room Service"
+  ],
+  "hotelDisclaimer": "Hotel check-in is 12:00 Noon. Room categories are base category. Triple sharing includes an extra mattress/rollaway bed."
+}
+   
+  ].map((item, i) => (
+    <div 
+      key={i} 
+      className="min-w-[85vw] md:min-w-0 snap-center bg-slate-950 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col transition-all duration-300 hover:border-orange-500/30"
+    >
+      {/* HERO SECTION */}
+      <div className="relative h-[200px] md:h-[260px] w-full shrink-0 overflow-hidden">
+        <img 
+          src={item.itinerary[0].img} 
+          className="w-full h-full object-cover opacity-60 transition-transform duration-1000 hover:scale-105" 
+          alt={item.packageTitle} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        
+        {/* Badges */}
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+          <div className="flex flex-col gap-1.5">
+            <span className="bg-orange-600 text-white text-[7px] md:text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+              {item.tag}
+            </span>
+            <span className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[6px] md:text-[7px] font-bold px-3 py-1 rounded-full uppercase tracking-tight w-fit">
+              TRIPURAFLY Approved
+            </span>
+          </div>
+          <div className="bg-black/50 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
+            <span className="text-white text-[9px] font-black tracking-tighter uppercase">{item.totalDuration}</span>
+          </div>
+        </div>
+
+        <div className="absolute bottom-5 left-6 right-6">
+          <h3 className="text-white text-xl md:text-3xl font-black leading-tight tracking-tighter italic uppercase drop-shadow-xl">
+            {item.packageTitle}
+          </h3>
+        </div>
+      </div>
+
+      {/* CONTENT AREA */}
+      <div className="p-5 md:p-6 space-y-5 flex-1 flex flex-col">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-white/30 text-[8px] font-black uppercase tracking-[0.2em]">Route Highlights</h4>
+            <div className="h-[1px] flex-1 bg-white/5 ml-3" />
+          </div>
+
+          {/* Day Horizontal Scroller */}
+          <div className="flex overflow-x-auto gap-3 no-scrollbar -mx-1 px-1 snap-x">
+            {item.itinerary.map((step, idx) => (
+              <div 
+                key={idx} 
+                className="min-w-[180px] md:min-w-[200px] snap-start bg-white/[0.03] border border-white/5 rounded-2xl p-2.5 flex gap-3 items-center"
+              >
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                  <img src={step.img} className="w-full h-full object-cover opacity-70" alt="Day" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-orange-500 text-[7px] font-black uppercase">{step.day}</span>
+                  <h5 className="text-white text-[10px] font-bold truncate tracking-tight">{step.title}</h5>
+                  <p className="text-slate-500 text-[7px] font-medium truncate uppercase mt-0.5 italic">
+                    {step.hotel !== "None" ? `Stay: ${step.hotel.split(' ')[0]}` : "Departure"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* BOTTOM ACTION BAR */}
+        <div className="mt-auto pt-5 space-y-4 border-t border-white/5">
+           <div className="flex flex-wrap gap-2">
+              {item.inclusions.slice(0, 3).map((inc, ii) => (
+                <div key={ii} className="flex items-center gap-1.5 bg-white/[0.03] border border-white/10 px-2 py-1 rounded-md">
+                  <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
+                  <span className="text-slate-300 text-[7px] font-bold uppercase tracking-tighter">
+                    {inc}
+                  </span>
+                </div>
+              ))}
+           </div>
+
+          <div className="bg-white rounded-[1.8rem] p-1.5 flex items-center justify-between shadow-xl">
+            <div className="pl-4">
+              <p className="text-slate-400 text-[7px] font-black uppercase tracking-widest mb-0.5 leading-none">Starting Package</p>
+              <div className="flex items-baseline">
+                <span className="text-slate-900 text-[9px] font-bold mr-0.5">₹</span>
+                <span className="text-slate-900 text-xl md:text-2xl font-black italic tracking-tighter leading-none">
+                  {item.totalPrice}
+                </span>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setBookingPackage(item)} 
+              className="bg-slate-950 text-white px-5 md:px-7 h-11 md:h-13 rounded-[1.5rem] font-black text-[9px] uppercase tracking-[0.15em] flex items-center gap-2 active:scale-95 transition-all shadow-lg"
+            >
+              Book
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+  
+  <div className="min-w-[20px] md:hidden" />
+  <style dangerouslySetInnerHTML={{ __html: `
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  `}} />
+</div>
+
+  {/* Inline Styles for hiding scrollbar */}
+  <style dangerouslySetInnerHTML={{ __html: `
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  `}} />
+</section>
+
+
+
                 
  
                   {/* STATS SECTION */}
