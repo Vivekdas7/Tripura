@@ -242,30 +242,38 @@ function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [completedBooking, setCompletedBooking] = useState<any>(null);
 
- const handleWhatsAppRedirect = (pkg: any) => {
+const handleWhatsAppRedirect = (pkg: any) => {
   // CONFIGURATION
-  const phoneNumber = "919366159066"; // Your WhatsApp Number
+  const phoneNumber = "919366159066"; // TripuraFly Official WhatsApp
   
-  // CUSTOM TEMPLATE
+  // LOGIC TO GENERATE A SHORT ROUTE SUMMARY
+  const routeSummary = pkg.itinerary
+    .map((item: any) => item.title)
+    .join(" → ");
+
+  // CUSTOM PREMIUM TEMPLATE
   const messageTemplate = 
-`👋 *NEW TRIPURA PACKAGE INQUIRY*
+`🏔️ *TRIPURA TOURISM BOOKING INQUIRY*
+---------------------------------------
+📍 *Package:* ${pkg.packageTitle}
+💰 *Total Price:* ₹${pkg.totalPrice}
+⏳ *Duration:* ${pkg.totalDuration}
+🗺️ *Route:* ${routeSummary}
 
-*Package Name:* ${pkg.title}
-*Price:* ₹${pkg.price}
-*Duration:* ${pkg.duration}
+*Hi TripuraFly!* I am interested in this official Tripura Tourism circuit. Can you please confirm the availability for my travel dates and share the booking process?
 
-Hi TripuraFly! I saw this special package and I'm interested in booking it. Can you please share the availability and more details?
-
-_Sent from TripuraFly Mobile App_`;
+_Inquiry via TripuraFly Verified App_`;
 
   // Encode the message for URL
   const encodedMessage = encodeURIComponent(messageTemplate);
   
-  // Open WhatsApp
+  // WhatsApp Deep Link
   const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  
+  // Execute Redirection
   window.open(whatsappURL, '_blank');
   
-  // Close the modal
+  // Reset UI State
   setBookingPackage(null);
 };
 
