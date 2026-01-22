@@ -1,13 +1,22 @@
 import React from 'react';
-import { X, Calendar, MapPin, CheckCircle2, Phone, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { X, Calendar, MapPin, CheckCircle2, Sparkles, ArrowRight, ShieldCheck, Map, BedDouble, Coffee } from 'lucide-react';
+
+interface ItineraryStep {
+  day: string;
+  title: string;
+  hotel: string;
+  img: string;
+  desc: string;
+  highlights: string[];
+}
 
 interface Package {
-  title: string;
-  img: string;
-  tag: string;
-  price: string;
-  duration: string;
-  features: string[];
+  packageTitle: string;
+  totalPrice: string;
+  totalDuration: string;
+  description: string;
+  itinerary: ItineraryStep[];
+  inclusions: string[];
 }
 
 interface PackageModalProps {
@@ -18,130 +27,150 @@ interface PackageModalProps {
 
 const PackageModal = ({ pkg, onClose, onConfirmSubmit }: PackageModalProps) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
-      {/* Animated Backdrop */}
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+      {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-slate-900/90 backdrop-blur-md transition-opacity duration-300"
+        className="absolute inset-0 bg-slate-950/90 backdrop-blur-md transition-opacity duration-300"
         onClick={onClose}
       />
 
-      {/* Sheet Content */}
-      <div className="relative w-full max-w-lg bg-white rounded-t-[3.5rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-500 ease-out max-h-[96vh] flex flex-col border-t border-white/20">
+      {/* Modal Container */}
+      <div className="relative w-full max-w-xl bg-slate-900 rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl animate-in slide-in-from-bottom duration-500 ease-out max-h-[96vh] flex flex-col border border-white/10 overflow-hidden">
         
-        {/* Visual Header */}
+        {/* Header Image - Fixed Height */}
         <div className="relative h-56 shrink-0">
-          <img src={pkg.img} alt={pkg.title} className="w-full h-full object-cover" />
-          {/* Top Shadow for close button visibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-          {/* Bottom Gradient for text separation */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+          <img src={pkg.itinerary[0].img} alt={pkg.packageTitle} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
           
           <button 
             onClick={onClose}
-            className="absolute top-6 right-6 p-3 bg-white/20 backdrop-blur-xl text-white rounded-full hover:bg-white/40 transition-all active:scale-90 z-10 border border-white/30"
+            className="absolute top-5 right-5 p-2.5 bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 active:scale-90 transition-all z-50"
           >
-            <X size={22} strokeWidth={3} />
+            <X size={18} />
           </button>
           
-          <div className="absolute bottom-6 left-8">
-            <div className="inline-flex items-center gap-2 bg-indigo-600 text-white text-[10px] font-black px-5 py-2.5 rounded-full uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/30 border border-indigo-400">
-              <Sparkles size={12} fill="currentColor" /> {pkg.tag}
+          <div className="absolute bottom-5 left-6">
+            <div className="inline-flex items-center gap-2 bg-orange-600 text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-xl">
+              <Sparkles size={10} fill="currentColor" /> {pkg.totalDuration} Premium Trip
             </div>
           </div>
         </div>
 
-        {/* Scrollable Details Section */}
-        <div className="p-8 pt-2 space-y-8 overflow-y-auto no-scrollbar flex-1">
-          <div className="space-y-3">
-            <h3 className="text-4xl font-black italic text-slate-900 tracking-tighter leading-[0.9]">
-              {pkg.title}
-            </h3>
-            <div className="flex flex-wrap items-center gap-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
-              <span className="flex items-center gap-2 text-orange-500 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">
-                <Calendar size={14} /> {pkg.duration}
-              </span>
-              <span className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                <MapPin size={14} /> Agartala, Tripura
-              </span>
-            </div>
-          </div>
-
-          {/* Inclusions Grid */}
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
-                <div className="w-1.5 h-4 bg-indigo-600 rounded-full" />
-                Experience Highlights
+        {/* Scrollable Body Content */}
+        <div className="overflow-y-auto no-scrollbar flex-1 bg-slate-900">
+          <div className="p-6 sm:p-8 space-y-8">
+            {/* Title Section */}
+            <div className="space-y-3">
+              <h3 className="text-3xl font-black italic text-white tracking-tighter leading-tight uppercase">
+                {pkg.packageTitle}
+              </h3>
+              <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                {pkg.description}
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-3">
-              {pkg.features.map((feat, i) => (
-                <div key={i} className="flex items-center gap-4 bg-slate-50/80 p-5 rounded-[1.5rem] border border-slate-100 group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-200">
-                    <CheckCircle2 size={16} strokeWidth={3} />
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center gap-3">
+                <div className="p-2 bg-orange-500/20 rounded-lg text-orange-500">
+                  <Map size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase">Destinations</p>
+                  <p className="text-xs font-black text-white">{pkg.itinerary.length} Spots</p>
+                </div>
+              </div>
+              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-500">
+                  <ShieldCheck size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase">Verified</p>
+                  <p className="text-xs font-black text-white">Full Access</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Itinerary Timeline */}
+            <div className="space-y-6">
+              <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                <span className="w-6 h-[1px] bg-orange-500/40" />
+                Your Detailed Plan
+              </p>
+              
+              <div className="space-y-8 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[1px] before:bg-white/5">
+                {pkg.itinerary.map((day, i) => (
+                  <div key={i} className="relative pl-12">
+                    {/* Timeline Number Circle */}
+                    <div className="absolute left-0 top-0.5 w-9 h-9 bg-slate-800 rounded-xl border border-white/10 flex items-center justify-center text-[11px] font-black text-white z-10 shadow-lg group-hover:border-orange-500 transition-colors">
+                      {i + 1}
+                    </div>
+                    
+                    <div className="space-y-2.5">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-md font-bold text-white tracking-tight">{day.title}</h4>
+                        <span className="text-[8px] font-black text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded">{day.day}</span>
+                      </div>
+
+                      {/* Hotel Highlight */}
+                      <div className="inline-flex items-center gap-2 bg-white/5 border border-white/5 px-3 py-1 rounded-full">
+                        <BedDouble size={11} className="text-orange-500" />
+                        <span className="text-[9px] font-bold text-slate-300">Stay: {day.hotel}</span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {day.highlights.map((tag, idx) => (
+                          <span key={idx} className="text-[8px] font-bold text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs font-black text-slate-700 uppercase tracking-tight">{feat}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+
+            {/* Inclusion Summary Box */}
+            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-5 space-y-4">
+               <h4 className="text-emerald-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                 <Coffee size={12} /> Package Inclusions
+               </h4>
+               <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  {pkg.inclusions.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <CheckCircle2 size={10} className="text-emerald-500/60" />
+                      <span className="text-[10px] font-bold text-slate-400">{item}</span>
+                    </div>
+                  ))}
+               </div>
+            </div>
+
+            {/* Extra Spacer to prevent overlapping with footer */}
+            <div className="h-12" />
           </div>
+        </div>
 
-          {/* Trust Banner */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-indigo-600 rounded-[2rem] blur-xl opacity-10" />
-            <div className="relative flex items-center gap-4 px-6 py-5 bg-gradient-to-br from-indigo-50 to-white rounded-[2rem] border border-indigo-100">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shrink-0">
-                <ShieldCheck size={24} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-0.5">TripuraFly Verified</p>
-                <p className="text-[9px] font-bold text-indigo-700/60 leading-tight">
-                  Handpicked local stays and professional guides for a premium trip.
-                </p>
+        {/* Updated Sticky Footer Layout */}
+        <div className="shrink-0 bg-slate-900 border-t border-white/10 p-5 pb-8 sm:pb-5 backdrop-blur-3xl">
+          <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Grand Total</span>
+              <div className="flex items-center gap-1">
+                <span className="text-white text-xs font-bold mt-1">₹</span>
+                <span className="text-3xl font-black text-white tracking-tighter italic">{pkg.totalPrice}</span>
               </div>
             </div>
-          </div>
-
-          {/* Pricing & CTA - Sticky Bottom Logic */}
-          <div className="pt-4 space-y-5">
-            <div className="flex items-center justify-between px-2">
-              <div className="space-y-0.5">
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fixed Price</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-black text-slate-900 uppercase italic">₹</span>
-                  <p className="text-4xl font-black text-slate-900 tracking-tighter italic">{pkg.price}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="inline-flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
-                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-[9px] font-black uppercase">All Inclusive</span>
-                </div>
-              </div>
-            </div>
-
+            
             <button 
               onClick={() => onConfirmSubmit(pkg)}
-              className="w-full bg-slate-900 text-white py-6 rounded-[2.2rem] font-black text-[13px] uppercase tracking-[0.25em] flex items-center justify-center gap-4 shadow-2xl shadow-slate-300 active:scale-[0.96] transition-all hover:bg-indigo-600 group"
+              className="flex-1 max-w-[200px] bg-orange-600 hover:bg-orange-500 text-white h-14 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-orange-950/40 transition-all active:scale-95"
             >
-              Book via WhatsApp 
-              <div className="bg-white/20 p-1 rounded-lg group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={18} />
-              </div>
+              Confirm Booking
+              <ArrowRight size={16} />
             </button>
-            
-            <div className="flex items-center justify-center gap-3">
-              <div className="h-[1px] w-8 bg-slate-100" />
-              <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">
-                Secure Direct Booking
-              </p>
-              <div className="h-[1px] w-8 bg-slate-100" />
-            </div>
           </div>
         </div>
-
-        {/* Safety Spacer for Mobile Gestures */}
-        <div className="h-8 bg-white shrink-0 sm:hidden" />
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `

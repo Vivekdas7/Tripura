@@ -384,69 +384,8 @@ _Sent from TripuraFly Mobile App_`;
                     )}
                   </div>
 
-                 {/* 2. THE TRACKER HERO (MIDDLE) */}
-                   <div className="w-full bg-[#f8fafc] py-12 md:py-20 px-4 md:px-6 relative overflow-hidden">
-      
-      {/* Background Decor: Subtle Radar rings visible on white */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] md:opacity-[0.05]">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[800px] border-[10px] md:border-[40px] border-slate-900 rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] md:w-[500px] md:h-[500px] border-[1px] border-slate-900 rounded-full animate-pulse" />
-      </div>
-
-      {/* TRACKER CARD: Mobile Responsive Widths */}
-      <div className="max-w-[100%] md:max-w-md mx-auto relative z-10 bg-slate-950 rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-        
-        {/* LIVE STATUS */}
-        <div className="flex items-center gap-2 mb-6">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
-          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-            Live Satellite Radar Active
-          </span>
-        </div>
-
-        {/* TITLE: Adjusted for mobile text wrap */}
-        <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter text-white leading-[0.85] mb-6">
-          TRACK THE <br />
-          <span className="text-blue-500">INDIAN SKY</span>
-        </h1>
-
-        <p className="text-slate-400 text-[11px] md:text-xs font-bold leading-relaxed mb-8 md:mb-10 opacity-80 uppercase tracking-wide">
-          Real-time flight paths, altitude data, and <br className="hidden md:block" />
-          airline tracking across the subcontinent.
-        </p>
-
-        {/* STATS GRID: Mobile Friendly (Side by Side) */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 md:mb-10">
-          <div className="bg-white/5 p-3 md:p-4 rounded-3xl border border-white/5 flex items-center gap-2 md:gap-3">
-            <Navigation className="text-blue-400 shrink-0" size={18} />
-            <div>
-              <p className="text-white font-black text-base md:text-lg leading-none">800+</p>
-              <p className="text-[8px] text-slate-500 font-bold uppercase">Flights</p>
-            </div>
-          </div>
-          <div className="bg-white/5 p-3 md:p-4 rounded-3xl border border-white/5 flex items-center gap-2 md:gap-3">
-            <ShieldCheck className="text-orange-400 shrink-0" size={18} />
-            <div>
-              <p className="text-white font-black text-base md:text-lg leading-none">100%</p>
-              <p className="text-[8px] text-slate-500 font-bold uppercase">Real Data</p>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA BUTTON: High contrast on dark card */}
-        <Link 
-          to="/flight-tracking"
-          className="group flex items-center justify-between w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white p-5 md:p-6 rounded-3xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20"
-        >
-          <div className="flex items-center gap-3">
-            <Plane size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            Launch Live Radar
-          </div>
-          <ArrowRight size={18} />
-        </Link>
-      </div>
-
-    </div>
+               
+       
   
 
                   {/* PACKAGE SHOWCASE */}
@@ -465,72 +404,176 @@ _Sent from TripuraFly Mobile App_`;
   </div>
 
   {/* SLIDER CONTAINER */}
-  <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-10 overflow-x-auto md:overflow-visible no-scrollbar snap-x snap-mandatory px-4 md:px-0 pb-10">
-    {[
-      { 
-        title: "Ujjayanta Heritage", 
-        img: "https://imgs.search.brave.com/VKlKADSNjxB9inPbUnYd4Q6YsqlnVmVYZ-OWl306I6o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zN2Fw/MS5zY2VuZTcuY29t/L2lzL2ltYWdlL2lu/Y3JlZGlibGVpbmRp/YS9FeHBsb3Jpbmct/SGVyaXRhZ2UtYW5k/LVJlbGlnaW91cy1H/ZW1zLW9mLUFnYXJ0/YWxhLTEtcG9wdWxh/cj9xbHQ9ODImdHM9/MTcyNjY1MTA2NzY1/MA", 
-        tag: "Cultural", price: "2,499", duration: "3D/2N",
-        features: ["Premium Hotel", "Royal Guide", "Photo Walk"]
+{/* Parent Container: Handles the Main Package Swipe */}
+<div className="flex md:grid md:grid-cols-2 gap-6 md:gap-10 overflow-x-auto md:overflow-visible no-scrollbar snap-x snap-mandatory px-6 md:px-0 pb-12">
+  {
+    [
+      {
+        "packageTitle": "The Grand Tripura Odyssey",
+        "totalPrice": "14,999",
+        "totalDuration": "7D/6N",
+        "tag": "Ultimate Combo",
+        "description": "A luxury circuit covering the Royal Heritage, Rock carvings of Unakoti, and the island magic of Dumboor.",
+        "itinerary": [
+          { 
+            "day": "Day 1",
+            "title": "Agartala Arrival", 
+            "hotel": "Hotel Polo Tower (5-Star)",
+            "img": "https://imgs.search.brave.com/VKlKADSNjxB9inPbUnYd4Q6YsqlnVmVYZ-OWl306I6o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zN2Fw/MS5zY2VuZTcuY29t/L2lzL2ltYWdlL2lu/Y3JlZGlibGVpbmRp/YS9FeHBsb3Jpbmct/SGVyaXRhZ2UtYW5k/LVJlbGlnaW91cy1H/ZW1zLW9mLUFnYXJ0/YWxhLTEtcG9wdWxh/cj9xbHQ9ODImdHM9/MTcyNjY1MTA2NzY1/MA", 
+            "highlights": ["Ujjayanta Palace", "Heritage Walk"]
+          },
+          { 
+            "day": "Day 2",
+            "title": "Heritage & Water", 
+            "hotel": "Sagar Mahal Tourist Lodge",
+            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
+            "highlights": ["Matabari Temple", "Neermahal Boat Trip"]
+          },
+          { 
+            "day": "Day 3",
+            "title": "Island Paradise", 
+            "hotel": "Narikel Kunju Log Huts",
+            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Dumboor%20Lake.jpg", 
+            "highlights": ["Dumboor Lake", "Island Stay"]
+          },
+          { 
+            "day": "Day 4",
+            "title": "Unakoti Spirits", 
+            "hotel": "Unakoti Tourist Lodge",
+            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Unakoti.jpg", 
+            "highlights": ["Rock Carvings", "Ancient Caves"]
+          },
+          { 
+            "day": "Day 5-6",
+            "title": "Misty Peaks", 
+            "hotel": "Eden Tourist Lodge (Jampui)",
+            "img": "https://imgs.search.brave.com/mKJ0y5ZiRvtsZbkf3TmY_bfP3SORyg-zt2K9cvyEzOA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9KYW1w/dWktSGlsbC1Bcy1T/ZWVuLUZyb20tdGhl/LVdhdGNoLVRvd2Vy/LmpwZw", 
+            "highlights": ["Sunrise Point", "Orange Gardens"]
+          },
+          { 
+            "day": "Day 7",
+            "title": "Wildlife Safari", 
+            "hotel": "Departure",
+            "img": "https://www.tripuratourism.gov.in/sites/default/files/styles/destination_banner_image/public/2021-12/Sepahijala.jpg", 
+            "highlights": ["Sepahijala Zoo", "Botanical Garden"]
+          }
+        ],
+        "inclusions": ["Innova Crysta", "Daily Breakfast", "Entry Fees", "Guide"]
       },
-      { 
-        title: "Neermahal Floating", 
-        img: "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
-        tag: "Adventure", price: "1,250", duration: "Day Trip",
-        features: ["Speed Boat", "History Tour", "Local Lunch"]
-      },
-      { 
-        title: "Jampui Mist", 
-        img: "https://imgs.search.brave.com/mKJ0y5ZiRvtsZbkf3TmY_bfP3SORyg-zt2K9cvyEzOA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rbm93/bGVkZ2VvZmluZGlh/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMC8wMi9KYW1w/dWktSGlsbC1Bcy1T/ZWVuLUZyb20tdGhl/LVdhdGNoLVRvd2Vy/LmpwZw", 
-        tag: "Eco-Tour", price: "3,800", duration: "2D/1N",
-        features: ["Hill Resort", "Orange Orchard", "Trekking"]
+      {
+        "packageTitle": "Spiritual South Circuit",
+        "totalPrice": "8,499",
+        "totalDuration": "4D/3N",
+        "tag": "Pilgrimage",
+        "description": "A focused journey through Tripura's most sacred temples and the iconic Neermahal Water Palace.",
+        "itinerary": [
+          { 
+            "day": "Day 1",
+            "title": "Matabari Blessing", 
+            "hotel": "Gomati Tourist Lodge",
+            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
+            "highlights": ["Sundari Temple", "Kalyan Sagar"]
+          },
+          { 
+            "day": "Day 2",
+            "title": "Royal Neermahal", 
+            "hotel": "Sagar Mahal Lodge",
+            "img": "https://imgs.search.brave.com/8tSgzr_irvUwd6mQQnNXE-PQE6VFCs0zbmtaVSvOgZI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMuaW5kaWEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIy/LzA4L25lZXJtYWhh/bC5qcGc_aW1wb2xp/Y3k9TWVkaXVtX1dp/ZHRob25seSZ3PTcw/MA", 
+            "highlights": ["Rudrasagar Lake", "Architecture Tour"]
+          }
+        ],
+        "inclusions": ["AC Sedan", "Temple VIP Entry", "Breakfast", "Boat Charges"]
       }
     ].map((item, i) => (
+      /* Outer Card: snap-center allows for the horizontal flicking effect */
       <div 
         key={i} 
-        className="min-w-[85vw] sm:min-w-[45vw] md:min-w-full snap-center group relative rounded-[3rem] overflow-hidden bg-white shadow-2xl h-[500px] md:h-[550px] transition-all"
+        className="min-w-[85vw] md:min-w-full snap-center bg-slate-900 rounded-[3rem] overflow-hidden shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] border border-white/5 flex flex-col"
       >
-        <img src={item.img} className="absolute inset-0 w-full h-full object-cover transition-all duration-700 scale-105 group-hover:scale-110" alt={item.title} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-        
-        <div className="absolute top-8 left-8">
-          <span className="bg-white/10 backdrop-blur-xl border border-white/20 text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
-            {item.tag}
-          </span>
+        {/* TOP HERO SECTION */}
+        <div className="relative h-[240px] md:h-[300px] w-full shrink-0">
+          <img 
+            src={item.itinerary[0].img} 
+            className="w-full h-full object-cover opacity-60 transition-transform duration-700 hover:scale-110" 
+            alt="Hero" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/20" />
+          
+          <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
+            <span className="bg-orange-600 text-white text-[8px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
+              {item.tag}
+            </span>
+            <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+              <span className="text-white text-[9px] font-bold tracking-wider">{item.totalDuration}</span>
+            </div>
+          </div>
+
+          <div className="absolute bottom-6 left-8 right-8">
+            <h3 className="text-white text-2xl md:text-3xl font-black leading-tight tracking-tighter italic uppercase">
+              {item.packageTitle}
+            </h3>
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 space-y-6">
-          <div>
-            <p className="text-orange-500 text-[10px] font-black uppercase tracking-[0.4em] mb-1">{item.duration}</p>
-            <h3 className="text-white text-3xl font-black tracking-tighter leading-tight">{item.title}</h3>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {item.features.map((feat, idx) => (
-              <span key={idx} className="bg-white/5 backdrop-blur-md text-white/80 text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border border-white/5">
-                + {feat}
-              </span>
-            ))}
+        {/* INNER CONTENT AREA */}
+        <div className="p-6 space-y-6 flex-1 flex flex-col justify-between">
+          <div className="space-y-4">
+            <h4 className="text-white/40 text-[9px] font-black uppercase tracking-[0.3em] italic">Itinerary Highlights</h4>
+
+            {/* Internal Horizontal Swipe: Itinerary Days */}
+            <div className="flex overflow-x-auto gap-3 no-scrollbar -mx-2 px-2 snap-x">
+              {item.itinerary.map((step, idx) => (
+                <div 
+                  key={idx} 
+                  className="min-w-[200px] snap-start bg-white/5 border border-white/10 rounded-[1.8rem] p-4 relative overflow-hidden"
+                >
+                  <span className="text-orange-500 text-[9px] font-black uppercase mb-1 block">{step.day}</span>
+                  <h5 className="text-white text-sm font-bold truncate mb-2">{step.title}</h5>
+                  <div className="flex items-center gap-2 bg-black/30 p-1.5 rounded-lg border border-white/5">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <span className="text-slate-400 text-[8px] font-medium truncate uppercase tracking-tighter">{step.hotel}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-white p-2 rounded-[2.5rem]">
-            <div className="flex-1 pl-4 md:pl-6">
-              <p className="text-slate-900 text-xl font-black">₹{item.price}</p>
+          {/* PRICING & CTA BLOCK */}
+          <div className="space-y-4 pt-4 border-t border-white/5">
+             <div className="flex flex-wrap gap-2">
+                {item.inclusions.slice(0, 3).map((inc, ii) => (
+                  <span key={ii} className="text-emerald-400 text-[7px] font-black uppercase tracking-widest border border-emerald-500/20 px-2 py-1 rounded-md">
+                    ✓ {inc}
+                  </span>
+                ))}
+             </div>
+
+            <div className="bg-white rounded-[2rem] p-2 flex items-center justify-between shadow-2xl">
+              <div className="pl-4">
+                <p className="text-slate-400 text-[8px] font-bold uppercase leading-none mb-1">Total Package</p>
+                <p className="text-slate-900 text-xl font-black italic tracking-tighter leading-none">₹{item.totalPrice}</p>
+              </div>
+              <button 
+                onClick={() => setBookingPackage(item)} 
+                className="bg-slate-900 text-white px-6 py-4 rounded-[1.6rem] font-black text-[9px] uppercase tracking-[0.15em] active:scale-95 transition-all"
+              >
+                Book Now
+              </button>
             </div>
-            <button 
-              onClick={() => setBookingPackage(item)} 
-              className="bg-slate-900 text-white px-6 md:px-8 py-4 rounded-[2rem] font-black text-[10px] uppercase tracking-widest active:scale-90 transition-all shadow-xl"
-            >
-              Book
-            </button>
           </div>
         </div>
       </div>
-    ))}
-    
-    {/* Spacer for mobile to allow last card to center */}
-    <div className="min-w-[1px] md:hidden" />
-  </div>
+    ))
+  }
+  
+  {/* Spacer to handle end-padding on mobile swipe */}
+  <div className="min-w-[20px] md:hidden" />
+
+  <style dangerouslySetInnerHTML={{ __html: `
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  `}} />
+</div>
 
   {/* Inline Styles for hiding scrollbar */}
   <style dangerouslySetInnerHTML={{ __html: `
@@ -556,58 +599,6 @@ _Sent from TripuraFly Mobile App_`;
                 </main>
 
                 {/* PREMIUM FOOTER */}
-                {/* <footer className="bg-slate-950 pt-24 pb-40 md:pb-12 text-white">
-                  <div className="container mx-auto px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
-                      <div className="col-span-1 md:col-span-2 space-y-8">
-                        <div className="flex items-center gap-4 group">
-                          <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center rotate-12 transition-transform group-hover:rotate-0">
-                            <Plane className="text-white" size={24} />
-                          </div>
-                          <h2 className="text-3xl font-black tracking-tighter">TRIPURA<span className="text-orange-500">FLY.</span></h2>
-                        </div>
-                        <p className="text-slate-500 max-w-sm font-medium leading-relaxed">
-                          Your gateway to the Northeast. We provide the most reliable flight comparison and travel planning services specifically focused on Tripura.
-                        </p>
-                        <div className="flex gap-4">
-                          {[Globe, Mail, Phone].map((Icon, i) => (
-                            <div key={i} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 cursor-pointer transition-colors">
-                              <Icon size={16} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase tracking-[0.4em] text-orange-500">Quick Links</h4>
-                        <ul className="space-y-4 text-slate-400 font-black text-xs uppercase tracking-widest">
-                          <li className="hover:text-white cursor-pointer transition-colors">About Agartala</li>
-                          <li className="hover:text-white cursor-pointer transition-colors">Flight Partners</li>
-                          <li className="hover:text-white cursor-pointer transition-colors">Corporate Travel</li>
-                          <li className="hover:text-white cursor-pointer transition-colors">MBB Airport Info</li>
-                        </ul>
-                      </div>
-                      <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase tracking-[0.4em] text-orange-500">Legal</h4>
-                        <ul className="space-y-4 text-slate-400 font-black text-xs uppercase tracking-widest">
-                          <li className="hover:text-white cursor-pointer transition-colors"><Link to="/privacy">Privacy Policy</Link></li>
-                          <li className="hover:text-white cursor-pointer transition-colors">Terms of Service</li>
-                          <li className="hover:text-white cursor-pointer transition-colors">Cancellation Policy</li>
-                          <li className="hover:text-white cursor-pointer transition-colors">Safe Booking</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">© 2024 TripuraFly Global. All Rights Reserved.</p>
-                      <div className="flex items-center gap-6">
-                         <div className="flex items-center gap-2 opacity-30 grayscale">
-                            <CreditCard size={14} /> <span className="text-[8px] font-black uppercase">Secure Payments</span>
-                         </div>
-                         <div className="w-1 h-1 bg-white/10 rounded-full" />
-                         <span className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">v2.4.0 Production</span>
-                      </div>
-                    </div>
-                  </div>
-                </footer> */}
             </div>
           )} />
           
