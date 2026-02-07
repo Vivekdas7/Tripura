@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, ArrowRight, Gift, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -36,10 +37,9 @@ export default function AuthForm() {
   };
 
   return (
-    /* FIXED INSET-0 ensures the form covers every pixel of the screen, hiding any layout headers */
-    <div className="fixed inset-0 z-[9999] bg-white flex flex-col lg:flex-row overflow-hidden font-sans selection:bg-[#FF5722]/30">
+    <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30">
       
-      {/* --- LEFT SIDE: CINEMATIC PANEL (Desktop Only) --- */}
+      {/* --- DESKTOP VISUAL PANEL --- */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
@@ -61,38 +61,46 @@ export default function AuthForm() {
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: THE FORM (Full Screen on Mobile) --- */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-[#F8FAFC] relative">
+      {/* --- MAIN FORM AREA --- */}
+      <div className="flex-1 flex flex-col bg-[#F8FAFC] overflow-y-auto">
         
-        <div className="w-full max-w-sm">
-          {/* Internal Logo - Replaces the external header */}
-          <div className="flex  items-center ">
-            <img 
-              src="/assets/logo1.png" 
-              className="h-23 w-auto object-contain drop-shadow-sm" 
-              alt="TripuraFly" 
-            />
+        {/* Mobile Header / Logo Area */}
+        <div className="pt-12 pb-6 px-8 flex justify-center lg:justify-start">
+          <img 
+            src="/assets/logo1.png" 
+            className="h-16 w-auto object-contain drop-shadow-sm" 
+            alt="TripuraFly" 
+          />
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center items-center px-8 pb-12">
+          <div className="w-full max-w-sm">
             
-          </div>
+            <header className="mb-10 text-center lg:text-left">
+              <h1 className="text-4xl lg:text-[42px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-3 italic">
+                {isLogin ? 'Sign In' : 'Join Us'}
+              </h1>
+              <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.25em]">
+                {isLogin ? 'Access your premium dashboard' : 'Unlock exclusive travel benefits'}
+              </p>
+            </header>
 
-          <div className="mb-10 text-center lg:text-left">
-            <h1 className="text-[38px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-2">
-              {isLogin ? 'Sign In' : 'Register'}
-            </h1>
-            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
-              {isLogin ? 'Welcome back to TripuraFly' : 'Start your journey today'}
-            </p>
-          </div>
+            {/* Error Message with AnimatePresence */}
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-tight">{error}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Error/Referral Area */}
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 animate-shake">
-              <p className="text-[11px] font-black text-red-600 uppercase">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative group">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
                 <input
@@ -100,13 +108,11 @@ export default function AuthForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="EMAIL ADDRESS"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-300"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-200"
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
                 <input
@@ -114,40 +120,48 @@ export default function AuthForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="PASSWORD"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-300"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-200"
                   required
                 />
               </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl shadow-slate-200 disabled:bg-slate-300 flex items-center justify-center gap-3 mt-4"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>{isLogin ? 'Authorize' : 'Initialize'}</span>
+                    <ArrowRight size={18} className="text-[#FF5722]" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                className="group flex flex-col items-center gap-2 mx-auto"
+              >
+                <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">
+                  {isLogin ? "Don't have an account?" : "Already a member?"}
+                </span>
+                <span className="text-[#FF5722] text-[11px] font-black uppercase tracking-widest flex items-center gap-2 group-active:scale-90 transition-transform">
+                  {isLogin ? <><UserPlus size={14} /> Create Account</> : <><LogIn size={14} /> Log In Now</>}
+                </span>
+              </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-[#FF5722] transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98] disabled:bg-slate-200 flex items-center justify-center gap-3"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>{isLogin ? 'Authenticate' : 'Complete Setup'}</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-10 text-center">
-            <button
-              onClick={() => { setIsLogin(!isLogin); setError(''); }}
-              className="text-[#FF5722] text-[10px] font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity"
-            >
-              {isLogin ? 'New to TripuraFly? Create Account' : 'Already Have Access? Log In'}
-            </button>
-          </div>
-
-          <div className="mt-12 flex items-center justify-center gap-2 opacity-20 grayscale">
-             <ShieldCheck size={14} />
-             <span className="text-[9px] font-black uppercase tracking-widest text-slate-900">Cloud Secured</span>
+            <footer className="mt-16 flex flex-col items-center gap-4 opacity-30 grayscale">
+               <div className="flex items-center gap-2">
+                 <ShieldCheck size={14} />
+                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">256-Bit SSL Secured</span>
+               </div>
+               <p className="text-[8px] font-bold uppercase tracking-widest">© 2026 TripuraFly Global</p>
+            </footer>
           </div>
         </div>
       </div>
@@ -155,18 +169,19 @@ export default function AuthForm() {
       <style>{`
         @keyframes subtle-zoom {
           from { transform: scale(1); }
-          to { transform: scale(1.15); }
+          to { transform: scale(1.1); }
         }
         .animate-subtle-zoom {
           animation: subtle-zoom 20s infinite alternate ease-in-out;
         }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .flex-1::-webkit-scrollbar {
+          display: none;
         }
-        .animate-shake {
-          animation: shake 0.2s ease-in-out 0s 2;
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .flex-1 {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
         }
       `}</style>
     </div>
