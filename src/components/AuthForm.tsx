@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, Plane, Mail, Lock, ArrowRight, Gift } from 'lucide-react';
-// 1. Import useSearchParams to read the URL
-import { useSearchParams } from 'react-router-dom';
+import { Mail, Lock, ArrowRight, Gift, ShieldCheck } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,8 +10,8 @@ export default function AuthForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
   
-  // 2. Initialize search params
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
@@ -21,134 +20,102 @@ export default function AuthForm() {
     setError('');
     setLoading(true);
 
-    // 3. Pass the referralCode to the signUp function
     const { error } = isLogin
       ? await signIn(email, password)
-      : await signUp(email, password, referralCode); // Pass ref here
+      : await signUp(email, password, referralCode);
 
     if (error) {
       setError(error.message);
     } else if (!isLogin) {
       setError('Account created! Please sign in.');
       setIsLogin(true);
+    } else {
+      navigate('/'); 
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-white flex overflow-hidden">
+    /* FIXED INSET-0 ensures the form covers every pixel of the screen, hiding any layout headers */
+    <div className="fixed inset-0 z-[9999] bg-white flex flex-col lg:flex-row overflow-hidden font-sans selection:bg-[#FF5722]/30">
       
-      {/* --- LEFT SIDE: THEMATIC VISUAL --- */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-indigo-950 items-center justify-center p-12">
+      {/* --- LEFT SIDE: CINEMATIC PANEL (Desktop Only) --- */}
+      <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://hblimg.mmtcdn.com/content/hubble/img/tvdestinationimages/mmt/activities/m_Agartala_tv_destination_img_2_l_591_1000.jpg" 
-            className="w-full h-full object-cover opacity-40 brightness-75"
-            alt="Tripura Heritage"
+            src="https://images.pexels.com/photos/2088210/pexels-photo-2088210.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+            className="w-full h-full object-cover opacity-60 scale-110 animate-subtle-zoom"
+            alt="Tripura Skyline"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-950 via-transparent to-orange-500/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
         </div>
         
-        <div className="relative z-10 max-w-lg">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="bg-orange-600 p-2 rounded-xl">
-              <Plane size={32} className="text-white transform -rotate-45" />
-            </div>
-            <h1 className="text-3xl font-black text-white italic tracking-tighter">TripuraFly</h1>
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center gap-4">
+             <div className="h-1 w-12 bg-[#FF5722] rounded-full" />
+             <span className="text-[#FF5722] font-black tracking-[0.4em] text-xs uppercase">Premium Travel</span>
           </div>
-          <h2 className="text-5xl font-black text-white leading-tight mb-6">
-            The Most <span className="text-orange-500">Affordable</span> Way to Explore the Northeast.
+          <h2 className="text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">
+            Fly <br /> <span className="text-[#FF5722]">Smarter.</span>
           </h2>
-          <p className="text-indigo-100 text-xl font-light leading-relaxed">
-            Join thousands of travelers booking cheap flights to Agartala every day. Your journey to the Queen of Hills starts here.
-          </p>
-          
-          <div className="mt-12 flex gap-4">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-              <p className="text-orange-400 font-bold text-2xl">10k+</p>
-              <p className="text-indigo-200 text-xs uppercase tracking-widest">Happy Travelers</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-              <p className="text-orange-400 font-bold text-2xl">50+</p>
-              <p className="text-indigo-200 text-xs uppercase tracking-widest">Daily Routes</p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: LOGIN FORM --- */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-[#f8fafc]">
-        <div className="w-full max-w-md">
-          
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="bg-orange-600 p-1.5 rounded-lg">
-              <Plane size={24} className="text-white transform -rotate-45" />
-            </div>
-            <h1 className="text-2xl font-black text-slate-900 italic tracking-tighter">TripuraFly</h1>
+      {/* --- RIGHT SIDE: THE FORM (Full Screen on Mobile) --- */}
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-[#F8FAFC] relative">
+        
+        <div className="w-full max-w-sm">
+          {/* Internal Logo - Replaces the external header */}
+          <div className="flex  items-center ">
+            <img 
+              src="/assets/logo1.png" 
+              className="h-23 w-auto object-contain drop-shadow-sm" 
+              alt="TripuraFly" 
+            />
+            
           </div>
 
-          {/* Referral Banner - Shows if user came from a link */}
-          {!isLogin && referralCode && (
-            <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center gap-3">
-              <div className="bg-indigo-600 p-2 rounded-lg text-white">
-                <Gift size={16} />
-              </div>
-              <div>
-                <p className="text-xs font-black text-indigo-900 uppercase">Referral Applied</p>
-                <p className="text-[10px] text-indigo-600 font-bold">You're helping a friend earn ₹50!</p>
-              </div>
-            </div>
-          )}
-
           <div className="mb-10 text-center lg:text-left">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3">
-              {isLogin ? 'Welcome Back' : 'Create Account'}
-            </h2>
-            <p className="text-slate-500 font-medium">
-              {isLogin ? 'Enter your details to access your bookings.' : 'Join us for exclusive fares to Tripura.'}
+            <h1 className="text-[38px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-2">
+              {isLogin ? 'Sign In' : 'Register'}
+            </h1>
+            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
+              {isLogin ? 'Welcome back to TripuraFly' : 'Start your journey today'}
             </p>
           </div>
 
+          {/* Error/Referral Area */}
           {error && (
-            <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
-              error.includes('created') 
-                ? 'bg-green-50 text-green-700 border border-green-100' 
-                : 'bg-red-50 text-red-700 border border-red-100'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${error.includes('created') ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <p className="text-sm font-bold">{error}</p>
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 animate-shake">
+              <p className="text-[11px] font-black text-red-600 uppercase">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <div className="space-y-2">
+              <div className="relative group">
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all outline-none font-medium"
+                  placeholder="EMAIL ADDRESS"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-300"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <div className="space-y-2">
+              <div className="relative group">
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all outline-none font-medium"
+                  placeholder="PASSWORD"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-300"
                   required
-                  minLength={6}
                 />
               </div>
             </div>
@@ -156,35 +123,52 @@ export default function AuthForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-orange-600 transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98] disabled:bg-slate-300 flex items-center justify-center gap-2 group"
+              className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-[#FF5722] transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98] disabled:bg-slate-200 flex items-center justify-center gap-3"
             >
               {loading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  {isLogin ? 'Sign In' : 'Create My Account'}
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  <span>{isLogin ? 'Authenticate' : 'Complete Setup'}</span>
+                  <ArrowRight size={18} />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-8 text-center lg:text-left">
-            <p className="text-slate-500 font-medium">
-              {isLogin ? "Don't have an account? " : "Already a member? "}
-              <button
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setError('');
-                }}
-                className="text-orange-600 font-bold hover:text-orange-700 transition-colors ml-1"
-              >
-                {isLogin ? 'Register Now' : 'Log In'}
-              </button>
-            </p>
+          <div className="mt-10 text-center">
+            <button
+              onClick={() => { setIsLogin(!isLogin); setError(''); }}
+              className="text-[#FF5722] text-[10px] font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity"
+            >
+              {isLogin ? 'New to TripuraFly? Create Account' : 'Already Have Access? Log In'}
+            </button>
+          </div>
+
+          <div className="mt-12 flex items-center justify-center gap-2 opacity-20 grayscale">
+             <ShieldCheck size={14} />
+             <span className="text-[9px] font-black uppercase tracking-widest text-slate-900">Cloud Secured</span>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes subtle-zoom {
+          from { transform: scale(1); }
+          to { transform: scale(1.15); }
+        }
+        .animate-subtle-zoom {
+          animation: subtle-zoom 20s infinite alternate ease-in-out;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+        .animate-shake {
+          animation: shake 0.2s ease-in-out 0s 2;
+        }
+      `}</style>
     </div>
   );
 }

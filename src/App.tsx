@@ -31,6 +31,7 @@ import ReferralPage from './components/ReferralPage';
 import PackageModal from './components/PackageModal';
 import FlightTracker from './components/FlightTracker';
 import RefundPage from './components/Refund';
+import ExplorePage from './components/ExplorePage';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -310,7 +311,7 @@ _Inquiry via TripuraFly Verified App_`;
 
         <Routes>
           <Route path="/" element={
-            !user ? <AuthForm /> : (
+            !user ? <ExplorePage /> : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* HERO SECTION */}
                 <section className="relative h-[90vh] md:h-[850px] flex items-center justify-center overflow-hidden bg-slate-950">
@@ -883,8 +884,9 @@ _Inquiry via TripuraFly Verified App_`;
            <Route path="/flight-tracking" element={<FlightTracker/>} />
           <Route path="/refund" element={<RefundPage/>} />
           <Route path='/train-booking'element={<TrainBookingPage/>}/>
+          <Route path='/explore'element={< ExplorePage/>}/>
           <Route path="/payment-success" element={<PaymentSuccess/>} />
-          
+          <Route path='/auth'element={<AuthForm/>}/>
           <Route path="/admin-pannel-vivekdas" element={<AdminDashboard/>} />
           
         </Routes>
