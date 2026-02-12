@@ -64,7 +64,7 @@ export default function AppOnboarding() {
       </div>
 
       {/* --- MOBILE OPTIMIZED HEADER --- */}
-      <div className="relative z-50 flex justify-between items-center px-6 pt-16 pb-4">
+      <div className="relative z-50 flex justify-between items-center px-6 pt-6 ">
         <div className="flex items-center">
           {/* LOGO FIX: 
               - Increased height to h-16 (64px) or h-20 (80px) for visibility.
@@ -74,7 +74,7 @@ export default function AppOnboarding() {
           <img 
             src='assets/logo1.png' 
             alt="TripuraFly" 
-            className="h-16 md:h-20 w-auto max-w-[55vw] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" 
+            className="h-24 md:h-20 w-auto max-w-[55vw] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" 
           />
         </div>
         
