@@ -1,7 +1,29 @@
-import { useState, useEffect } from 'react';
-import { Plane, User, Clock, ShieldCheck, AlertCircle, Lock, ChevronRight, Zap } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { 
+  Plane, 
+  User, 
+  Clock, 
+  ShieldCheck, 
+  AlertCircle, 
+  Lock, 
+  ChevronRight, 
+  Zap, 
+  CheckCircle2, 
+  TrendingDown, 
+  ShieldAlert,
+  Info,
+  Calendar,
+  IndianRupee,
+  BadgePercent,
+  Star,
+  ArrowRightLeft,
+  Navigation
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+/**
+ * --- INTERFACES & TYPES ---
+ */
 export interface Flight {
   id: string;
   airline: string;
@@ -18,223 +40,245 @@ export interface Flight {
   total_seats: number;
 }
 
-const getAirlineMeta = (name: string) => {
+interface AirlineMeta {
+  code: string;
+  color: string;
+  fullName: string;
+}
+
+/**
+ * --- CONSTANTS ---
+ */
+const PLATFORM_FEE_SAVINGS = 400;
+
+/**
+ * --- HELPER FUNCTIONS ---
+ */
+const getAirlineData = (name: string): AirlineMeta => {
   const n = name.toLowerCase();
-  if (n.includes('indigo')) return { code: '6E', color: '#001b94' };
-  if (n.includes('express')) return { code: 'IX', color: '#d42e12' };
-  if (n.includes('india')) return { code: 'AI', color: '#ed1c24' };
-  if (n.includes('vistara')) return { code: 'UK', color: '#5f2653' };
-  if (n.includes('akasa')) return { code: 'QP', color: '#ff6d22' };
-  return { code: 'G8', color: '#000000' };
+  if (n.includes('indigo')) return { code: '6E', color: '#001b94', fullName: 'IndiGo' };
+  if (n.includes('express')) return { code: 'IX', color: '#d42e12', fullName: 'Air India Express' };
+  if (n.includes('india')) return { code: 'AI', color: '#ed1c24', fullName: 'Air India' };
+  if (n.includes('vistara')) return { code: 'UK', color: '#5f2653', fullName: 'Vistara' };
+  if (n.includes('akasa')) return { code: 'QP', color: '#ff6d22', fullName: 'Akasa Air' };
+  return { code: 'G8', color: '#0f172a', fullName: name };
 };
 
-const formatTimeDirectly = (dbString: string) => {
+const formatTime = (dbString: string) => {
   if (!dbString) return "--:--";
   try {
     const timePart = dbString.includes('T') ? dbString.split('T')[1] : dbString.split(' ')[1];
     return timePart.substring(0, 5);
-  } catch (e) {
-    return "--:--";
-  }
+  } catch { return "--:--"; }
 };
 
+/**
+ * --- ATOMIC UI COMPONENTS ---
+ */
+
+const SavingsBadge = () => (
+  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full border border-emerald-100 animate-pulse">
+    <CheckCircle2 size={10} strokeWidth={3} />
+    <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-tight">₹0 Convenience Fee</span>
+  </div>
+);
+
+const UrgencyBadge = () => (
+  <div className="flex items-center gap-1 text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md self-end">
+    <Zap size={9} fill="currentColor" />
+    <span className="text-[8px] font-black uppercase italic">Selling Fast</span>
+  </div>
+);
+
+const ProgressIndicator = ({ current, total, low }: { current: number, total: number, low: boolean }) => (
+  <div className="space-y-1">
+    <div className="flex justify-between items-center w-full">
+      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Availability</span>
+      <span className={`text-[8px] font-black ${low ? 'text-rose-500' : 'text-indigo-500'}`}>{current} Seats</span>
+    </div>
+    <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+      <div 
+        className={`h-full rounded-full transition-all duration-1000 ${low ? 'bg-rose-500' : 'bg-indigo-600'}`}
+        style={{ width: `${(current / total) * 100}%` }}
+      />
+    </div>
+  </div>
+);
+
+/**
+ * --- MAIN LIST COMPONENT ---
+ */
 export default function FlightList({ searchParams, onSelectFlight }: { searchParams: any, onSelectFlight: (f: Flight) => void }) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchFlights() {
       if (!searchParams.origin || !searchParams.destination || !searchParams.date) return;
       setLoading(true);
-      setError(null);
       try {
-        const dateStr = searchParams.date;
-        const dayStart = `${dateStr} 00:00:00`;
-        const dayEnd = `${dateStr} 23:59:59`;
-        
-        const { data, error: dbError } = await supabase
+        const { data } = await supabase
           .from('flights')
           .select('*')
           .eq('origin', searchParams.origin.toUpperCase())
           .eq('destination', searchParams.destination.toUpperCase())
-          .gte('departure_time', dayStart)
-          .lte('departure_time', dayEnd)
+          .gte('departure_time', `${searchParams.date} 00:00:00`)
+          .lte('departure_time', `${searchParams.date} 23:59:59`)
           .order('departure_time', { ascending: true });
-
-        if (dbError) throw dbError;
         setFlights((data as Flight[]) || []);
-      } catch (err: any) {
-        setError("Unable to find flights.");
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) { console.error(e); }
+      finally { setTimeout(() => setLoading(false), 500); }
     }
     fetchFlights();
-  }, [searchParams.origin, searchParams.destination, searchParams.date, searchParams.timestamp]);
+  }, [searchParams.origin, searchParams.destination, searchParams.date]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center py-32 px-6">
-      <div className="w-12 h-12 border-[3px] border-indigo-600 border-t-transparent rounded-full animate-spin mb-6" />
-      <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em] animate-pulse">Scanning Skies...</p>
-    </div>
-  );
-
-  if (flights.length === 0 && !loading) return (
-    <div className="mx-4 mt-10 p-12 bg-white rounded-[2rem] text-center border border-slate-100 shadow-xl shadow-slate-200/50">
-      <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <AlertCircle className="text-slate-300" size={32} />
-      </div>
-      <p className="text-slate-900 font-bold text-sm uppercase tracking-tight">No Flights Found</p>
-      <p className="text-slate-400 text-xs mt-1 italic">Try adjusting your filters</p>
+    <div className="flex flex-col items-center justify-center py-32 px-6 space-y-4">
+      <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Airline Servers...</p>
     </div>
   );
 
   return (
-    <div className="px-4 pb-32 space-y-8 max-w-xl mx-auto mt-6">
-      {flights.map((f) => {
-        const meta = getAirlineMeta(f.airline);
+    <div className="w-full max-w-md mx-auto px-4 pb-1 space-y-8 mt-4">
+      
+      {/* HEADER PROMO */}
+     
+
+      {/* FLIGHT CARDS */}
+      {flights.map((f, idx) => {
+        const meta = getAirlineData(f.airline);
         const isSoldOut = f.available_seats <= 0;
-        const isLowAvailability = f.available_seats > 0 && f.available_seats <= 7;
-        const hasStops = f.stops > 0;
+        const isLow = f.available_seats <= 7;
 
         return (
           <div 
-            key={f.id} 
+            key={f.id}
             onClick={() => !isSoldOut && onSelectFlight(f)}
-            className={`group relative transition-all duration-300 transform active:scale-[0.97] tap-highlight-transparent
-              ${isSoldOut ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'}`}
+            style={{ animationDelay: `${idx * 100}ms` }}
+            className={`group animate-in fade-in slide-in-from-bottom-4 duration-500 ${isSoldOut ? 'opacity-50 pointer-events-none' : 'active:scale-[0.98]'}`}
           >
-            {/* BOARDING PASS TOP (Main Info) */}
-            <div className="relative bg-white rounded-t-[2.5rem] p-6 pb-4 border-t border-x border-slate-100 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]">
-              {/* Airline Branding */}
-              <div className="flex justify-between items-center mb-8">
+            {/* TOP SECTION */}
+            <div className="bg-white rounded-t-[2.5rem] p-6 pb-4 border-t border-x border-slate-100 shadow-sm">
+              <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-slate-50 rounded-xl p-1.5 border border-slate-100 flex items-center justify-center">
-                    <img 
-                      src={`https://pics.avs.io/200/200/${meta.code}.png`} 
-                      alt={f.airline} 
-                      className="w-full h-full object-contain"
-                    />
+                  <div className="w-10 h-10 bg-slate-50 rounded-xl p-1.5 border border-slate-100 flex items-center justify-center">
+                    <img src={`https://pics.avs.io/200/100/${meta.code}.png`} className="w-full object-contain" alt="logo" />
                   </div>
                   <div>
-                    <h4 className="font-black text-slate-900 text-xs uppercase tracking-tight">{f.airline}</h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">{f.flight_number}</p>
+                    <h3 className="text-[11px] font-black uppercase text-slate-900 leading-none">{meta.fullName}</h3>
+                    <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider">{f.flight_number}</p>
                   </div>
                 </div>
-                
-                {/* Status Badges */}
-                <div className="flex flex-col items-end gap-2">
-                  <div className="flex items-center gap-1.5 text-indigo-600 bg-indigo-50/50 px-3 py-1.5 rounded-full border border-indigo-100">
-                    <ShieldCheck size={12} strokeWidth={3} />
-                    <span className="text-[10px] font-black uppercase">Confirmed</span>
-                  </div>
-                  {isLowAvailability && !isSoldOut && (
-                    <div className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-lg animate-pulse">
-                      <Zap size={10} fill="currentColor" />
-                      <span className="text-[8px] font-black uppercase">Fast Filling</span>
+                <div className="flex flex-col items-end gap-1.5">
+                  <SavingsBadge />
+                  {isLow && <UrgencyBadge />}
+                </div>
+              </div>
+
+              {/* ROUTE BOX */}
+              <div className="grid grid-cols-7 items-center gap-2 mb-4">
+                <div className="col-span-2">
+                  <p className="text-[8px] font-black text-slate-300 uppercase mb-1">Origin</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{f.origin}</p>
+                  <p className="text-[11px] font-bold text-indigo-600 mt-1">{formatTime(f.departure_time)}</p>
+                </div>
+
+                <div className="col-span-3 flex flex-col items-center">
+                  <div className="w-full h-px bg-slate-100 relative mb-3">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2">
+                      <Plane size={14} className="text-slate-300 rotate-90" />
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Route & Times */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Origin</span>
-                  <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{f.origin}</p>
-                  <p className="text-sm font-bold text-indigo-600 mt-2">{formatTimeDirectly(f.departure_time)}</p>
+                  </div>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{f.duration}</span>
+                  <div className="mt-2 px-2 py-0.5 rounded-full bg-slate-50 text-[7px] font-black text-slate-400 border uppercase">
+                    {f.stops === 0 ? 'Non-Stop' : `${f.stops} Stop`}
+                  </div>
                 </div>
 
-                <div className="flex-[1.2] flex flex-col items-center px-2">
-                   <div className="w-full flex items-center gap-2 mb-1">
-                      <div className="h-[2px] flex-1 bg-slate-100 rounded-full" />
-                      <Plane size={18} className="text-slate-300 rotate-90 shrink-0" />
-                      <div className="h-[2px] flex-1 bg-slate-100 rounded-full" />
-                   </div>
-                   <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">
-                      {f.duration}
-                   </div>
-                   <div className={`mt-1 px-2 py-0.5 rounded text-[8px] font-bold uppercase ${hasStops ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
-                      {hasStops ? `via ${f.via}` : 'Direct'}
-                   </div>
-                </div>
-
-                <div className="flex-1 text-right">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Dest</span>
-                  <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{f.destination}</p>
-                  <p className="text-sm font-bold text-indigo-600 mt-2">{formatTimeDirectly(f.arrival_time)}</p>
+                <div className="col-span-2 text-right">
+                  <p className="text-[8px] font-black text-slate-300 uppercase mb-1">Dest</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{f.destination}</p>
+                  <p className="text-[11px] font-bold text-indigo-600 mt-1">{formatTime(f.arrival_time)}</p>
                 </div>
               </div>
             </div>
 
-            {/* BOARDING PASS TEAR-OFF DIVIDER */}
-            <div className="relative h-10 flex items-center bg-transparent overflow-visible">
-               <div className="absolute -left-[18px] w-9 h-9 bg-[#f8fafc] rounded-full border border-slate-100 z-10 shadow-[inset_-4px_0_8px_-4px_rgba(0,0,0,0.05)]" />
-               <div className="absolute -right-[18px] w-9 h-9 bg-[#f8fafc] rounded-full border border-slate-100 z-10 shadow-[inset_4px_0_8px_-4px_rgba(0,0,0,0.05)]" />
-               
-               <div className="w-full h-full bg-white border-x border-slate-100 flex items-center">
-                  <div className="w-full border-t-2 border-dashed border-slate-100 mx-6 opacity-60" />
-               </div>
+            {/* DIVIDER */}
+            <div className="relative h-6 bg-white border-x border-slate-100 flex items-center px-4">
+              <div className="absolute -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 shadow-inner" />
+              <div className="absolute -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 shadow-inner" />
+              <div className="w-full border-t-2 border-dashed border-slate-100 opacity-50" />
             </div>
 
-            {/* BOARDING PASS BOTTOM (Stub Section) */}
-            <div className="relative bg-white rounded-b-[2.5rem] p-6 pt-2 border-b border-x border-slate-100 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)]">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSoldOut ? 'bg-red-50 text-red-400' : isLowAvailability ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-500'}`}>
-                      {isSoldOut ? <Lock size={14} /> : <User size={14} />}
+            {/* BOTTOM SECTION */}
+            <div className="bg-white rounded-b-[2.5rem] p-6 pt-3 border-b border-x border-slate-100 shadow-xl shadow-slate-200/40">
+              
+              {/* COMPARISON BAR */}
+              <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100 flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-2 rounded-lg shadow-sm"><TrendingDown size={14} className="text-slate-400" /></div>
+                  <div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase">Others</p>
+                    <p className="text-xs font-bold text-slate-400 line-through">₹{(f.price + PLATFORM_FEE_SAVINGS).toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[8px] font-black text-emerald-500 uppercase">Your Savings</p>
+                  <p className="text-xs font-black text-emerald-600">Save ₹{PLATFORM_FEE_SAVINGS}</p>
+                </div>
+              </div>
+
+              <div className="flex items-end justify-between gap-4">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+                      <ShieldCheck size={16} />
                     </div>
                     <div>
-                      <p className={`text-[10px] font-black uppercase tracking-tight ${isSoldOut ? 'text-red-500' : isLowAvailability ? 'text-red-600' : 'text-slate-900'}`}>
-                        {isSoldOut ? 'Sold Out' : isLowAvailability ? `Only ${f.available_seats} left!` : `${f.available_seats} Seats Left`}
-                      </p>
-                      <div className="flex gap-0.5 mt-1">
-                        {[...Array(5)].map((_, i) => {
-                           const progress = (f.available_seats / f.total_seats) * 5;
-                           return (
-                             <div 
-                               key={i} 
-                               className={`h-1 w-3 rounded-full ${
-                                 i < progress 
-                                   ? (isLowAvailability ? 'bg-red-500' : 'bg-orange-400') 
-                                   : 'bg-slate-100'
-                               }`} 
-                             />
-                           );
-                        })}
-                      </div>
+                      <p className="text-[10px] font-black uppercase text-slate-900 leading-none">Fare Protected</p>
+                      <p className="text-[8px] text-slate-400 mt-1">Cancellation available</p>
                     </div>
                   </div>
+                  <ProgressIndicator current={f.available_seats} total={f.total_seats} low={isLow} />
                 </div>
 
-                <div className="text-right">
-                  <div className="flex items-baseline justify-end gap-0.5 mb-1">
-                    <span className="text-[10px] font-black text-slate-400 mr-1 italic uppercase">Total</span>
-                    <span className="text-xs font-black text-slate-900 uppercase">₹</span>
-                    <span className="text-3xl font-black text-slate-900 tracking-tighter">
-                      {f.price.toLocaleString()}
-                    </span>
+                <div className="flex flex-col items-end shrink-0">
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">Total</span>
+                    <span className="text-xs font-black text-slate-900">₹</span>
+                    <span className="text-3xl font-black text-slate-900 tracking-tighter leading-none">{f.price.toLocaleString()}</span>
                   </div>
-                  <button className={`w-full min-w-[120px] py-3 px-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2
-                    ${isSoldOut ? 'bg-slate-100 text-slate-400 shadow-none' : 'bg-slate-900 text-white active:bg-indigo-600'}`}>
-                    {isSoldOut ? 'Locked' : (
-                      <>Select Flight <ChevronRight size={14} strokeWidth={3} /></>
-                    )}
+                  <button className="h-8 px-4 bg-slate-900 text-white rounded-2xl flex items-center gap-2 shadow-lg shadow-slate-200 group-hover:bg-indigo-700 transition-all">
+                    <span className="text-[10px] font-black uppercase tracking-widest">Book Now</span>
+                    <ChevronRight size={10} />
                   </button>
                 </div>
               </div>
-              
-              <div className="mt-6 flex justify-center gap-[3px] opacity-10 h-6 overflow-hidden">
-                {[...Array(40)].map((_, i) => (
-                  <div key={i} className={`bg-black rounded-full`} style={{ width: `${Math.random() * 4 + 1}px`, height: '100%' }} />
-                ))}
+
+              {/* BARCODE DECO */}
+              <div className="mt-6 pt-4 border-t border-slate-50 flex flex-col items-center gap-2">
+                <div className="flex gap-[2px] h-4 opacity-10">
+                  {[...Array(40)].map((_, i) => (
+                    <div key={i} className="bg-black rounded-full" style={{ width: `${(i % 5) + 1}px` }} />
+                  ))}
+                </div>
+                <p className="text-[7px] font-black text-slate-300 uppercase tracking-[0.4em]">Secure Airline Transaction</p>
               </div>
             </div>
           </div>
         );
       })}
+
+      {/* MOBILE SAFE-AREA FOOTER */}
+      <div className="py-10 text-center space-y-4">
+        <div className="flex justify-center gap-6 opacity-30">
+          <ShieldAlert size={18} />
+          <Navigation size={18} />
+          <ArrowRightLeft size={18} />
+        </div>
+        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Powered by Real-Time Flight Radar 2026</p>
+      </div>
     </div>
   );
 }
