@@ -1,5 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { 
+  Plane, Calendar, MapPin, Plus, Edit2, Trash2, 
+  X, ChevronRight, AlertCircle, CheckCircle2, ArrowRightLeft
+} from 'lucide-react';
 
 // --- Configuration ---
 const supabase = createClient(
@@ -39,7 +43,6 @@ export default function FlightManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFlight, setEditingFlight] = useState<Flight | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // --- Helper: Notifications ---
   const showNotification = (text: string, isError = false) => {
@@ -107,244 +110,216 @@ export default function FlightManager() {
       const updatedRow = data[0] as Flight;
       if (editingFlight?.id) {
         setFlights(prev => prev.map(f => f.id === editingFlight.id ? updatedRow : f));
-        showNotification("Flight updated on radar");
+        showNotification("Flight radar updated");
       } else {
         setFlights(prev => [updatedRow, ...prev]);
-        showNotification("New flight cleared for takeoff");
+        showNotification("New flight cleared");
       }
       setIsModalOpen(false);
       setEditingFlight(null);
     }
   };
 
-  // --- 3. DELETE ---
   const handleDelete = async (id: string) => {
-    if (!window.confirm("This will permanently remove this flight record. Proceed?")) return;
-    
+    if (!window.confirm("Permanently delete this flight?")) return;
     const { error } = await supabase.from('flights').delete().eq('id', id);
-    if (error) {
-      showNotification("Could not delete record", true);
-    } else {
+    if (error) showNotification("Delete failed", true);
+    else {
       setFlights(prev => prev.filter(f => f.id !== id));
-      showNotification("Flight scrubbed from system");
+      showNotification("Record scrubbed");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-32 font-sans text-slate-900 selection:bg-indigo-100">
+    <div className="flex flex-col h-[100dvh] bg-[#F8FAFC] overflow-hidden text-slate-900 font-sans">
       
-      {/* Toast Notification (Floating Action Style) */}
+      {/* --- FLOATING NOTIFICATION --- */}
       {statusMsg && (
-        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-full shadow-2xl text-white text-sm font-bold flex items-center gap-3 transition-all animate-in slide-in-from-top-full duration-300 ${statusMsg.isError ? 'bg-rose-500' : 'bg-slate-900'}`}>
-          <div className={`w-2 h-2 rounded-full animate-pulse ${statusMsg.isError ? 'bg-white' : 'bg-emerald-400'}`}></div>
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl text-white text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all animate-in slide-in-from-top-full ${statusMsg.isError ? 'bg-rose-600' : 'bg-slate-900'}`}>
+          {statusMsg.isError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} className="text-emerald-400" />}
           {statusMsg.text}
         </div>
       )}
 
-      {/* Glass Header */}
-      <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 p-4 pb-6">
-        <div className="max-w-xl mx-auto space-y-5">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-black tracking-tighter text-slate-900 italic">SKYPORT<span className="text-indigo-600">.</span></h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin Dashboard</p>
-            </div>
-            <button 
-              onClick={() => { setEditingFlight(null); setIsModalOpen(true); }}
-              className="bg-indigo-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 active:scale-90 transition-all"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+      {/* --- HEADER --- */}
+      <header className="flex-none bg-white border-b border-slate-100 px-6 pt-12 pb-6 shadow-sm z-30">
+        <div className="max-w-2xl mx-auto flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-black tracking-tighter italic">SKYPORT<span className="text-blue-600">.</span></h1>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Management</p>
           </div>
+          <button 
+            onClick={() => { setEditingFlight(null); setIsModalOpen(true); }}
+            className="bg-blue-600 text-white p-3.5 rounded-2xl shadow-lg shadow-blue-100 active:scale-90 transition-all"
+          >
+            <Plus size={20} strokeWidth={3} />
+          </button>
+        </div>
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            <div className="flex-shrink-0 bg-white border border-slate-200 rounded-2xl p-2 px-4 flex items-center gap-3 shadow-sm">
-                <span className="text-[10px] font-black text-indigo-500 uppercase">Date</span>
-                <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="bg-transparent border-none p-0 text-sm font-bold focus:ring-0" />
-            </div>
+        {/* --- FILTERS --- */}
+        <div className="max-w-2xl mx-auto flex gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex-shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-2">
+            <Calendar size={14} className="text-blue-500" />
             <input 
-              type="text" 
-              placeholder="Origin (e.g CCU)" 
-              value={filterOrigin} 
-              onChange={e => setFilterOrigin(e.target.value)} 
-              className="flex-shrink-0 w-32 bg-white border border-slate-200 rounded-2xl p-3 text-sm font-bold uppercase placeholder:text-slate-300 focus:border-indigo-500 focus:ring-0 transition-all shadow-sm" 
+              type="date" 
+              value={filterDate} 
+              onChange={e => setFilterDate(e.target.value)} 
+              className="bg-transparent text-[11px] font-black uppercase outline-none"
             />
+          </div>
+          <div className="flex-shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-2">
+            <MapPin size={14} className="text-slate-400" />
             <input 
-              type="text" 
-              placeholder="Dest (e.g IXA)" 
+              placeholder="ORG" 
+              value={filterOrigin} 
+              onChange={e => setFilterOrigin(e.target.value.toUpperCase())}
+              className="bg-transparent text-[11px] font-black uppercase w-12 outline-none"
+            />
+          </div>
+          <div className="flex-shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-2">
+            <ArrowRightLeft size={14} className="text-slate-400" />
+            <input 
+              placeholder="DEST" 
               value={filterDest} 
-              onChange={e => setFilterDest(e.target.value)} 
-              className="flex-shrink-0 w-32 bg-white border border-slate-200 rounded-2xl p-3 text-sm font-bold uppercase placeholder:text-slate-300 focus:border-indigo-500 focus:ring-0 transition-all shadow-sm" 
+              onChange={e => setFilterDest(e.target.value.toUpperCase())}
+              className="bg-transparent text-[11px] font-black uppercase w-12 outline-none"
             />
           </div>
         </div>
       </header>
 
-      {/* Flight List Container */}
-      <main className="max-w-xl mx-auto p-4 space-y-6 mt-2">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Scanning Airspace...</p>
-          </div>
-        ) : flights.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 shadow-inner">
-             <div className="text-4xl mb-4">☁️</div>
-             <p className="text-slate-400 font-bold text-sm">No flights scheduled for this route.</p>
-          </div>
-        ) : (
-          flights.map((f, idx) => f && (
-            <div 
-              key={f.id} 
-              className="bg-white rounded-[2.5rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 overflow-hidden group animate-in fade-in slide-in-from-bottom-6 duration-500"
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
-              <div className="p-6">
+      {/* --- MAIN SCROLL AREA --- */}
+      <main className="flex-1 overflow-y-auto px-6 pt-6 pb-40 no-scrollbar">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {loading ? (
+            <div className="py-20 text-center space-y-4">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Frequencies...</p>
+            </div>
+          ) : flights.length === 0 ? (
+            <div className="py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-slate-100">
+               <Plane size={40} className="mx-auto text-slate-200 mb-4" />
+               <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">No Active Flights Found</p>
+            </div>
+          ) : (
+            flights.map((f) => (
+              <div key={f.id} className="bg-white rounded-[2.5rem] border border-slate-100 p-6 shadow-sm group">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-black text-xs">
-                      {f.airline.substring(0,2).toUpperCase()}
+                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xs uppercase">
+                      {f.airline.substring(0,2)}
                     </div>
                     <div>
-                      <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{f.airline}</span>
-                      <h3 className="text-lg font-black text-slate-800 leading-none">{f.flight_number}</h3>
+                      <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-0.5">{f.airline}</p>
+                      <h3 className="text-lg font-black tracking-tighter">{f.flight_number}</h3>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-black text-slate-900 leading-none">₹{f.price.toLocaleString()}</div>
-                    <span className={`text-[9px] font-bold px-2 py-1 rounded-full mt-2 inline-block ${f.available_seats < 20 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                      {f.available_seats} SEATS LEFT
+                    <p className="text-xl font-black tracking-tighter text-slate-900">₹{f.price.toLocaleString()}</p>
+                    <span className={`text-[8px] font-black px-2 py-1 rounded-lg uppercase ${f.available_seats < 10 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {f.available_seats} Seats Open
                     </span>
                   </div>
                 </div>
 
-                {/* Route Visualizer */}
-                <div className="flex items-center justify-between gap-6 py-4 bg-slate-50/50 rounded-3xl px-6 border border-slate-50">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-slate-800 leading-none">{f.origin}</div>
-                    <div className="text-[9px] font-bold text-slate-400 uppercase mt-1">Origin</div>
+                {/* VISUAL ROUTE */}
+                <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-3xl border border-slate-50">
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-black leading-none mb-1">{f.origin}</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase">{new Date(f.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                   </div>
-                  
-                  <div className="flex-1 flex flex-col items-center">
-                     <div className="w-full h-[1.5px] bg-indigo-100 relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-indigo-100 p-1 rounded-full text-indigo-500 transform rotate-45">
-                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
-                        </div>
-                     </div>
-                     <div className="text-[10px] font-black text-indigo-600 mt-3 tabular-nums">
-                       {new Date(f.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                     </div>
+                  <div className="flex-[1.5] flex flex-col items-center">
+                    <div className="w-full h-px bg-slate-200 relative">
+                      <Plane size={14} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-300" />
+                    </div>
                   </div>
-
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-slate-800 leading-none">{f.destination}</div>
-                    <div className="text-[9px] font-bold text-slate-400 uppercase mt-1">Dest</div>
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-black leading-none mb-1">{f.destination}</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase">{new Date(f.arrival_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-2 mt-4">
                   <button 
-                    onClick={() => { setEditingFlight(f); setIsModalOpen(true); }} 
-                    className="flex-[2] bg-indigo-50 text-indigo-600 font-black py-4 rounded-2xl active:bg-indigo-100 transition-colors text-xs uppercase tracking-widest"
+                    onClick={() => { setEditingFlight(f); setIsModalOpen(true); }}
+                    className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
                   >
-                    Modify
+                    Manage
                   </button>
                   <button 
-                    onClick={() => handleDelete(f.id)} 
-                    className="flex-1 bg-white text-rose-400 font-black py-4 rounded-2xl border border-rose-50 active:bg-rose-50 transition-colors text-xs uppercase tracking-widest"
+                    onClick={() => handleDelete(f.id)}
+                    className="p-4 bg-rose-50 text-rose-600 rounded-2xl active:bg-rose-100 transition-colors"
                   >
-                    Scrub
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </main>
 
-      {/* Modern Bottom Sheet Modal */}
+      {/* --- MODAL / BOTTOM SHEET --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center transition-all">
-          <div 
-            className="bg-white w-full max-h-[92vh] sm:max-w-lg rounded-t-[3.5rem] sm:rounded-[3.5rem] p-8 relative shadow-2xl overflow-y-auto animate-in slide-in-from-bottom-full duration-500 ease-out"
-          >
-            {/* Modal Handle (Mobile Feel) */}
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-6 transition-all">
+          <div className="bg-white w-full max-h-[94dvh] overflow-y-auto rounded-t-[3.5rem] sm:rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom-full duration-500 ease-out no-scrollbar sm:max-w-lg">
             
-            <button 
-              onClick={() => setIsModalOpen(false)} 
-              className="absolute top-8 right-8 w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center font-light text-2xl"
-            >
-              &times;
-            </button>
+            {/* Grab Handle */}
+            <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-8" />
+
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-3xl font-black tracking-tighter">{editingFlight ? 'Modify' : 'New Flight'}</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aviation Logistics System</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center"><X size={20} /></button>
+            </div>
             
-            <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter">
-              {editingFlight ? 'Edit Flight' : 'Add Flight'}
-            </h2>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-8">Manual Override Console</p>
-            
-            <form onSubmit={handleSaveFlight} className="space-y-6 pb-8">
+            <form onSubmit={handleSaveFlight} className="space-y-6 pb-20">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Airline</label>
-                  <input name="airline" defaultValue={editingFlight?.airline} placeholder="Indigo" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Flight ID</label>
-                  <input name="flight_number" defaultValue={editingFlight?.flight_number} placeholder="6E-202" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-                </div>
+                <Input label="Airline" name="airline" defaultValue={editingFlight?.airline} placeholder="Indigo" />
+                <Input label="Flight No" name="flight_number" defaultValue={editingFlight?.flight_number} placeholder="6E-212" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Origin Port</label>
-                  <input name="origin" defaultValue={editingFlight?.origin} placeholder="CCU" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold uppercase focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" maxLength={3} required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dest Port</label>
-                  <input name="destination" defaultValue={editingFlight?.destination} placeholder="IXA" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold uppercase focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" maxLength={3} required />
-                </div>
+                <Input label="Origin (IATA)" name="origin" defaultValue={editingFlight?.origin} placeholder="CCU" maxLength={3} />
+                <Input label="Dest (IATA)" name="destination" defaultValue={editingFlight?.destination} placeholder="IXA" maxLength={3} />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Departure Schedule</label>
-                <input type="datetime-local" name="departure_time" defaultValue={editingFlight?.departure_time?.slice(0,16)} className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Arrival Schedule</label>
-                <input type="datetime-local" name="arrival_time" defaultValue={editingFlight?.arrival_time?.slice(0,16)} className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-              </div>
+              <Input label="Departure" name="departure_time" type="datetime-local" defaultValue={editingFlight?.departure_time?.slice(0,16)} />
+              <Input label="Arrival" name="arrival_time" type="datetime-local" defaultValue={editingFlight?.arrival_time?.slice(0,16)} />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Fare (INR)</label>
-                  <input type="number" name="price" defaultValue={editingFlight?.price} placeholder="0.00" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Inventory</label>
-                  <input type="number" name="available_seats" defaultValue={editingFlight?.available_seats} placeholder="180" className="w-full p-4 bg-slate-50 border-transparent rounded-2xl font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" required />
-                </div>
+                <Input label="Base Price (₹)" name="price" type="number" defaultValue={editingFlight?.price} />
+                <Input label="Inventory" name="available_seats" type="number" defaultValue={editingFlight?.available_seats} />
               </div>
 
-              <button 
-                type="submit" 
-                className="w-full bg-slate-900 text-white p-5 rounded-[2.5rem] font-black text-lg shadow-2xl shadow-slate-200 active:scale-95 transition-all mt-4 uppercase tracking-tighter"
-              >
-                Transmit Changes
+              <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-tighter">
+                Confirm Schedule
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* CSS For Hide Scrollbar */}
+      {/* --- STYLES --- */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
+    </div>
+  );
+}
+
+// --- Internal Input Component ---
+function Input({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{label}</label>
+      <input 
+        className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl font-black text-sm outline-none focus:bg-white focus:border-blue-600 transition-all placeholder:text-slate-200" 
+        {...props} 
+      />
     </div>
   );
 }
