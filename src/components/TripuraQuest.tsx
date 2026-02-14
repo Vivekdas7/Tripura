@@ -392,22 +392,6 @@ export default function MyProfile() {
         </motion.section>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         {/* LOGOUT */}
         <div className="pt-6">
           <button 

@@ -10,6 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type Flight = {
+  [x: string]: any;
   id: string;
   flight_number: string;
   airline: string;

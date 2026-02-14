@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Plane, Calendar, MapPin, Plus, Edit2, Trash2, 
-  X, ChevronRight, AlertCircle, CheckCircle2, ArrowRightLeft
+  X, ChevronRight, AlertCircle, CheckCircle2, ArrowRightLeft, Clock
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -31,6 +31,20 @@ interface Flight {
   fare_options: FareOption[];
 }
 
+/**
+ * FIXED: Helper to show time exactly as stored in DB without Timezone shifts
+ */
+const formatTimeDirectly = (dbString: string) => {
+  if (!dbString) return "--:--";
+  try {
+    // If string is "2026-02-14T10:30:00", this takes the "10:30" part
+    const timePart = dbString.includes('T') ? dbString.split('T')[1] : dbString.split(' ')[1];
+    return timePart.substring(0, 5);
+  } catch (e) {
+    return "--:--";
+  }
+};
+
 export default function FlightManager() {
   // --- States ---
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -39,22 +53,20 @@ export default function FlightManager() {
   const [filterOrigin, setFilterOrigin] = useState('');
   const [filterDest, setFilterDest] = useState('');
   
-  // UI States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFlight, setEditingFlight] = useState<Flight | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
-  // --- Helper: Notifications ---
   const showNotification = (text: string, isError = false) => {
     setStatusMsg({ text, isError });
     setTimeout(() => setStatusMsg(null), 3500);
   };
 
-  // --- 1. READ (Fetch) ---
   const fetchFlights = useCallback(async () => {
     setLoading(true);
-    const startOfDay = `${filterDate}T00:00:00Z`;
-    const endOfDay = `${filterDate}T23:59:59Z`;
+    // Use simple date strings for range to avoid TZ issues in query
+    const startOfDay = `${filterDate} 00:00:00`;
+    const endOfDay = `${filterDate} 23:59:59`;
 
     let query = supabase
       .from('flights')
@@ -79,18 +91,21 @@ export default function FlightManager() {
     fetchFlights();
   }, [fetchFlights]);
 
-  // --- 2. CREATE & UPDATE ---
   const handleSaveFlight = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    // Convert datetime-local "YYYY-MM-DDTHH:mm" to "YYYY-MM-DD HH:mm:ss" for Supabase
+    const dep = (formData.get('departure_time') as string).replace('T', ' ');
+    const arr = (formData.get('arrival_time') as string).replace('T', ' ');
+
     const flightPayload = {
       airline: formData.get('airline') as string,
       flight_number: formData.get('flight_number') as string,
       origin: (formData.get('origin') as string).toUpperCase(),
       destination: (formData.get('destination') as string).toUpperCase(),
-      departure_time: formData.get('departure_time') as string,
-      arrival_time: formData.get('arrival_time') as string,
+      departure_time: dep,
+      arrival_time: arr,
       price: Number(formData.get('price')),
       available_seats: Number(formData.get('available_seats')),
       total_seats: 180,
@@ -107,16 +122,10 @@ export default function FlightManager() {
     if (error) {
       showNotification(`Error: ${error.message}`, true);
     } else if (data && data.length > 0) {
-      const updatedRow = data[0] as Flight;
-      if (editingFlight?.id) {
-        setFlights(prev => prev.map(f => f.id === editingFlight.id ? updatedRow : f));
-        showNotification("Flight radar updated");
-      } else {
-        setFlights(prev => [updatedRow, ...prev]);
-        showNotification("New flight cleared");
-      }
+      fetchFlights(); // Refresh to ensure data consistency
       setIsModalOpen(false);
       setEditingFlight(null);
+      showNotification(editingFlight ? "Radar Updated" : "Flight Cleared");
     }
   };
 
@@ -133,7 +142,6 @@ export default function FlightManager() {
   return (
     <div className="flex flex-col h-[100dvh] bg-[#F8FAFC] overflow-hidden text-slate-900 font-sans">
       
-      {/* --- FLOATING NOTIFICATION --- */}
       {statusMsg && (
         <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl text-white text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all animate-in slide-in-from-top-full ${statusMsg.isError ? 'bg-rose-600' : 'bg-slate-900'}`}>
           {statusMsg.isError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} className="text-emerald-400" />}
@@ -141,7 +149,6 @@ export default function FlightManager() {
         </div>
       )}
 
-      {/* --- HEADER --- */}
       <header className="flex-none bg-white border-b border-slate-100 px-6 pt-12 pb-6 shadow-sm z-30">
         <div className="max-w-2xl mx-auto flex justify-between items-center mb-6">
           <div>
@@ -156,8 +163,7 @@ export default function FlightManager() {
           </button>
         </div>
 
-        {/* --- FILTERS --- */}
-        <div className="max-w-2xl mx-auto flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="max-w-2xl mx-auto flex gap-2 overflow-x-auto no-scrollbar pb-2">
           <div className="flex-shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-2">
             <Calendar size={14} className="text-blue-500" />
             <input 
@@ -188,69 +194,76 @@ export default function FlightManager() {
         </div>
       </header>
 
-      {/* --- MAIN SCROLL AREA --- */}
       <main className="flex-1 overflow-y-auto px-6 pt-6 pb-40 no-scrollbar">
-        <div className="max-w-2xl mx-auto space-y-4">
+        <div className="max-w-2xl mx-auto space-y-6">
           {loading ? (
             <div className="py-20 text-center space-y-4">
               <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Frequencies...</p>
             </div>
           ) : flights.length === 0 ? (
             <div className="py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-slate-100">
                <Plane size={40} className="mx-auto text-slate-200 mb-4" />
-               <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">No Active Flights Found</p>
+               <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">No Flights Found</p>
             </div>
           ) : (
             flights.map((f) => (
-              <div key={f.id} className="bg-white rounded-[2.5rem] border border-slate-100 p-6 shadow-sm group">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xs uppercase">
-                      {f.airline.substring(0,2)}
+              <div key={f.id} className="bg-white rounded-[3rem] border border-slate-100 p-7 shadow-sm transition-all hover:shadow-md">
+                <div className="flex justify-between items-start mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xs">
+                      {f.airline.substring(0,2).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-0.5">{f.airline}</p>
-                      <h3 className="text-lg font-black tracking-tighter">{f.flight_number}</h3>
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{f.airline}</p>
+                      <h3 className="text-xl font-black tracking-tighter">{f.flight_number}</h3>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-black tracking-tighter text-slate-900">₹{f.price.toLocaleString()}</p>
-                    <span className={`text-[8px] font-black px-2 py-1 rounded-lg uppercase ${f.available_seats < 10 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                      {f.available_seats} Seats Open
+                    <p className="text-2xl font-black tracking-tighter text-slate-900">₹{f.price.toLocaleString()}</p>
+                    <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl uppercase inline-block mt-2 ${f.available_seats < 10 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {f.available_seats} Seats Left
                     </span>
                   </div>
                 </div>
 
-                {/* VISUAL ROUTE */}
-                <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-3xl border border-slate-50">
-                  <div className="flex-1 text-center">
-                    <p className="text-xl font-black leading-none mb-1">{f.origin}</p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase">{new Date(f.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                  </div>
-                  <div className="flex-[1.5] flex flex-col items-center">
-                    <div className="w-full h-px bg-slate-200 relative">
-                      <Plane size={14} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-300" />
+                {/* UPDATED: Visual Route using formatTimeDirectly */}
+                <div className="grid grid-cols-3 items-center gap-4 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-50 mb-6">
+                  <div className="text-center">
+                    <p className="text-2xl font-black tracking-tighter mb-1">{f.origin}</p>
+                    <div className="flex items-center justify-center gap-1 text-indigo-600">
+                        <Clock size={10} strokeWidth={3} />
+                        <p className="text-[11px] font-black uppercase">{formatTimeDirectly(f.departure_time)}</p>
                     </div>
                   </div>
-                  <div className="flex-1 text-center">
-                    <p className="text-xl font-black leading-none mb-1">{f.destination}</p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase">{new Date(f.arrival_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="w-full h-[2px] bg-slate-200 relative mb-2">
+                      <Plane size={16} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-300 rotate-90" />
+                    </div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Non-Stop</p>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-2xl font-black tracking-tighter mb-1">{f.destination}</p>
+                    <div className="flex items-center justify-center gap-1 text-indigo-600">
+                        <p className="text-[11px] font-black uppercase">{formatTimeDirectly(f.arrival_time)}</p>
+                        <Clock size={10} strokeWidth={3} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-3">
                   <button 
                     onClick={() => { setEditingFlight(f); setIsModalOpen(true); }}
-                    className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 bg-slate-900 text-white py-4.5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
                   >
-                    Manage
+                    Edit Logistics
                   </button>
                   <button 
                     onClick={() => handleDelete(f.id)}
-                    className="p-4 bg-rose-50 text-rose-600 rounded-2xl active:bg-rose-100 transition-colors"
+                    className="w-14 h-14 bg-rose-50 text-rose-600 rounded-[1.5rem] flex items-center justify-center active:bg-rose-100 transition-colors"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>
@@ -259,59 +272,70 @@ export default function FlightManager() {
         </div>
       </main>
 
-      {/* --- MODAL / BOTTOM SHEET --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-6 transition-all">
-          <div className="bg-white w-full max-h-[94dvh] overflow-y-auto rounded-t-[3.5rem] sm:rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom-full duration-500 ease-out no-scrollbar sm:max-w-lg">
+        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-6">
+          <div className="bg-white w-full max-h-[94dvh] overflow-y-auto rounded-t-[3.5rem] sm:rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom-full no-scrollbar sm:max-w-lg">
             
-            {/* Grab Handle */}
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-8" />
 
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h2 className="text-3xl font-black tracking-tighter">{editingFlight ? 'Modify' : 'New Flight'}</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aviation Logistics System</p>
+                <h2 className="text-3xl font-black tracking-tighter">{editingFlight ? 'Edit Flight' : 'New Flight'}</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">System Entry</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center"><X size={20} /></button>
+              <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center transition-colors hover:bg-slate-100"><X size={20} /></button>
             </div>
             
-            <form onSubmit={handleSaveFlight} className="space-y-6 pb-20">
+            <form onSubmit={handleSaveFlight} className="space-y-6 pb-12">
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Airline" name="airline" defaultValue={editingFlight?.airline} placeholder="Indigo" />
-                <Input label="Flight No" name="flight_number" defaultValue={editingFlight?.flight_number} placeholder="6E-212" />
+                <Input label="Airline Name" name="airline" defaultValue={editingFlight?.airline} placeholder="Air India" required />
+                <Input label="Flight Number" name="flight_number" defaultValue={editingFlight?.flight_number} placeholder="AI-102" required />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Origin (IATA)" name="origin" defaultValue={editingFlight?.origin} placeholder="CCU" maxLength={3} />
-                <Input label="Dest (IATA)" name="destination" defaultValue={editingFlight?.destination} placeholder="IXA" maxLength={3} />
+                <Input label="Origin (IATA)" name="origin" defaultValue={editingFlight?.origin} placeholder="CCU" maxLength={3} required />
+                <Input label="Destination (IATA)" name="destination" defaultValue={editingFlight?.destination} placeholder="DEL" maxLength={3} required />
               </div>
 
-              <Input label="Departure" name="departure_time" type="datetime-local" defaultValue={editingFlight?.departure_time?.slice(0,16)} />
-              <Input label="Arrival" name="arrival_time" type="datetime-local" defaultValue={editingFlight?.arrival_time?.slice(0,16)} />
+              <Input 
+                label="Departure (Local Time)" 
+                name="departure_time" 
+                type="datetime-local" 
+                defaultValue={editingFlight?.departure_time?.replace(' ', 'T').slice(0,16)} 
+                required
+              />
+              <Input 
+                label="Arrival (Local Time)" 
+                name="arrival_time" 
+                type="datetime-local" 
+                defaultValue={editingFlight?.arrival_time?.replace(' ', 'T').slice(0,16)} 
+                required
+              />
 
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Base Price (₹)" name="price" type="number" defaultValue={editingFlight?.price} />
-                <Input label="Inventory" name="available_seats" type="number" defaultValue={editingFlight?.available_seats} />
+                <Input label="Ticket Price (₹)" name="price" type="number" defaultValue={editingFlight?.price} required />
+                <Input label="Initial Seats" name="available_seats" type="number" defaultValue={editingFlight?.available_seats} required />
               </div>
 
-              <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-tighter">
-                Confirm Schedule
+              <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-lg shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-tighter">
+                {editingFlight ? 'Update Flight' : 'Authorize Flight'}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* --- STYLES --- */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+        }
       `}</style>
     </div>
   );
 }
 
-// --- Internal Input Component ---
 function Input({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="space-y-2">
