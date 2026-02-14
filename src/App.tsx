@@ -32,6 +32,7 @@ import PackageModal from './components/PackageModal';
 import FlightTracker from './components/FlightTracker';
 import RefundPage from './components/Refund';
 import ExplorePage from './components/ExplorePage';
+import FlightDetails from './components/FlightDetails';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
@@ -155,6 +156,8 @@ const BottomNav = () => {
     { path: '/bookings', icon: <Ticket size={22} />, label: 'Bookings' },
     { path: '/cab-booking', icon: <Car size={22} />, label: 'Cabs' },
     { path: '/game', icon: <User size={22} />, label: 'Profile' },
+     
+    
     // {path:'/train-booking',icon:<Train size={22}/>,label:'Train'}
   ];
 
@@ -887,6 +890,7 @@ _Inquiry via TripuraFly Verified App_`;
           <Route path='/explore'element={< ExplorePage/>}/>
           <Route path="/payment-success" element={<PaymentSuccess/>} />
           <Route path='/auth'element={<AuthForm/>}/>
+          <Route path='/flight-manager'element={<FlightDetails/>}/>
           <Route path="/admin-pannel-vivekdas" element={<AdminDashboard/>} />
           
         </Routes>
