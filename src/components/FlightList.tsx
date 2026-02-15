@@ -19,9 +19,9 @@ import {
   ArrowRightLeft,
   Navigation,
   Filter,
-  Flame
+  Flame,
+  RefreshCcw
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 /**
  * --- INTERFACES & TYPES ---
@@ -29,10 +29,10 @@ import { supabase } from '../lib/supabase';
 export interface Flight {
   id: string;
   airline: string;
+  airlineCode: string;
   flight_number: string;
   origin: string;
   destination: string;
-  via?: string | null;
   stops: number;
   departure_time: string;
   arrival_time: string;
@@ -52,25 +52,29 @@ interface AirlineMeta {
  * --- CONSTANTS ---
  */
 const PLATFORM_FEE_SAVINGS = 400;
+const RAPID_API_KEY = '64eaeaba66mshe996f271458da7ap11bdb8jsnb74702c01a50';
+const RAPID_API_HOST = 'flights-sky.p.rapidapi.com';
 
 /**
  * --- HELPER FUNCTIONS ---
  */
-const getAirlineData = (name: string): AirlineMeta => {
+const getAirlineData = (name: string, code?: string): AirlineMeta => {
   const n = name.toLowerCase();
-  if (n.includes('indigo')) return { code: '6E', color: '#001b94', fullName: 'IndiGo' };
-  if (n.includes('express')) return { code: 'IX', color: '#d42e12', fullName: 'Air India Express' };
-  if (n.includes('india')) return { code: 'AI', color: '#ed1c24', fullName: 'Air India' };
-  if (n.includes('vistara')) return { code: 'UK', color: '#5f2653', fullName: 'Vistara' };
-  if (n.includes('akasa')) return { code: 'QP', color: '#ff6d22', fullName: 'Akasa Air' };
-  return { code: 'G8', color: '#0f172a', fullName: name };
+  const c = code?.toUpperCase();
+  
+  if (n.includes('indigo') || c === '6E') return { code: '6E', color: '#001b94', fullName: 'IndiGo' };
+  if (n.includes('express') || c === 'IX') return { code: 'IX', color: '#d42e12', fullName: 'Air India Express' };
+  if (n.includes('india') || c === 'AI') return { code: 'AI', color: '#ed1c24', fullName: 'Air India' };
+  if (n.includes('vistara') || c === 'UK') return { code: 'UK', color: '#5f2653', fullName: 'Vistara' };
+  if (n.includes('akasa') || c === 'QP') return { code: 'QP', color: '#ff6d22', fullName: 'Akasa Air' };
+  return { code: c || 'G8', color: '#0f172a', fullName: name };
 };
 
-const formatTime = (dbString: string) => {
-  if (!dbString) return "--:--";
+const formatTime = (timeStr: string) => {
+  if (!timeStr) return "--:--";
   try {
-    const timePart = dbString.includes('T') ? dbString.split('T')[1] : dbString.split(' ')[1];
-    return timePart.substring(0, 5);
+    const date = new Date(timeStr);
+    return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
   } catch { return "--:--"; }
 };
 
@@ -115,23 +119,55 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'direct' | 'cheapest'>('all');
 
-  useEffect(() => {
-    async function fetchFlights() {
-      if (!searchParams.origin || !searchParams.destination || !searchParams.date) return;
-      setLoading(true);
-      try {
-        const { data } = await supabase
-          .from('flights')
-          .select('*')
-          .eq('origin', searchParams.origin.toUpperCase())
-          .eq('destination', searchParams.destination.toUpperCase())
-          .gte('departure_time', `${searchParams.date} 00:00:00`)
-          .lte('departure_time', `${searchParams.date} 23:59:59`)
-          .order('departure_time', { ascending: true });
-        setFlights((data as Flight[]) || []);
-      } catch (e) { console.error(e); }
-      finally { setTimeout(() => setLoading(false), 500); }
+  const fetchFlights = async () => {
+    if (!searchParams.origin || !searchParams.destination || !searchParams.date) return;
+    
+    setLoading(true);
+    const url = `https://${RAPID_API_HOST}/flights/search-one-way?fromEntityId=${searchParams.origin}&toEntityId=${searchParams.destination}&departDate=${searchParams.date}&market=IN&currency=INR`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': RAPID_API_KEY,
+          'x-rapidapi-host': RAPID_API_HOST
+        }
+      });
+
+      const result = await response.json();
+      
+      // Transform RapidAPI structure to our local Flight interface
+      if (result.status && result.data && result.data.itineraries) {
+        const mappedFlights: Flight[] = result.data.itineraries.map((it: any) => {
+          const leg = it.legs[0];
+          const carrier = leg.carriers.marketing[0];
+          
+          return {
+            id: it.id,
+            airline: carrier.name,
+            airlineCode: carrier.displayCode,
+            flight_number: `${carrier.displayCode}-${leg.segments[0].flightNumber}`,
+            origin: leg.origin.displayCode,
+            destination: leg.destination.displayCode,
+            stops: leg.stopCount,
+            departure_time: leg.departure,
+            arrival_time: leg.arrival,
+            price: Math.round(it.price.raw),
+            duration: Math.floor(leg.durationInMinutes / 60) + "h " + (leg.durationInMinutes % 60) + "m",
+            available_seats: Math.floor(Math.random() * 10) + 1, // Mock data as API rarely provides live seat counts
+            total_seats: 180
+          };
+        });
+        setFlights(mappedFlights);
+      }
+    } catch (error) {
+      console.error("API Fetch Error:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchFlights();
   }, [searchParams.origin, searchParams.destination, searchParams.date]);
 
@@ -150,39 +186,59 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-32 px-6 space-y-4">
-      <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Airline Servers...</p>
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-slate-100 rounded-full" />
+        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin absolute top-0" />
+      </div>
+      <div className="text-center">
+        <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Live Radar Active</p>
+        <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">Fetching Best Fares from RapidAPI...</p>
+      </div>
     </div>
   );
 
   return (
     <div className="w-full max-w-md mx-auto px-4 pb-1 space-y-6 mt-4">
       
+      {/* HEADER & REFRESH */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Live Results</span>
+        </div>
+        <button 
+          onClick={fetchFlights}
+          className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+        >
+          <RefreshCcw size={14} className="text-slate-400" />
+        </button>
+      </div>
+
       {/* QUICK FILTERS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
         <button 
           onClick={() => setActiveFilter('all')}
-          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-            activeFilter === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          className={`flex-none px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-lg' : 'bg-white text-slate-400 border-slate-100'
           }`}
         >
-          All Flights
+          All
         </button>
         <button 
           onClick={() => setActiveFilter('direct')}
-          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-            activeFilter === 'direct' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          className={`flex-none px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'direct' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-white text-slate-400 border-slate-100'
           }`}
         >
           Non-Stop
         </button>
         <button 
           onClick={() => setActiveFilter('cheapest')}
-          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-            activeFilter === 'cheapest' ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          className={`flex-none px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'cheapest' ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-white text-slate-400 border-slate-100'
           }`}
         >
-          Cheapest First
+          Cheapest
         </button>
       </div>
 
@@ -193,15 +249,15 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
             <AlertCircle className="text-slate-300" size={32} />
           </div>
           <h3 className="text-sm font-black text-slate-900 uppercase">No Flights Found</h3>
-          <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">We couldn't find any flights matching your filter. Try adjusting your preferences.</p>
+          <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">Try changing your search date or filters.</p>
         </div>
       )}
 
       {/* FLIGHT CARDS */}
       {filteredFlights.map((f, idx) => {
-        const meta = getAirlineData(f.airline);
+        const meta = getAirlineData(f.airline, f.airlineCode);
         const isSoldOut = f.available_seats <= 0;
-        const isLow = f.available_seats <= 7;
+        const isLow = f.available_seats <= 3;
 
         return (
           <div 
@@ -214,8 +270,13 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
             <div className="bg-white rounded-t-[2.5rem] p-6 pb-4 border-t border-x border-slate-100 shadow-sm">
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-50 rounded-xl p-1.5 border border-slate-100 flex items-center justify-center">
-                    <img src={`https://pics.avs.io/200/100/${meta.code}.png`} className="w-full object-contain" alt="logo" />
+                  <div className="w-10 h-10 bg-slate-50 rounded-xl p-1.5 border border-slate-100 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={`https://pics.avs.io/200/100/${meta.code}.png`} 
+                      className="w-full h-full object-contain" 
+                      alt={meta.code}
+                      onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/40?text=✈️' }} 
+                    />
                   </div>
                   <div>
                     <h3 className="text-[11px] font-black uppercase text-slate-900 leading-none">{meta.fullName}</h3>
@@ -266,7 +327,6 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
             {/* BOTTOM SECTION */}
             <div className="bg-white rounded-b-[2.5rem] p-6 pt-3 border-b border-x border-slate-100 shadow-xl shadow-slate-200/40">
               
-              {/* COMPARISON BAR */}
               <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100 flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="bg-white p-2 rounded-lg shadow-sm"><TrendingDown size={14} className="text-slate-400" /></div>
@@ -276,8 +336,8 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[8px] font-black text-emerald-500 uppercase">Your Savings</p>
-                  <p className="text-xs font-black text-emerald-600">Save ₹{PLATFORM_FEE_SAVINGS}</p>
+                  <p className="text-[8px] font-black text-emerald-500 uppercase">Discount Applied</p>
+                  <p className="text-xs font-black text-emerald-600">-₹{PLATFORM_FEE_SAVINGS}</p>
                 </div>
               </div>
 
@@ -288,8 +348,8 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
                       <ShieldCheck size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase text-slate-900 leading-none">Fare Protected</p>
-                      <p className="text-[8px] text-slate-400 mt-1">Cancellation available</p>
+                      <p className="text-[10px] font-black uppercase text-slate-900 leading-none">Instant Booking</p>
+                      <p className="text-[8px] text-slate-400 mt-1">Direct via Skyscanner</p>
                     </div>
                   </div>
                   <ProgressIndicator current={f.available_seats} total={f.total_seats} low={isLow} />
@@ -297,12 +357,15 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
 
                 <div className="flex flex-col items-end shrink-0">
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">Total</span>
+                    <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">Net</span>
                     <span className="text-xs font-black text-slate-900">₹</span>
-                    <span className="text-3xl font-black text-slate-900 tracking-tighter leading-none">{f.price.toLocaleString()}</span>
+                   <span className="text-3xl font-black text-slate-900 tracking-tighter leading-none">
+  {(f.price + 200).toLocaleString()}
+</span>
+
                   </div>
                   <button className="h-8 px-4 bg-slate-900 text-white rounded-2xl flex items-center gap-2 shadow-lg shadow-slate-200 group-hover:bg-indigo-700 transition-all">
-                    <span className="text-[10px] font-black uppercase tracking-widest">Book Now</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Select</span>
                     <ChevronRight size={10} />
                   </button>
                 </div>
@@ -315,21 +378,20 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
                     <div key={i} className="bg-black rounded-full" style={{ width: `${(i % 5) + 1}px` }} />
                   ))}
                 </div>
-                <p className="text-[7px] font-black text-slate-300 uppercase tracking-[0.4em]">Secure Airline Transaction</p>
+                <p className="text-[7px] font-black text-slate-300 uppercase tracking-[0.4em]">External API Verification</p>
               </div>
             </div>
           </div>
         );
       })}
 
-      {/* MOBILE SAFE-AREA FOOTER */}
       <div className="py-10 text-center space-y-4">
         <div className="flex justify-center gap-6 opacity-30">
           <ShieldAlert size={18} />
           <Navigation size={18} />
           <ArrowRightLeft size={18} />
         </div>
-        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Powered by Real-Time Flight Radar 2026</p>
+        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">RapidAPI Data Node: {RAPID_API_HOST}</p>
       </div>
     </div>
   );
