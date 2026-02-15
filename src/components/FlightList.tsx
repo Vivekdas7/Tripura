@@ -17,7 +17,9 @@ import {
   BadgePercent,
   Star,
   ArrowRightLeft,
-  Navigation
+  Navigation,
+  Filter,
+  Flame
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -111,6 +113,7 @@ const ProgressIndicator = ({ current, total, low }: { current: number, total: nu
 export default function FlightList({ searchParams, onSelectFlight }: { searchParams: any, onSelectFlight: (f: Flight) => void }) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'direct' | 'cheapest'>('all');
 
   useEffect(() => {
     async function fetchFlights() {
@@ -132,6 +135,19 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
     fetchFlights();
   }, [searchParams.origin, searchParams.destination, searchParams.date]);
 
+  /**
+   * --- FILTERING LOGIC ---
+   */
+  const filteredFlights = useMemo(() => {
+    let result = [...flights];
+    if (activeFilter === 'direct') {
+      result = result.filter(f => f.stops === 0);
+    } else if (activeFilter === 'cheapest') {
+      result = result.sort((a, b) => a.price - b.price);
+    }
+    return result;
+  }, [flights, activeFilter]);
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-32 px-6 space-y-4">
       <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
@@ -140,13 +156,49 @@ export default function FlightList({ searchParams, onSelectFlight }: { searchPar
   );
 
   return (
-    <div className="w-full max-w-md mx-auto px-4 pb-1 space-y-8 mt-4">
+    <div className="w-full max-w-md mx-auto px-4 pb-1 space-y-6 mt-4">
       
-      {/* HEADER PROMO */}
-     
+      {/* QUICK FILTERS */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+        <button 
+          onClick={() => setActiveFilter('all')}
+          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          }`}
+        >
+          All Flights
+        </button>
+        <button 
+          onClick={() => setActiveFilter('direct')}
+          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'direct' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          }`}
+        >
+          Non-Stop
+        </button>
+        <button 
+          onClick={() => setActiveFilter('cheapest')}
+          className={`flex-none px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+            activeFilter === 'cheapest' ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-white text-slate-400 border-slate-100'
+          }`}
+        >
+          Cheapest First
+        </button>
+      </div>
+
+      {/* NO RESULTS STATE */}
+      {filteredFlights.length === 0 && !loading && (
+        <div className="bg-white rounded-[2.5rem] p-10 text-center border border-slate-100 shadow-sm">
+          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="text-slate-300" size={32} />
+          </div>
+          <h3 className="text-sm font-black text-slate-900 uppercase">No Flights Found</h3>
+          <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">We couldn't find any flights matching your filter. Try adjusting your preferences.</p>
+        </div>
+      )}
 
       {/* FLIGHT CARDS */}
-      {flights.map((f, idx) => {
+      {filteredFlights.map((f, idx) => {
         const meta = getAirlineData(f.airline);
         const isSoldOut = f.available_seats <= 0;
         const isLow = f.available_seats <= 7;
