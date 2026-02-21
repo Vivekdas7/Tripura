@@ -3,7 +3,8 @@ import {
   Ticket, Plane, Calendar, Users, CheckCircle, XCircle, MapPin, 
   IndianRupee, ArrowRight, ShieldCheck, RefreshCcw, 
   Wallet, Clock, Phone, Mail, ChevronRight, AlertCircle, 
-  Headphones, Info, ExternalLink, Zap, Hash, QrCode
+  Headphones, Info, ExternalLink, Zap, Hash, QrCode, MessageSquare,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,12 +28,14 @@ export default function MyBookings() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<BookingWithFlight[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) fetchBookings();
   }, [user]);
 
   const fetchBookings = async () => {
+    setRefreshing(true);
     try {
       const { data, error } = await supabase
         .from('bookings')
@@ -46,6 +49,7 @@ export default function MyBookings() {
       console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
+      setTimeout(() => setRefreshing(false), 1000);
     }
   };
 
@@ -67,12 +71,36 @@ export default function MyBookings() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+    <div className="min-h-screen bg-[#F8FAFC] pb-32">
+      {/* INLINE ANIMATION DEFINITION */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-custom-marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 25s linear infinite;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
+
       {/* --- PREMIUM MOBILE HEADER --- */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-2xl px-6 pt-14 pb-6 border-b border-slate-100">
+      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-2xl px-6 pt-14 pb-4 border-b border-slate-100">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">My <span className="text-indigo-600">Trips</span></h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">
+                My <span className="text-indigo-600">Trips</span>
+              </h2>
+              <button 
+                onClick={fetchBookings} 
+                className={`p-1.5 rounded-full bg-slate-50 text-slate-400 active:rotate-180 transition-transform duration-500 ${refreshing ? 'animate-spin text-indigo-600' : ''}`}
+              >
+                <RefreshCw size={16} />
+              </button>
+            </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {bookings.length} Active Manifests
@@ -84,6 +112,41 @@ export default function MyBookings() {
         </div>
       </div>
 
+      {/* --- RE-FIXED MARQUEE NOTIFICATION --- */}
+      <div className="bg-amber-50 border-b border-amber-100 py-3 overflow-hidden">
+        <div className="animate-custom-marquee gap-12 items-center">
+          <div className="flex items-center gap-12">
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight flex items-center gap-2">
+              <Clock size={14} className="animate-pulse" />
+              Payment update takes ~2 mins. Status will update to "Approved" automatically. 
+            </p>
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight flex items-center gap-2">
+              <AlertCircle size={14} />
+              Still pending? Contact WhatsApp: 9366159066 
+            </p>
+          </div>
+          {/* Duplicate for seamless loop */}
+          <div className="flex items-center gap-12">
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight flex items-center gap-2">
+              <Clock size={14} className="animate-pulse" />
+              Payment update takes ~2 mins. Status will update to "Approved" automatically. 
+            </p>
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight flex items-center gap-2">
+              <AlertCircle size={14} />
+              Still pending? Contact WhatsApp: 9366159066 
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* FLOATING REFRESH BUTTON (Mobile Friendly) */}
+      <button 
+        onClick={fetchBookings}
+        className="fixed bottom-24 right-6 z-50 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-all border-4 border-white"
+      >
+        <RefreshCw size={24} className={refreshing ? 'animate-spin' : ''} />
+      </button>
+
       <div className="px-5 mt-8 space-y-12">
         {/* --- BOARDING PASS LIST --- */}
         {bookings.length > 0 ? (
@@ -94,20 +157,24 @@ export default function MyBookings() {
                 <div className="bg-white rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
                   
                   {/* Top Header Section */}
-                  <div className={`px-6 py-4 flex justify-between items-center ${booking.status === 'confirmed' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                  <div className={`px-6 py-4 flex justify-between items-center ${
+                    booking.status.toLowerCase() === 'confirmed' || booking.status.toLowerCase() === 'approved' 
+                    ? 'bg-emerald-500' 
+                    : 'bg-amber-500'
+                  }`}>
                     <div className="flex items-center gap-3">
                       <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md">
                         <Plane size={16} className="text-white" />
                       </div>
                       <span className="text-[11px] font-black text-white uppercase tracking-widest italic">{booking.airline}</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">
+                    <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-md text-white">
                       <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      <span className="text-[9px] font-black text-white uppercase tracking-widest">{booking.status}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest">{booking.status}</span>
                     </div>
                   </div>
 
-                  {/* Main Flight Info (Departure/Arrival) */}
+                  {/* Main Flight Info */}
                   <div className="p-7">
                     <div className="flex justify-between items-start mb-8">
                       <div className="flex-1">
@@ -117,17 +184,8 @@ export default function MyBookings() {
                       </div>
 
                       <div className="flex flex-col items-center justify-center px-4 pt-2">
-                        <div className="flex items-center gap-2 opacity-20 mb-1">
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                        </div>
                         <Plane size={18} className="text-slate-300" />
-                        <div className="flex items-center gap-2 opacity-20 mt-1">
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                           <div className="w-1 h-1 rounded-full bg-slate-900" />
-                        </div>
+                        <ArrowRight size={14} className="text-slate-200 -mt-1" />
                       </div>
 
                       <div className="flex-1 text-right">
@@ -172,7 +230,7 @@ export default function MyBookings() {
                   </div>
                 </div>
 
-                {/* Perforation Aesthetic Notches */}
+                {/* Aesthetic Notches */}
                 <div className="absolute left-[-10px] bottom-[110px] w-5 h-10 bg-[#F8FAFC] rounded-r-full border border-slate-100 shadow-inner z-10" />
                 <div className="absolute right-[-10px] bottom-[110px] w-5 h-10 bg-[#F8FAFC] rounded-l-full border border-slate-100 shadow-inner z-10" />
               </div>
@@ -183,61 +241,44 @@ export default function MyBookings() {
              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200 shadow-inner">
                 <Plane size={40} />
              </div>
-             <p className="text-lg font-black text-slate-900 italic uppercase">Clear Skies</p>
-             <p className="text-xs font-bold text-slate-400 mt-2 max-w-[200px] mx-auto leading-relaxed">You don't have any upcoming trips at the moment.</p>
+             <p className="text-lg font-black text-slate-900 italic uppercase">No Trips Found</p>
+             <button onClick={fetchBookings} className="mt-4 text-xs font-black text-indigo-600 uppercase underline">Refresh List</button>
           </div>
         )}
 
         {/* --- AIRLINE POLICY SECTION --- */}
         <div className="space-y-6 pt-8">
-           <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-2">
-                 <ShieldCheck size={18} className="text-indigo-600" />
-                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Flight Policies</h3>
-              </div>
+           <div className="flex items-center gap-2 px-2">
+              <ShieldCheck size={18} className="text-indigo-600" />
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Flight Policies</h3>
            </div>
 
            <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
               <div className="p-8 space-y-8">
-                {/* Cancellation Policy */}
                 <div className="flex gap-5">
                    <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center shrink-0 text-rose-500"><XCircle size={24} /></div>
                    <div className="space-y-1">
                       <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Cancellations</p>
                       <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
-                        Cancellations must be made at least <span className="text-rose-600">4 hours prior</span> to domestic flight departure. Standard airline fees + TripFly convenience fee applies.
+                        Cancellations must be made at least <span className="text-rose-600">4 hours prior</span> to domestic flight departure.
                       </p>
                    </div>
                 </div>
 
-                {/* Refund Policy */}
                 <div className="flex gap-5">
                    <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0 text-amber-600"><RefreshCcw size={24} /></div>
                    <div className="space-y-1">
                       <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Refund Timeline</p>
                       <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
-                        Refunds are credited to the <span className="text-amber-600">original source account</span> within 72 working hours after airline processing. No wallet conversions.
-                      </p>
-                   </div>
-                </div>
-
-                {/* No Show Policy */}
-                <div className="flex gap-5">
-                   <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center shrink-0 text-white"><Clock size={24} /></div>
-                   <div className="space-y-1">
-                      <p className="text-xs font-black text-slate-900 uppercase tracking-tight">No-Show Terms</p>
-                      <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
-                        Failure to check-in or board results in 100% forfeiture of the ticket fare. Only statutory taxes may be refundable.
+                        Refunds processed to <span className="text-amber-600">original source account</span> within 72 working hours.
                       </p>
                    </div>
                 </div>
               </div>
               
-              <div className="bg-slate-50 px-8 py-5 border-t border-slate-100">
-                <div className="flex items-center gap-3">
-                   <AlertCircle size={14} className="text-indigo-600" />
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.1em]">Subject to Airline Specific Conditions</p>
-                </div>
+              <div className="bg-slate-50 px-8 py-5 border-t border-slate-100 flex items-center gap-3">
+                 <AlertCircle size={14} className="text-indigo-600" />
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.1em]">Subject to Airline Conditions</p>
               </div>
            </div>
         </div>
