@@ -5,8 +5,8 @@ import { supabase } from '../lib/supabase';
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  // Updated: signUp now accepts an optional referralCode
-  signUp: (email: string, password: string, referralCode?: string | null) => Promise<{ error: any }>;
+  // Updated: Added phone parameter
+  signUp: (email: string, password: string, referralCode?: string | null, phone?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 };
@@ -18,7 +18,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial session check
     const initializeAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -27,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth();
 
-    // Listen for auth changes (Login, Logout, Signup)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -36,16 +34,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 1. UPDATED SIGNUP: Stores the referral code in User Metadata
-  const signUp = async (email: string, password: string, referralCode?: string | null) => {
+  // UPDATED SIGNUP: Now handles email, password, referralCode, and Phone
+  const signUp = async (email: string, password: string, referralCode?: string | null, phone?: string) => {
     const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
-        // This 'data' object is stored in auth.users.raw_user_meta_data
         data: {
           referred_by: referralCode || null,
-          full_name: email.split('@')[0], // Optional: sets a default name
+          phone_number: phone || null, // Stores phone in auth.users.raw_user_meta_data
+          full_name: email.split('@')[0],
         }
       }
     });
