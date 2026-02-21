@@ -220,22 +220,52 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
           </div>
 
           <div className="space-y-3">
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Select Payment App</p>
-             {['PhonePe', 'Google Pay', 'Paytm'].map((app) => (
-               <button key={app} onClick={openPaymentApp} className="w-full bg-white border-2 border-slate-100 p-5 rounded-3xl flex items-center justify-between hover:border-indigo-600 transition-all group active:scale-95">
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center">
-                       {app === 'PhonePe' ? <Smartphone className="text-purple-600" /> : app === 'Google Pay' ? <Globe className="text-blue-600" /> : <Wallet className="text-sky-600" />}
-                    </div>
-                    <div className="text-left">
-                       <p className="font-black text-slate-900">{app}</p>
-                       <p className="text-[10px] text-slate-400 font-bold uppercase">Instant Confirmation</p>
-                    </div>
-                 </div>
-                 <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600" />
-               </button>
-             ))}
-          </div>
+  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Select Payment App</p>
+  {[
+    { 
+      name: 'PhonePe', 
+      logo: 'https://imgs.search.brave.com/oFcAskGSLx-cRhKZMZVmQsTe6UV_M9Iruwi3MleRLk4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuc2Vla2xvZ28u/Y29tL2xvZ28tcG5n/LzUwLzEvcGhvbmVw/ZS1sb2dvLXBuZ19z/ZWVrbG9nby01MDcy/MDIucG5n', 
+      bgColor: 'bg-purple-50' 
+    },
+    { 
+      name: 'Google Pay', 
+      logo: 'https://imgs.search.brave.com/dtyv-i7jsNFdLwj61dbPU6Vd0nkqs2VjlIyy8ePTurY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/aWNvbnM4LmNvbS9l/eHRlcm5hbC10YWwt/cmV2aXZvLWNvbG9y/LXRhbC1yZXZpdm8v/MTIwMC9leHRlcm5h/bC1nb29nbGUtcGF5/LWlzLXRoZS1mYXN0/LXNpbXBsZS13YXkt/dG8tcGF5LW9ubGlu/ZS1pbi1zdG9yZXMt/YW5kLW1vcmUtbG9n/by1jb2xvci10YWwt/cmV2aXZvLmpwZw', // High-res GPay icon
+      bgColor: 'bg-blue-50' 
+    },
+    { 
+      name: 'Paytm', 
+      logo: 'https://imgs.search.brave.com/NzhXyhAb09q4Z8NI6NBxQwMsrhj85zXXNmqi0Yau33Y/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zcGxh/c2hmcmFncmFuY2Uu/aW4vd3AtY29udGVu/dC91cGxvYWRzLzIw/MTgvMTIvUGF5dG0t/TG9nby1kZXNpZ24t/UG5nLVZlY3RvcnMu/anBn', 
+      bgColor: 'bg-sky-50' 
+    }
+  ].map((app) => (
+    <button 
+      key={app.name} 
+      onClick={openPaymentApp} 
+      className="w-full bg-white border-2 border-slate-100 p-5 rounded-3xl flex items-center justify-between hover:border-indigo-600 transition-all group active:scale-95 shadow-sm hover:shadow-md"
+    >
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 ${app.bgColor} rounded-2xl flex items-center justify-center p-2.5 transition-transform group-hover:scale-110`}>
+          <img 
+            src={app.logo} 
+            alt={app.name} 
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              // Fallback to a placeholder if the external link fails
+              (e.target as HTMLImageElement).src = 'https://img.icons8.com/color/48/bank-cards.png';
+            }}
+          />
+        </div>
+        <div className="text-left">
+          <p className="font-black text-slate-900">{app.name}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Instant Redirection</p>
+        </div>
+      </div>
+      <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+        <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600" />
+      </div>
+    </button>
+  ))}
+</div>
 
           <div className="bg-slate-900 rounded-[3rem] p-8 text-center text-white">
              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6">Or Scan QR Code</p>
