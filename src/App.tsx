@@ -200,7 +200,6 @@ const BottomNav = () => {
 
 // --- ADDITIONAL UI: LOYALTY COMPONENT ---
 
-
 // --- IMPROVED SUCCESS POPUP ---
 const SuccessPopup = ({ details, onClose }: { details: any, onClose: () => void }) => (
   <div className="fixed inset-0 z-[1500] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-2xl">
@@ -295,6 +294,10 @@ _Inquiry via TripuraFly Verified App_`;
       </div>
     </div>
   );
+
+  function handleCloseProfilePopup() {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <Router>
@@ -937,3 +940,12 @@ _Inquiry via TripuraFly Verified App_`;
 }
 
 export default App;
+
+function setBookingPackage(arg0: null) {
+  throw new Error('Function not implemented.');
+}
+
+
+function setShowProfilePopup(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
