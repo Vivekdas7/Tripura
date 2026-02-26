@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn, Loader2, ExternalLink } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,27 +10,43 @@ export default function AuthForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, signInWithGoogle } = useAuth(); // Ensure signInWithGoogle is pulled from context
-  const navigate = useNavigate();
+  const [isWebView, setIsWebView] = useState(false);
   
+  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
+  // Detect if user is in an embedded WebView (which Google blocks)
+  useEffect(() => {
+    const ua = window.navigator.userAgent;
+    const isMobileWebView = /viber|fbav|instagram|fban|line|wv/i.test(ua);
+    setIsWebView(isMobileWebView);
+  }, []);
+
   const handleGoogleSignIn = async () => {
+    if (isWebView) {
+      setError("Google Login is blocked in WebViews. Please open this site in Chrome or Safari.");
+      return;
+    }
+    
     setError('');
+    setLoading(true);
     const { error } = await signInWithGoogle();
-    if (error) setError(error.message);
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+    // Note: If successful, the page will redirect away to Google
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-
     setError('');
     setLoading(true);
 
     try {
-      // Logic for Email/Password
       const { error: authError } = isLogin
         ? await signIn(email.trim(), password)
         : await signUp(email.trim(), password, referralCode);
@@ -44,9 +60,7 @@ export default function AuthForm() {
         navigate('/'); 
       }
     } catch (err: any) {
-      // CATCHING "FAILED TO FETCH" ON MOBILE
-      console.error("Auth Error:", err);
-      setError("Network error. Please check your internet or VPN settings.");
+      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -55,7 +69,7 @@ export default function AuthForm() {
   return (
     <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30 overflow-x-hidden">
       
-      {/* DESKTOP PANEL */}
+      {/* DESKTOP PANEL (Hidden on Mobile) */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
@@ -66,12 +80,8 @@ export default function AuthForm() {
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
         </div>
         <div className="relative z-10 space-y-6">
-          <div className="flex items-center gap-4">
-             <div className="h-1 w-12 bg-[#FF5722] rounded-full" />
-             <span className="text-[#FF5722] font-black tracking-[0.4em] text-xs uppercase">Premium Travel</span>
-          </div>
-          <h2 className="text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">
-            Fly <br /> <span className="text-[#FF5722]">Smarter.</span>
+          <h2 className="text-6xl font-black text-white uppercase italic tracking-tighter">
+            Fly <span className="text-[#FF5722]">Smarter.</span>
           </h2>
         </div>
       </div>
@@ -85,19 +95,27 @@ export default function AuthForm() {
         <div className="flex-1 flex flex-col justify-center items-center px-8 pb-12">
           <div className="w-full max-w-sm">
             <header className="mb-8 text-center lg:text-left">
-              <h1 className="text-4xl lg:text-[42px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-3 italic">
+              <h1 className="text-4xl lg:text-[42px] font-black text-slate-900 uppercase mb-3 italic">
                 {isLogin ? 'Sign In' : 'Join Us'}
               </h1>
-              <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.25em]">
-                {isLogin ? 'Access your premium dashboard' : 'Unlock exclusive travel benefits'}
-              </p>
             </header>
 
-            {/* GOOGLE SIGN IN BUTTON */}
+            {/* WEBVIEW WARNING */}
+            {isWebView && (
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                <ExternalLink className="text-amber-600 shrink-0" size={18} />
+                <p className="text-[10px] font-bold text-amber-800 uppercase leading-relaxed">
+                  You are using an internal browser. For Google Login, please tap the three dots (⋮) and select "Open in Browser".
+                </p>
+              </div>
+            )}
+
+            {/* GOOGLE SIGN IN */}
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              className="w-full mb-4 bg-white border border-slate-200 py-4 rounded-[1.2rem] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm"
+              disabled={loading}
+              className="w-full mb-4 bg-white border border-slate-200 py-4 rounded-[1.2rem] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
               <span className="text-[11px] font-black uppercase tracking-widest text-slate-700">Continue with Google</span>
@@ -105,7 +123,7 @@ export default function AuthForm() {
 
             <div className="relative my-8 flex items-center">
               <div className="flex-grow border-t border-slate-200"></div>
-              <span className="px-4 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">OR</span>
+              <span className="px-4 text-[9px] font-black text-slate-300 uppercase">OR</span>
               <div className="flex-grow border-t border-slate-200"></div>
             </div>
 
@@ -114,7 +132,7 @@ export default function AuthForm() {
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                   className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-tight">{error}</p>
+                  <p className="text-[10px] font-black text-red-600 uppercase leading-tight">{error}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -124,11 +142,10 @@ export default function AuthForm() {
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722]" size={18} />
                 <input
                   type="email"
-                  inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="EMAIL ADDRESS"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] outline-none font-black text-[11px] tracking-widest"
                   required
                 />
               </div>
@@ -140,7 +157,7 @@ export default function AuthForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="PASSWORD"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] outline-none font-black text-[11px] tracking-widest"
                   required
                 />
               </div>
@@ -148,7 +165,7 @@ export default function AuthForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl disabled:bg-slate-400 flex items-center justify-center gap-3"
+                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 shadow-xl disabled:bg-slate-400 flex items-center justify-center gap-3"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>{isLogin ? 'Authorize' : 'Initialize'}</span>}
               </button>
@@ -156,9 +173,6 @@ export default function AuthForm() {
 
             <div className="mt-8 text-center">
               <button type="button" onClick={() => {setIsLogin(!isLogin); setError('');}} className="group flex flex-col items-center gap-2 mx-auto">
-                <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">
-                  {isLogin ? "Don't have an account?" : "Already a member?"}
-                </span>
                 <span className="text-[#FF5722] text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
                   {isLogin ? <><UserPlus size={14} /> Create Account</> : <><LogIn size={14} /> Log In Now</>}
                 </span>
