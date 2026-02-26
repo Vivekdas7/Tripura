@@ -43,7 +43,7 @@ export default function MyProfile() {
   const [saving, setSaving] = useState(false);
   
   // PRIVILEGE CHECK
-  const isAdmin = user?.email === 'dasvivek398@gmail.com';
+  const isAdmin = user?.email === 'vgdjfijj@gmail.com';
 
   const [stats, setStats] = useState<ProfileStats>({ 
     totalBookings: 0, totalSpent: 0, tier: 'Explorer', nextTierProgress: 0 
