@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -10,24 +10,46 @@ export default function AuthForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
-  // Clear errors when switching modes
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
+  const handleGoogleSignIn = async () => {
     setError('');
+    setLoading(true);
+    
+    // Detection for Webview
+    const isWebview = /W_V_W|WebView|Version\/[\d\.]+/i.test(navigator.userAgent);
+    
+    if (isWebview) {
+      // If we are in a webview, alert the user or try to force external browser
+      // Note: In a standard Play Store web app, you might need to 
+      // handle the link opening via your native bridge (Java/Kotlin)
+      console.warn("WebView detected. Google may block this request.");
+    }
+
+    try {
+      const { error } = await signInWithGoogle();
+      if (error) {
+        if (error.message.includes('disallowed_useragent')) {
+          setError("Google login is blocked inside this app. Please open in Chrome/Safari.");
+        } else {
+          setError(error.message);
+        }
+      }
+    } catch (err: any) {
+      setError("Please use your native mobile browser for Google Sign-In.");
+    } finally {
+      // Don't set loading false immediately for Google as it redirects
+      setTimeout(() => setLoading(false), 2000);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // 1. Prevent all default mobile browser behaviors
     e.preventDefault();
-    e.stopPropagation(); 
-    
-    if (loading) return; // Prevent double-tap submissions on mobile
+    if (loading) return;
 
     setError('');
     setLoading(true);
@@ -38,24 +60,16 @@ export default function AuthForm() {
         : await signUp(email.trim(), password, referralCode);
 
       if (authError) {
-        // Handle specific mobile timeout/network errors
-        setError(authError.message || "Connection failed. Please try again.");
-        setLoading(false);
+        setError(authError.message);
+      } else if (!isLogin) {
+        setError('Verification email sent! Please check your inbox.');
+        setIsLogin(true);
       } else {
-        if (!isLogin) {
-          setError('Account created! Please sign in.');
-          setIsLogin(true);
-          setLoading(false);
-        } else {
-          // 2. Small delay ensures mobile keyboard closes before navigation
-          // This prevents the "crash" feel on iOS/Android
-          setTimeout(() => {
-            navigate('/');
-          }, 100);
-        }
+        navigate('/'); 
       }
     } catch (err: any) {
-      setError("An unexpected error occurred. Please check your internet.");
+      setError("Network error. Please check your internet connection.");
+    } finally {
       setLoading(false);
     }
   };
@@ -63,17 +77,16 @@ export default function AuthForm() {
   return (
     <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30 overflow-x-hidden">
       
-      {/* --- DESKTOP VISUAL PANEL --- */}
+      {/* DESKTOP PANEL - Hidden on Mobile */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.pexels.com/photos/2088210/pexels-photo-2088210.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
             className="w-full h-full object-cover opacity-60 scale-110 animate-subtle-zoom"
-            alt="Tripura Skyline"
+            alt="Skyline"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
         </div>
-        
         <div className="relative z-10 space-y-6">
           <div className="flex items-center gap-4">
              <div className="h-1 w-12 bg-[#FF5722] rounded-full" />
@@ -85,21 +98,15 @@ export default function AuthForm() {
         </div>
       </div>
 
-      {/* --- MAIN FORM AREA --- */}
+      {/* MAIN FORM AREA */}
       <div className="flex-1 flex flex-col bg-[#F8FAFC] overflow-y-auto">
-        
-        <div className="pt-12 pb-6 px-8 flex justify-center lg:justify-start">
-          <img 
-            src="/assets/logo1.png" 
-            className="h-14 w-auto object-contain" 
-            alt="TripuraFly" 
-          />
+        <div className="pt-10 pb-4 px-8 flex justify-center lg:justify-start">
+          <img src="/assets/logo1.png" className="h-12 w-auto object-contain" alt="TripuraFly" />
         </div>
 
         <div className="flex-1 flex flex-col justify-center items-center px-8 pb-12">
           <div className="w-full max-w-sm">
-            
-            <header className="mb-10 text-center lg:text-left">
+            <header className="mb-8 text-center lg:text-left">
               <h1 className="text-4xl lg:text-[42px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-3 italic">
                 {isLogin ? 'Sign In' : 'Join Us'}
               </h1>
@@ -108,42 +115,60 @@ export default function AuthForm() {
               </p>
             </header>
 
+            <button
+              onClick={handleGoogleSignIn}
+              type="button"
+              disabled={loading}
+              className="w-full mb-4 bg-white border border-slate-200 py-4 rounded-[1.2rem] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50"
+            >
+              {loading ? (
+                 <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+              ) : (
+                <>
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-700">Continue with Google</span>
+                </>
+              )}
+            </button>
+
+            <div className="relative my-8 flex items-center">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="px-4 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">OR</span>
+              <div className="flex-grow border-t border-slate-200"></div>
+            </div>
+
             <AnimatePresence mode="wait">
               {error && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3"
-                >
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                  className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-tight">{error}</p>
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-tight leading-relaxed">{error}</p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722]" size={18} />
                 <input
                   type="email"
-                  inputMode="email" // Better mobile keyboard
+                  inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="EMAIL ADDRESS"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-200"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800"
                   required
                 />
               </div>
 
               <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722]" size={18} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="PASSWORD"
-                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:ring-[6px] focus:ring-[#FF5722]/5 focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800 placeholder:text-slate-200"
+                  className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-[1.5rem] focus:border-[#FF5722] transition-all outline-none font-black text-[11px] tracking-widest text-slate-800"
                   required
                 />
               </div>
@@ -151,25 +176,14 @@ export default function AuthForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl shadow-slate-200 disabled:bg-slate-400 flex items-center justify-center gap-3 mt-4"
+                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl disabled:bg-slate-400 flex items-center justify-center gap-3"
               >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <span>{isLogin ? 'Authorize' : 'Initialize'}</span>
-                    <ArrowRight size={18} className="text-[#FF5722]" />
-                  </>
-                )}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>{isLogin ? 'Authorize' : 'Initialize'}</span>}
               </button>
             </form>
 
             <div className="mt-8 text-center">
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="group flex flex-col items-center gap-2 mx-auto"
-              >
+              <button type="button" onClick={() => {setIsLogin(!isLogin); setError('');}} className="group flex flex-col items-center gap-2 mx-auto">
                 <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">
                   {isLogin ? "Don't have an account?" : "Already a member?"}
                 </span>
@@ -178,29 +192,9 @@ export default function AuthForm() {
                 </span>
               </button>
             </div>
-
-            <footer className="mt-16 flex flex-col items-center gap-4 opacity-30 grayscale">
-               <div className="flex items-center gap-2">
-                 <ShieldCheck size={14} />
-                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">256-Bit SSL Secured</span>
-               </div>
-               <p className="text-[8px] font-bold uppercase tracking-widest">© 2026 TripuraFly Global</p>
-            </footer>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes subtle-zoom {
-          from { transform: scale(1); }
-          to { transform: scale(1.1); }
-        }
-        .animate-subtle-zoom {
-          animation: subtle-zoom 20s infinite alternate ease-in-out;
-        }
-        .flex-1::-webkit-scrollbar { display: none; }
-        .flex-1 { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 }

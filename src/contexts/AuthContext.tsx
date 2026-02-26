@@ -8,7 +8,7 @@ type AuthContextType = {
   loading: boolean;
   signUp: (email: string, password: string, referralCode?: string | null) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>; // Added
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 };
 
@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+
     const initializeAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
@@ -34,29 +35,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) setLoading(false);
       }
     };
+
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       if (mounted) {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        // Important for mobile: loading false once we have a session or null
         setLoading(false);
       }
     });
-    return () => { mounted = false; subscription.unsubscribe(); };
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, referralCode?: string | null) => {
     const cleanEmail = email.trim();
-    const { data, error } = await supabase.auth.signUp({ 
+    return await supabase.auth.signUp({ 
       email: cleanEmail, 
       password,
       options: {
         data: { referred_by: referralCode || null, full_name: cleanEmail.split('@')[0] },
-        emailRedirectTo: window.location.origin, 
+        emailRedirectTo: 'https://tripurago.vercel.app', 
       }
     });
-    return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -65,23 +71,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  // Google Sign In Logic
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    return await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // Essential for mobile: redirects the whole page instead of a popup
-        redirectTo: window.location.origin, 
-        queryParams: { access_type: 'offline', prompt: 'select_account' }
+        // Change window.location.origin to your fixed domain for consistency in WebViews
+        redirectTo: 'https://tripurago.vercel.app', 
+        queryParams: { 
+          access_type: 'offline', 
+          prompt: 'select_account' 
+        }
       },
     });
-    return { error };
   };
 
   const signOut = async () => {
     setLoading(true);
     await supabase.auth.signOut();
-    setUser(null); setSession(null);
+    setUser(null);
+    setSession(null);
     setLoading(false);
   };
 
