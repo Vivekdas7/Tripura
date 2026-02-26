@@ -7,10 +7,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Crucial for mobile: ensures the session is saved to localStorage correctly
+    persistSession: true, 
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // Using a specific key prevents collisions with other apps on the same domain
+    storageKey: 'tripurafly-auth-token', 
+  },
+  global: {
+    headers: { 'x-application-name': 'tripurafly' },
+  },
+});
+
+// --- Types ---
 
 export type Flight = {
-  [x: string]: any;
   id: string;
   flight_number: string;
   airline: string;
@@ -22,6 +35,7 @@ export type Flight = {
   available_seats: number;
   total_seats: number;
   aircraft_type: string;
+  [x: string]: any; 
 };
 
 export type Booking = {
@@ -37,7 +51,6 @@ export type Booking = {
 };
 
 export type Passenger = {
-  date_of_birth: string | number | readonly string[] | undefined;
   id?: string;
   booking_id?: string;
   first_name: string;
@@ -45,4 +58,5 @@ export type Passenger = {
   email: string;
   phone?: string;
   passport_number?: string;
+  date_of_birth: string | number | readonly string[] | undefined;
 };
