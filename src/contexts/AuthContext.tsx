@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 type AuthContextType = {
   user: User | null;
+  session: Session | null; // Added session for better mobile tracking
   loading: boolean;
-  // Updated: signUp now accepts an optional referralCode
   signUp: (email: string, password: string, referralCode?: string | null) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -15,55 +15,96 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial session check
+    let mounted = true;
+
     const initializeAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
 
     initializeAuth();
 
-    // Listen for auth changes (Login, Logout, Signup)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (mounted) {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // 1. UPDATED SIGNUP: Stores the referral code in User Metadata
   const signUp = async (email: string, password: string, referralCode?: string | null) => {
+    // Mobile fix: Trim email to remove accidental trailing spaces from auto-complete
+    const cleanEmail = email.trim();
     const { data, error } = await supabase.auth.signUp({ 
-      email, 
+      email: cleanEmail, 
       password,
       options: {
-        // This 'data' object is stored in auth.users.raw_user_meta_data
         data: {
           referred_by: referralCode || null,
-          full_name: email.split('@')[0], // Optional: sets a default name
-        }
+          full_name: cleanEmail.split('@')[0],
+        },
+        // Mobile browsers handle email confirms better with a site URL
+        emailRedirectTo: window.location.origin, 
       }
     });
     return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const cleanEmail = email.trim();
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+      email: cleanEmail, 
+      password 
+    });
+    
+    // Explicitly set user for mobile if listener is slow
+    if (data?.user) {
+      setUser(data.user);
+      setSession(data.session);
+    }
+    
     return { error };
   };
 
   const signOut = async () => {
+    setLoading(true);
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+      {/* On mobile, we show a blank screen or spinner while loading 
+        to prevent the AuthForm from flashing/crashing during init.
+      */}
+      {!loading ? children : (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+           <div className="w-8 h-8 border-4 border-[#FF5722] border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }

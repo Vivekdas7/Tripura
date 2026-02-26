@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,28 +16,52 @@ export default function AuthForm() {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
+  // Clear errors when switching modes
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setError('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
+    // 1. Prevent all default mobile browser behaviors
     e.preventDefault();
+    e.stopPropagation(); 
+    
+    if (loading) return; // Prevent double-tap submissions on mobile
+
     setError('');
     setLoading(true);
 
-    const { error } = isLogin
-      ? await signIn(email, password)
-      : await signUp(email, password, referralCode);
+    try {
+      const { error: authError } = isLogin
+        ? await signIn(email.trim(), password)
+        : await signUp(email.trim(), password, referralCode);
 
-    if (error) {
-      setError(error.message);
-    } else if (!isLogin) {
-      setError('Account created! Please sign in.');
-      setIsLogin(true);
-    } else {
-      navigate('/'); 
+      if (authError) {
+        // Handle specific mobile timeout/network errors
+        setError(authError.message || "Connection failed. Please try again.");
+        setLoading(false);
+      } else {
+        if (!isLogin) {
+          setError('Account created! Please sign in.');
+          setIsLogin(true);
+          setLoading(false);
+        } else {
+          // 2. Small delay ensures mobile keyboard closes before navigation
+          // This prevents the "crash" feel on iOS/Android
+          setTimeout(() => {
+            navigate('/');
+          }, 100);
+        }
+      }
+    } catch (err: any) {
+      setError("An unexpected error occurred. Please check your internet.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30">
+    <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30 overflow-x-hidden">
       
       {/* --- DESKTOP VISUAL PANEL --- */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
@@ -64,11 +88,10 @@ export default function AuthForm() {
       {/* --- MAIN FORM AREA --- */}
       <div className="flex-1 flex flex-col bg-[#F8FAFC] overflow-y-auto">
         
-        {/* Mobile Header / Logo Area */}
         <div className="pt-12 pb-6 px-8 flex justify-center lg:justify-start">
           <img 
             src="/assets/logo1.png" 
-            className="h-16 w-auto object-contain drop-shadow-sm" 
+            className="h-14 w-auto object-contain" 
             alt="TripuraFly" 
           />
         </div>
@@ -85,16 +108,15 @@ export default function AuthForm() {
               </p>
             </header>
 
-            {/* Error Message with AnimatePresence */}
             <AnimatePresence mode="wait">
               {error && (
                 <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
                   className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3"
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                   <p className="text-[10px] font-black text-red-600 uppercase tracking-tight">{error}</p>
                 </motion.div>
               )}
@@ -105,6 +127,7 @@ export default function AuthForm() {
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF5722] transition-colors" size={18} />
                 <input
                   type="email"
+                  inputMode="email" // Better mobile keyboard
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="EMAIL ADDRESS"
@@ -128,10 +151,10 @@ export default function AuthForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl shadow-slate-200 disabled:bg-slate-300 flex items-center justify-center gap-3 mt-4"
+                className="w-full bg-slate-900 text-white py-6 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.4em] active:scale-95 transition-all shadow-xl shadow-slate-200 disabled:bg-slate-400 flex items-center justify-center gap-3 mt-4"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
                     <span>{isLogin ? 'Authorize' : 'Initialize'}</span>
@@ -143,13 +166,14 @@ export default function AuthForm() {
 
             <div className="mt-8 text-center">
               <button
-                onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                type="button"
+                onClick={toggleMode}
                 className="group flex flex-col items-center gap-2 mx-auto"
               >
                 <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">
                   {isLogin ? "Don't have an account?" : "Already a member?"}
                 </span>
-                <span className="text-[#FF5722] text-[11px] font-black uppercase tracking-widest flex items-center gap-2 group-active:scale-90 transition-transform">
+                <span className="text-[#FF5722] text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
                   {isLogin ? <><UserPlus size={14} /> Create Account</> : <><LogIn size={14} /> Log In Now</>}
                 </span>
               </button>
@@ -174,16 +198,9 @@ export default function AuthForm() {
         .animate-subtle-zoom {
           animation: subtle-zoom 20s infinite alternate ease-in-out;
         }
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .flex-1::-webkit-scrollbar {
-          display: none;
-        }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .flex-1 {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
+        .flex-1::-webkit-scrollbar { display: none; }
+        .flex-1 { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
-} 
+}
