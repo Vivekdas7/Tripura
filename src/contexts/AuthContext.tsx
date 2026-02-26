@@ -9,6 +9,7 @@ type AuthContextType = {
   signUp: (email: string, password: string, referralCode?: string | null) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
+  signInAnonymously: () => Promise<{ error: any }>; // Added for Guest Access
   signOut: () => Promise<void>;
 };
 
@@ -42,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (mounted) {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        // Important for mobile: loading false once we have a session or null
         setLoading(false);
       }
     });
@@ -71,11 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  // --- NEW GUEST ACCESS METHOD ---
+  const signInAnonymously = async () => {
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (data?.user) {
+      setUser(data.user);
+      setSession(data.session);
+    }
+    return { error };
+  };
+
   const signInWithGoogle = async () => {
     return await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // Change window.location.origin to your fixed domain for consistency in WebViews
         redirectTo: 'https://tripurago.vercel.app', 
         queryParams: { 
           access_type: 'offline', 
@@ -94,7 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      signUp, 
+      signIn, 
+      signInWithGoogle, 
+      signInAnonymously, // Exposed to the app
+      signOut 
+    }}>
       {!loading ? children : (
         <div className="min-h-screen bg-white flex items-center justify-center">
            <div className="w-8 h-8 border-4 border-[#FF5722] border-t-transparent rounded-full animate-spin" />

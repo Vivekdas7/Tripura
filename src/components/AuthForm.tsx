@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn, Loader2 } from 'lucide-react';
+import { Mail, Lock, UserPlus, LogIn, Loader2, UserCircle } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,47 +10,17 @@ export default function AuthForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  
+  // Destructure signInAnonymously if you added it to your AuthContext
+  const { signIn, signUp, signInAnonymously } = useAuth(); 
   const navigate = useNavigate();
   
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
-  const handleGoogleSignIn = async () => {
-    setError('');
-    setLoading(true);
-    
-    // Detection for Webview
-    const isWebview = /W_V_W|WebView|Version\/[\d\.]+/i.test(navigator.userAgent);
-    
-    if (isWebview) {
-      // If we are in a webview, alert the user or try to force external browser
-      // Note: In a standard Play Store web app, you might need to 
-      // handle the link opening via your native bridge (Java/Kotlin)
-      console.warn("WebView detected. Google may block this request.");
-    }
-
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        if (error.message.includes('disallowed_useragent')) {
-          setError("Google login is blocked inside this app. Please open in Chrome/Safari.");
-        } else {
-          setError(error.message);
-        }
-      }
-    } catch (err: any) {
-      setError("Please use your native mobile browser for Google Sign-In.");
-    } finally {
-      // Don't set loading false immediately for Google as it redirects
-      setTimeout(() => setLoading(false), 2000);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-
     setError('');
     setLoading(true);
 
@@ -68,7 +38,26 @@ export default function AuthForm() {
         navigate('/'); 
       }
     } catch (err: any) {
-      setError("Network error. Please check your internet connection.");
+      setError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Real Anonymous Sign-In Logic
+  const handleGuestEntry = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // If your AuthContext doesn't have this yet, you can use:
+      // await supabase.auth.signInAnonymously()
+      const { error: guestError } = await signInAnonymously();
+      
+      if (guestError) throw guestError;
+      
+      navigate('/'); 
+    } catch (err: any) {
+      setError("Guest access failed. Please try email login.");
     } finally {
       setLoading(false);
     }
@@ -77,12 +66,12 @@ export default function AuthForm() {
   return (
     <div className="min-h-[100dvh] w-full bg-white flex flex-col lg:flex-row font-sans selection:bg-[#FF5722]/30 overflow-x-hidden">
       
-      {/* DESKTOP PANEL - Hidden on Mobile */}
+      {/* DESKTOP PANEL */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-black items-end p-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.pexels.com/photos/2088210/pexels-photo-2088210.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-            className="w-full h-full object-cover opacity-60 scale-110 animate-subtle-zoom"
+            className="w-full h-full object-cover opacity-60 scale-110"
             alt="Skyline"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
@@ -116,24 +105,22 @@ export default function AuthForm() {
             </header>
 
             <button
-              onClick={handleGoogleSignIn}
+              onClick={handleGuestEntry}
               type="button"
               disabled={loading}
-              className="w-full mb-4 bg-white border border-slate-200 py-4 rounded-[1.2rem] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50"
+              className="w-full mb-4 bg-white border border-slate-200 py-4 rounded-[1.2rem] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm hover:border-[#FF5722]/50 group disabled:opacity-50"
             >
-              {loading ? (
-                 <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-              ) : (
+              {loading ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" /> : (
                 <>
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-700">Continue with Google</span>
+                  <UserCircle className="w-5 h-5 text-slate-400 group-hover:text-[#FF5722] transition-colors" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-700">Explore as Guest</span>
                 </>
               )}
             </button>
 
             <div className="relative my-8 flex items-center">
               <div className="flex-grow border-t border-slate-200"></div>
-              <span className="px-4 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">OR</span>
+              <span className="px-4 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">OR AUTHENTICATE</span>
               <div className="flex-grow border-t border-slate-200"></div>
             </div>
 

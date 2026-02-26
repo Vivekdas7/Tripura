@@ -883,6 +883,7 @@ _Inquiry via TripuraFly Verified App_`;
           
           <Route path="/bookings" element={!user ? <AuthForm /> : <main className="container mx-auto px-4 py-12"><MyBookings /></main>} />
           <Route path="/privacy" element={<Privacy />} />
+          
           <Route path="/game" element={<TripuraQuest/>} />
           <Route path="/cab-booking" element={<CabBooking/>} />
           <Route path="/support" element={<SupportPage/>} />
