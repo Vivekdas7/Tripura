@@ -176,9 +176,9 @@ export default function MyProfile() {
               {/* Decorative Background Element */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full blur-3xl opacity-50" />
               
-              <div className="w-20 h-20 bg-slate-900 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-slate-200">
-                <Sparkles className="text-[#FF5722] w-10 h-10 animate-pulse" />
-              </div>
+              <div className="pt-6 pb-2 px-8 flex justify-center lg:justify-start">
+          <img src="/assets/logo1.png" className="h-50 w-auto object-contain" alt="TripuraFly" />
+        </div>
 
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none mb-4">
                 Unlock Your <br /><span className="text-[#FF5722]">Identity</span>

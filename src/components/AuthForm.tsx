@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, UserPlus, LogIn, Loader2, UserCircle } from 'lucide-react';
+import { Mail, Lock, UserPlus, LogIn, Loader2, UserCircle, WifiOff, AlertTriangle } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,7 +11,6 @@ export default function AuthForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Destructure signInAnonymously if you added it to your AuthContext
   const { signIn, signUp, signInAnonymously } = useAuth(); 
   const navigate = useNavigate();
   
@@ -38,26 +37,22 @@ export default function AuthForm() {
         navigate('/'); 
       }
     } catch (err: any) {
-      setError("Network error. Please check your connection.");
+      // Specifically highlighting the ISP issue in the error state
+      setError("Network Block Detected. If using JIO, please switch to WiFi or another SIM.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Real Anonymous Sign-In Logic
   const handleGuestEntry = async () => {
     setLoading(true);
     setError('');
     try {
-      // If your AuthContext doesn't have this yet, you can use:
-      // await supabase.auth.signInAnonymously()
       const { error: guestError } = await signInAnonymously();
-      
       if (guestError) throw guestError;
-      
       navigate('/'); 
     } catch (err: any) {
-      setError("Guest access failed. Please try email login.");
+      setError("Guest access blocked by ISP. Please try WiFi.");
     } finally {
       setLoading(false);
     }
@@ -89,13 +84,29 @@ export default function AuthForm() {
 
       {/* MAIN FORM AREA */}
       <div className="flex-1 flex flex-col bg-[#F8FAFC] overflow-y-auto">
-        <div className="pt-10 pb-4 px-8 flex justify-center lg:justify-start">
-          <img src="/assets/logo1.png" className="h-12 w-auto object-contain" alt="TripuraFly" />
+        
+        {/* JIO ISP WARNING BANNER - Highlighted Note */}
+        <div className="w-full bg-amber-50 border-b border-amber-100 px-6 py-3 flex items-center gap-3">
+          <div className="shrink-0 w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm">
+            <WifiOff size={16} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] font-black text-amber-800 uppercase tracking-tight leading-tight">
+              Network Alert: JIO ISP Restriction
+            </p>
+            <p className="text-[9px] font-bold text-amber-600 uppercase tracking-tighter">
+              Please switch to WiFi or another SIM card for Login/Guest access.
+            </p>
+          </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center items-center px-8 pb-12">
+        <div className="pt-6 pb-2 px-8 flex justify-center lg:justify-start">
+          <img src="/assets/logo1.png" className="h-16 w-auto object-contain" alt="TripuraFly" />
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center items-center px-8 pb-10">
           <div className="w-full max-w-sm">
-            <header className="mb-8 text-center lg:text-left">
+            <header className="mb-6 text-center lg:text-left">
               <h1 className="text-4xl lg:text-[42px] font-black text-slate-900 leading-none tracking-tighter uppercase mb-3 italic">
                 {isLogin ? 'Sign In' : 'Join Us'}
               </h1>
@@ -118,7 +129,7 @@ export default function AuthForm() {
               )}
             </button>
 
-            <div className="relative my-8 flex items-center">
+            <div className="relative my-6 flex items-center">
               <div className="flex-grow border-t border-slate-200"></div>
               <span className="px-4 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">OR AUTHENTICATE</span>
               <div className="flex-grow border-t border-slate-200"></div>
@@ -128,8 +139,8 @@ export default function AuthForm() {
               {error && (
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                   className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-tight leading-relaxed">{error}</p>
+                  <AlertTriangle className="text-red-500 shrink-0" size={16} />
+                  <p className="text-[9px] font-black text-red-600 uppercase tracking-tight leading-relaxed">{error}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -179,6 +190,11 @@ export default function AuthForm() {
                 </span>
               </button>
             </div>
+            
+            {/* APOLOGY FOOTER */}
+            <p className="mt-8 text-[8px] font-bold text-slate-300 uppercase text-center tracking-tighter">
+              We apologize for any inconvenience caused by regional ISP constraints.
+            </p>
           </div>
         </div>
       </div>
