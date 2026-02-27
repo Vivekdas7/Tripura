@@ -86,19 +86,7 @@ export default function AuthForm() {
       <div className="flex-1 flex flex-col bg-[#F8FAFC] overflow-y-auto">
         
         {/* JIO ISP WARNING BANNER - Highlighted Note */}
-        <div className="w-full bg-amber-50 border-b border-amber-100 px-6 py-3 flex items-center gap-3">
-          <div className="shrink-0 w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm">
-            <WifiOff size={16} className="text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[10px] font-black text-amber-800 uppercase tracking-tight leading-tight">
-              Network Alert: JIO ISP Restriction
-            </p>
-            <p className="text-[9px] font-bold text-amber-600 uppercase tracking-tighter">
-              Please switch to WiFi or another SIM card for Login/Guest access.
-            </p>
-          </div>
-        </div>
+        
 
         <div className="pt-6 pb-2 px-8 flex justify-center lg:justify-start">
           <img src="/assets/logo1.png" className="h-16 w-auto object-contain" alt="TripuraFly" />
