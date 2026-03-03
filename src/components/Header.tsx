@@ -19,44 +19,7 @@ export default function Header() {
 
   return (
     <header className="bg-white/90 backdrop-blur-md sticky top-0 z-[100] border-b border-slate-100">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          
-          {/* --- BRAND LOGO --- */}
-          <div className="flex items-center cursor-pointer group" onClick={() => { navigate('/'); setIsMenuOpen(false); }}>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter flex items-center">
-              <span className="text-[#1A1C8B]">Tripura</span>
-              <span className="text-[#FF9D00]">Fly</span>
-              <div className="ml-1 mb-3">
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M21 3L3 10.5L7.5 13.5M21 3L13.5 21L10.5 16.5M21 3L10.5 13.5" stroke="#FF9D00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                 </svg>
-              </div>
-            </h1>
-          </div>
-
-          {/* --- DESKTOP NAV --- */}
-          <div className="hidden md:flex items-center gap-6">
-            <nav className="flex gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-100">
-              <NavLink to="/" className={navLinkClasses}>Find Flights</NavLink>
-              <NavLink to="/bookings" className={navLinkClasses}>My Bookings</NavLink>
-            </nav>
-            <button onClick={() => signOut()} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all">
-              <LogOut size={20} />
-            </button>
-          </div>
-
-          {/* --- HAMBURGER BUTTON --- */}
-          {/* <div className="md:hidden">
-            <button 
-              onClick={toggleMenu}
-              className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all ${isMenuOpen ? 'bg-orange-500 text-white' : 'bg-slate-50 text-slate-900'}`}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div> */}
-        </div>
-      </div>
+     
 
       {/* --- FIXED MOBILE DRAWER --- */}
       {isMenuOpen && (

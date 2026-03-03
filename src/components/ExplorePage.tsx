@@ -72,7 +72,7 @@ export default function AppOnboarding() {
               - Added drop-shadow-xl to separate it from high-contrast backgrounds.
           */}
           <img 
-            src='assets/logo1.png' 
+            src='assets/logo2.png' 
             alt="TripuraFly" 
             className="h-24 md:h-20 w-auto max-w-[55vw] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" 
           />
@@ -138,7 +138,7 @@ export default function AppOnboarding() {
 
         {/* Brand Slogan */}
         <p className="text-center text-[9px] font-bold text-white/20 uppercase tracking-[0.5em] mt-8">
-          Tripura's Leading Travel Partner
+          India's Leading Travel Partner
         </p>
       </div>
 
