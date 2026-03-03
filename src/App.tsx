@@ -13,7 +13,7 @@ import {
   Calendar
 } from 'lucide-react'; 
 import AuthForm from './components/AuthForm';
-import Header from './components/Header';
+
 import FlightSearch from './components/FlightSearch';
 import FlightList from './components/FlightList';
 import BookingModal from './components/BookingModal';
@@ -313,7 +313,7 @@ _Inquiry via TripuraFly Verified App_`;
           </div>
         )}
 
-        <Header currentView="search" onViewChange={() => {}} />
+
 
         <Routes>
           <Route path="/" element={
