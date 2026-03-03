@@ -169,7 +169,7 @@ export default function BookingModal({ flight, onClose, onBookingComplete }: Boo
   // --- PAYMENT UTILS ---
   const upiId = "9366159066@ptaxis"; 
   const totalPrice = selectedFare.price * numPassengers;
-  const upiString = `upi://pay?pa=${upiId}&pn=TripuraFly&am=${totalPrice}&cu=INR&tn=${bookingRef}`;
+  const upiString = `upi://pay?pa=${upiId}&pn=EasyMyBook&am=${totalPrice}&cu=INR&tn=${bookingRef}`;
 
   const openPaymentApp = () => {
     window.location.href = upiString;

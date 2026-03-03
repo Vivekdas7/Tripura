@@ -37,7 +37,7 @@ export default function CabBooking() {
           </div>
           
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter leading-none">
-            TripuraFly <br /> 
+            EasyMyBook <br /> 
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
               Cabs
             </span>
@@ -120,19 +120,19 @@ export default function CabBooking() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600"><Phone size={22} /></div>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase">TripuraFly Care</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase">EasyMyBook Care</p>
                 <p className="text-base font-black text-slate-900 tracking-tight">9366159066</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-slate-300" />
           </a>
 
-          <a href="mailto:tripurafly.helpdesk@gmail.com" className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm active:bg-slate-50 transition-colors">
+          <a href="mailto:EasyMyBook.helpdesk@gmail.com" className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm active:bg-slate-50 transition-colors">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600"><Mail size={22} /></div>
               <div className="overflow-hidden">
                 <p className="text-[10px] font-black text-slate-400 uppercase">Support Email</p>
-                <p className="text-xs font-black text-slate-900 truncate">tripurafly.helpdesk@gmail.com</p>
+                <p className="text-xs font-black text-slate-900 truncate">EasyMyBook.helpdesk@gmail.com</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-slate-300" />
@@ -147,7 +147,7 @@ export default function CabBooking() {
            <Navigation size={20} className="text-slate-300" />
            <Heart size={20} className="text-slate-300" />
         </div>
-        <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.4em]">Stay Connected with TripuraFly Portal</p>
+        <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.4em]">Stay Connected with EasyMyBook Portal</p>
       </div>
 
       {/* CSS Animation Logic */}

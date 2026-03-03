@@ -18,13 +18,13 @@ const AboutUs = () => (
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Who We Are</h2>
             <p className="text-slate-600 leading-relaxed">
-              Founded in 2024, <strong>TripuraFly</strong> was born out of a simple necessity: making air travel to the Northeast affordable for everyone. Based in Agartala, we understand the unique geographic challenges of our region.
+              Founded in 2024, <strong>EasyMyBook</strong> was born out of a simple necessity: making air travel to the Northeast affordable for everyone. Based in Agartala, we understand the unique geographic challenges of our region.
             </p>
           </div>
         </div>
 
         <div className="bg-slate-50 p-8 md:p-12 rounded-[3rem] border border-slate-100">
-          <h3 className="text-2xl font-bold text-center mb-8">The TripuraFly Promise</h3>
+          <h3 className="text-2xl font-bold text-center mb-8">The EasyMyBook Promise</h3>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-3xl mb-2">💎</div>

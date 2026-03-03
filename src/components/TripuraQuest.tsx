@@ -152,7 +152,7 @@ export default function MyProfile() {
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
           className="w-12 h-12 border-t-4 border-blue-600 border-r-4 border-r-transparent rounded-full mb-6" 
         />
-        <p className="text-slate-900 font-black text-[10px] uppercase tracking-[0.3em]">TripuraFly Sync...</p>
+        <p className="text-slate-900 font-black text-[10px] uppercase tracking-[0.3em]">EasyMyBook Sync...</p>
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function MyProfile() {
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full blur-3xl opacity-50" />
               
               <div className="pt-6 pb-2 px-8 flex justify-center lg:justify-start">
-          <img src="/assets/logo1.png" className="h-50 w-auto object-contain" alt="TripuraFly" />
+          <img src="/assets/logo1.png" className="h-50 w-auto object-contain" alt="EasyMyBook" />
         </div>
 
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none mb-4">

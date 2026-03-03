@@ -14,10 +14,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     // Using a specific key prevents collisions with other apps on the same domain
-    storageKey: 'tripurafly-auth-token', 
+    storageKey: 'EasyMyBook-auth-token', 
   },
   global: {
-    headers: { 'x-application-name': 'tripurafly' },
+    headers: { 'x-application-name': 'EasyMyBook' },
   },
 });
 

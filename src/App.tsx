@@ -114,9 +114,9 @@ const handleWhatsAppRedirect = (pkg: any) => {
 *Price:* ₹${pkg.price}
 *Duration:* ${pkg.duration}
 
-Hi TripuraFly! I saw this special package and I'm interested in booking it. Can you please share the availability and more details?
+Hi EasyMyBook! I saw this special package and I'm interested in booking it. Can you please share the availability and more details?
 
-_Sent from TripuraFly Mobile App_`;
+_Sent from EasyMyBook Mobile App_`;
 
   // Encode the message for URL
   const encodedMessage = encodeURIComponent(messageTemplate);
@@ -247,7 +247,7 @@ function App() {
 
 const handleWhatsAppRedirect = (pkg: any) => {
   // CONFIGURATION
-  const phoneNumber = "919366159066"; // TripuraFly Official WhatsApp
+  const phoneNumber = "919366159066"; // EasyMyBook Official WhatsApp
   
   // LOGIC TO GENERATE A SHORT ROUTE SUMMARY
   const routeSummary = pkg.itinerary
@@ -263,9 +263,9 @@ const handleWhatsAppRedirect = (pkg: any) => {
 ⏳ *Duration:* ${pkg.totalDuration}
 🗺️ *Route:* ${routeSummary}
 
-*Hi TripuraFly!* I am interested in this official Tripura Tourism circuit. Can you please confirm the availability for my travel dates and share the booking process?
+*Hi EasyMyBook!* I am interested in this official Tripura Tourism circuit. Can you please confirm the availability for my travel dates and share the booking process?
 
-_Inquiry via TripuraFly Verified App_`;
+_Inquiry via EasyMyBook Verified App_`;
 
   // Encode the message for URL
   const encodedMessage = encodeURIComponent(messageTemplate);
@@ -770,7 +770,7 @@ _Inquiry via TripuraFly Verified App_`;
               {item.tag}
             </span>
             <span className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[6px] md:text-[7px] font-bold px-3 py-1 rounded-full uppercase tracking-tight w-fit">
-              TRIPURAFLY Approved
+              EasyMyBook Approved
             </span>
           </div>
           <div className="bg-black/50 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">

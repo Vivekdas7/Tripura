@@ -89,7 +89,7 @@ export default function AuthForm() {
         
 
         <div className="pt-6 pb-2 px-8 flex justify-center lg:justify-start">
-          <img src="/assets/logo1.png" className="h-16 w-auto object-contain" alt="TripuraFly" />
+          <img src="/assets/logo1.png" className="h-16 w-auto object-contain" alt="EasyMyBook" />
         </div>
 
         <div className="flex-1 flex flex-col justify-center items-center px-8 pb-10">

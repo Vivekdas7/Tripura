@@ -294,11 +294,11 @@ export default function MyBookings() {
               <ChevronRight size={20} className="text-white/40 ml-auto" />
            </a>
 
-           <a href="mailto:tripurafly.helpdesk@gmail.com" className="flex items-center gap-5 p-6 bg-white border border-slate-200 rounded-[2rem] active:bg-slate-50 transition-all">
+           <a href="mailto:EasyMyBook.helpdesk@gmail.com" className="flex items-center gap-5 p-6 bg-white border border-slate-200 rounded-[2rem] active:bg-slate-50 transition-all">
               <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-900"><Mail size={24} /></div>
               <div className="overflow-hidden">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Helpdesk</p>
-                <p className="text-xs font-black text-slate-900 truncate">tripurafly.helpdesk@gmail.com</p>
+                <p className="text-xs font-black text-slate-900 truncate">EasyMyBook.helpdesk@gmail.com</p>
               </div>
            </a>
         </div>
@@ -307,7 +307,7 @@ export default function MyBookings() {
         <div className="py-12 text-center">
            <div className="inline-flex items-center gap-2 grayscale opacity-40 mb-4">
               <ShieldCheck size={16} />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">TripuraFly Secure</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">EasyMyBook Secure</span>
            </div>
            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.5em]">Version 2.0.4 Alpha</p>
         </div>

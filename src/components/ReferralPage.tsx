@@ -114,7 +114,7 @@ const ReferralPage = () => {
       if (error) throw error;
 
       // WhatsApp Notification
-      const text = `*Withdrawal Request - TripuraFly*%0A%0AUser: ${user.email}%0AAmount: ₹${referralStats.totalEarned}%0AUPI: ${upiId}`;
+      const text = `*Withdrawal Request - EasyMyBook*%0A%0AUser: ${user.email}%0AAmount: ₹${referralStats.totalEarned}%0AUPI: ${upiId}`;
       window.open(`https://wa.me/919366159066?text=${text}`, '_blank');
       
       alert("Request submitted! Our team will verify and pay within 24 hours.");
@@ -126,7 +126,7 @@ const ReferralPage = () => {
     }
   };
 
-  const shareLink = `https://tripurafly.com/signup?ref=${user?.id}`;
+  const shareLink = `https://EasyMyBook.com/signup?ref=${user?.id}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareLink);
@@ -141,7 +141,7 @@ const ReferralPage = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-20 -mt-20 blur-3xl" />
         <div className="relative z-10 max-w-md mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
-            <Sparkles size={12} /> TripuraFly Rewards
+            <Sparkles size={12} /> EasyMyBook Rewards
           </div>
           <h1 className="text-4xl font-black text-white italic tracking-tighter mb-2">REFER & EARN</h1>
           <p className="text-slate-400 text-xs font-bold leading-relaxed">Refer friends traveling from Agartala and earn rewards.</p>

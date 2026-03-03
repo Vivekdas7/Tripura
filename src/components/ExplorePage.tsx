@@ -73,7 +73,7 @@ export default function AppOnboarding() {
           */}
           <img 
             src='assets/logo2.png' 
-            alt="TripuraFly" 
+            alt="EasyMyBook" 
             className="h-24 md:h-20 w-auto max-w-[55vw] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" 
           />
         </div>

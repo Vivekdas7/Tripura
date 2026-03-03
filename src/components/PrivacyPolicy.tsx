@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
             <ArrowLeft size={20} />
             <span className="font-bold text-sm uppercase tracking-tight">Back to Search</span>
           </Link>
-          <span className="text-slate-400 font-black italic">TripuraFly</span>
+          <span className="text-slate-400 font-black italic">EasyMyBook</span>
         </div>
       </nav>
 
@@ -29,7 +29,7 @@ const PrivacyPolicy = () => {
           <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
             <h2 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">1. Introduction</h2>
             <p className="text-slate-600 leading-relaxed font-medium mb-4">
-              Welcome to TripuraFly. We value your privacy and are committed to protecting your personal data. This policy explains how we handle your information when you use our flight booking services and tour packages in Tripura and beyond.
+              Welcome to EasyMyBook. We value your privacy and are committed to protecting your personal data. This policy explains how we handle your information when you use our flight booking services and tour packages in Tripura and beyond.
             </p>
             <p className="text-slate-600 leading-relaxed font-medium">
               By using our platform, you consent to the practices described in this policy. We ensure that all data processing is compliant with Indian IT Laws and local regulations.
@@ -74,7 +74,7 @@ const PrivacyPolicy = () => {
             </p>
             <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
               <p className="text-orange-800 text-sm font-bold">
-                Note: We use SSL encryption for all transactions. TripuraFly does not store your full Credit/Debit card numbers on our local servers.
+                Note: We use SSL encryption for all transactions. EasyMyBook does not store your full Credit/Debit card numbers on our local servers.
               </p>
             </div>
           </section>
@@ -86,7 +86,7 @@ const PrivacyPolicy = () => {
               <h2 className="text-xl font-black uppercase tracking-tight">4. Cookie Policy</h2>
             </div>
             <p className="text-slate-600 leading-relaxed font-medium">
-              We use cookies to improve your searching experience, remember your recent flight searches, and maintain your session while you complete a booking. You can disable cookies in your browser settings, but some features of TripuraFly may become unavailable.
+              We use cookies to improve your searching experience, remember your recent flight searches, and maintain your session while you complete a booking. You can disable cookies in your browser settings, but some features of EasyMyBook may become unavailable.
             </p>
           </section>
 
@@ -160,7 +160,7 @@ const PrivacyPolicy = () => {
 
         <footer className="mt-12 text-center">
           <p className="text-slate-400 text-sm font-medium">
-            &copy; {new Date().getFullYear()} TripuraFly. Part of Tripura Travel Solutions Pvt Ltd.
+            &copy; {new Date().getFullYear()} EasyMyBook. Part of Tripura Travel Solutions Pvt Ltd.
           </p>
         </footer>
       </div>

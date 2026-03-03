@@ -15,7 +15,7 @@ const FAQS = [
     id: 1,
     category: "Refunds",
     question: "What is the cancellation policy?",
-    answer: "Cancellations made 24 hours before departure are eligible for a partial refund as per airline policies. TripuraFly charges a minimal processing fee of ₹150 for cancellations."
+    answer: "Cancellations made 24 hours before departure are eligible for a partial refund as per airline policies. EasyMyBook charges a minimal processing fee of ₹150 for cancellations."
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ const FAQS = [
     id: 3,
     category: "Pricing",
     question: "Are there any hidden convenience fees?",
-    answer: "No. TripuraFly operates on a transparency model. The price you see on the search results is the final price you pay at checkout."
+    answer: "No. EasyMyBook operates on a transparency model. The price you see on the search results is the final price you pay at checkout."
   },
   {
     id: 4,
@@ -63,7 +63,7 @@ export default function SupportPage() {
   }, [searchQuery]);
 
   const handleWhatsApp = () => {
-    window.open("https://wa.me/919366159066?text=Hi Vivek, I need urgent help with my TripuraFly booking.", "_blank");
+    window.open("https://wa.me/919366159066?text=Hi Vivek, I need urgent help with my EasyMyBook booking.", "_blank");
   };
 
   return (
@@ -159,7 +159,7 @@ export default function SupportPage() {
             </div>
 
             <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8">
-              "Building TripuraFly means taking personal responsibility for your journey. If the automated systems don't solve it, I will."
+              "Building EasyMyBook means taking personal responsibility for your journey. If the automated systems don't solve it, I will."
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -316,7 +316,7 @@ export default function SupportPage() {
                         <p className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">Agartala HQ • West Tripura</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">TripuraFly Aviation Services</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">EasyMyBook Aviation Services</p>
                       <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">ISO 27001 Certified Portal • 2026</p>
                     </div>
                 </div>
