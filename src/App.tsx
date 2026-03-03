@@ -35,11 +35,6 @@ import ExplorePage from './components/ExplorePage';
 import FlightDetails from './components/FlightDetails';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
-
-
-
-
-
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
 
@@ -223,17 +218,15 @@ const BottomNav = () => {
     { path: '/bookings', icon: <Ticket size={22} />, label: 'Bookings' },
     { path: '/cab-booking', icon: <Car size={22} />, label: 'Cabs' },
     { path: '/game', icon: <User size={22} />, label: 'Profile' },
-     
-    
-    // {path:'/train-booking',icon:<Train size={22}/>,label:'Train'}
   ];
 
   return (
-    /* OUTER WRAPPER: 
-       Positioned at the true bottom (0).
-       Uses safe-area-inset-bottom to push the content above system buttons.
+    /* UPDATED WRAPPER: 
+       Removed env(safe-area-inset-bottom).
+       Changed pb to a standard 4 (1rem) to keep it slightly off the edge, 
+       or use pb-0 if you want it touching the very bottom.
     */
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pointer-events-none">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-4 pointer-events-none">
       <nav className="pointer-events-auto max-w-lg mx-auto bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] px-2 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
         <div className="flex justify-around items-center">
           {navItems.map((item) => {
