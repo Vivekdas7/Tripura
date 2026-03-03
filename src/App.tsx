@@ -320,44 +320,53 @@ _Inquiry via TripuraFly Verified App_`;
             !user ? <ExplorePage /> : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* HERO SECTION */}
-                <section className="relative h-[90vh] md:h-[850px] flex items-center justify-center overflow-hidden bg-slate-950">
-                  <div className="absolute inset-0 z-0">
-                    <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-50 scale-110 blur-[2px] md:blur-0">
-                      <source src="assets/video.mp4" type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
-                  </div>
+               <section className="relative h-[90vh] md:h-[850px] flex items-center justify-center overflow-hidden bg-slate-950">
+  {/* TOP LEFT LOGO */}
+  <div className="absolute top-6 left-6 z-20 md:top-10 md:left-10">
+    <img 
+      src="assets/logo2.png" 
+      alt="Logo" 
+      className="h-39 md:h-14 w-20 object-contain"
+    />
+  </div>
 
-                  <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
-                    <div className="mb-8 px-6 py-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full animate-bounce">
-                      <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.4em]">Ready for Agartala?</span>
-                    </div>
+  <div className="absolute inset-0 z-0">
+    <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-50 scale-110 blur-[2px] md:blur-0">
+      <source src="assets/video.mp4" type="video/mp4" />
+    </video>
+    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
+  </div>
 
-                    <h1 className="text-[14vw] md:text-[10rem] font-black text-white leading-[0.75] tracking-tighter text-center">
-                      FLY<br/>
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-indigo-500">HIGHER.</span>
-                    </h1>
+  <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
+    <div className="mb-8 px-6 py-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full animate-bounce">
+      <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.4em]">Ready for Agartala?</span>
+    </div>
 
-                    {/* CENTER MARQUEE */}
-                    <div className="mt-12 w-full max-w-[90vw] md:max-w-4xl bg-white/5 backdrop-blur-3xl border border-white/10 py-5 rounded-[3rem] overflow-hidden shadow-2xl">
-                      <div className="flex whitespace-nowrap animate-marquee-center">
-                        {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="flex items-center gap-12 px-6">
-                            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
-                              <Zap size={14} className="text-orange-500 fill-orange-500" /> IXA Direct Flights
-                            </span>
-                            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
-                              <Utensils size={14} className="text-emerald-400" /> Free Meals Live
-                            </span>
-                            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
-                              <Navigation size={14} className="text-indigo-400" /> Verified Tours
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </section>
+    <h1 className="text-[14vw] md:text-[10rem] font-black text-white leading-[0.75] tracking-tighter text-center">
+      FLY<br/>
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-indigo-500">HIGHER.</span>
+    </h1>
+
+    {/* CENTER MARQUEE */}
+    <div className="mt-12 w-full max-w-[90vw] md:max-w-4xl bg-white/5 backdrop-blur-3xl border border-white/10 py-5 rounded-[3rem] overflow-hidden shadow-2xl">
+      <div className="flex whitespace-nowrap animate-marquee-center">
+        {[1, 2, 3].map((_, i) => (
+          <div key={i} className="flex items-center gap-12 px-6">
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <Zap size={14} className="text-orange-500 fill-orange-500" /> IXA Direct Flights
+            </span>
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <Utensils size={14} className="text-emerald-400" /> Free Meals Live
+            </span>
+            <span className="text-white text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <Navigation size={14} className="text-indigo-400" /> Verified Tours
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
                 
 
