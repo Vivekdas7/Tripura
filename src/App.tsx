@@ -35,6 +35,11 @@ import ExplorePage from './components/ExplorePage';
 import FlightDetails from './components/FlightDetails';
 
 // --- STYLED LOADER COMPONENT (5 SECONDS) ---
+
+
+
+
+
 const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
 
@@ -42,64 +47,126 @@ const BeautifulLoader = ({ onComplete }: { onComplete: () => void }) => {
     const timer = setTimeout(onComplete, 5000);
     const interval = setInterval(() => {
       setProgress((prev) => (prev < 100 ? prev + 1 : 100));
-    }, 45); // Smooth progression over 4.5s-5s
-    return () => { clearTimeout(timer); clearInterval(interval); };
+    }, 45);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [onComplete]);
+
+  const radius = 85;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
 
   return (
     <div className="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-slate-950 overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-600/10 blur-[120px] rounded-full animate-pulse delay-1000" />
+      {/* Dynamic Background Beams */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-orange-600/10 blur-[120px] rounded-full animate-pulse delay-700" />
       
-      <div className="relative w-80 flex flex-col items-center">
-        {/* Animated Flight Path */}
-        <div className="relative w-full h-[2px] bg-white/5 rounded-full mb-12 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-          <div 
-            className="absolute h-full bg-gradient-to-r from-transparent via-orange-500 to-indigo-600 transition-all duration-300"
-            style={{ width: `${progress}%` }}
+      {/* Main Loader Container */}
+      <div className="relative flex items-center justify-center">
+        
+        {/* Outer Glow Ring (Static) */}
+        <div className="absolute w-64 h-64 md:w-72 md:h-72 rounded-full border border-white/5 shadow-[inset_0_0_40px_rgba(255,255,255,0.02)]" />
+
+        {/* The SVG Progress Ring */}
+        <svg className="w-64 h-64 md:w-72 md:h-72 transform -rotate-90">
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#f97316" />   {/* Orange-500 */}
+              <stop offset="100%" stopColor="#6366f1" /> {/* Indigo-500 */}
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Background Track */}
+          <circle
+            cx="50%"
+            cy="50%"
+            r={radius}
+            stroke="rgba(255,255,255,0.05)"
+            strokeWidth="2"
+            fill="transparent"
           />
-          {/* Flying Plane Icon */}
+
+          {/* Animated Gradient Progress Path */}
+          <circle
+            cx="50%"
+            cy="50%"
+            r={radius}
+            stroke="url(#gradient)"
+            strokeWidth="5"
+            fill="transparent"
+            strokeDasharray={circumference}
+            style={{ 
+              strokeDashoffset: offset,
+              transition: 'stroke-dashoffset 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+            }}
+            strokeLinecap="round"
+            filter="url(#glow)"
+          />
+        </svg>
+
+        {/* Center Logo with Glassmorphism background */}
+        <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-44 h-44 md:w-52 md:h-52 rounded-full bg-white/[0.02] backdrop-blur-3xl border border-white/5 flex items-center justify-center shadow-2xl animate-logo-float">
+                <img
+                    src="assets/logo2.png"
+                    alt="EasyMyBook"
+                    className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+                />
+            </div>
+        </div>
+
+        {/* Orbiting Light Dot (Matches progress tip) */}
+        <div 
+          className="absolute w-full h-full pointer-events-none"
+          style={{ transform: `rotate(${(progress / 100) * 360 - 90}deg)` }}
+        >
           <div 
-            className="absolute top-1/2 -translate-y-1/2 transition-all duration-300"
-            style={{ left: `calc(${progress}% - 20px)` }}
-          >
-            <Plane size={24} className="text-white fill-white rotate-90 drop-shadow-[0_0_10px_#fff]" />
-          </div>
-        </div>
-
-        {/* Textual Cues */}
-        <div className="text-center space-y-3">
-          <h2 className="text-white text-2xl font-black tracking-widest uppercase">
-            Tripura<span className="text-orange-500">Fly</span>
-          </h2>
-          <div className="h-6 overflow-hidden">
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.4em] animate-slide-up">
-              {progress < 30 ? "Initializing Cloud Sync..." : 
-               progress < 60 ? "Scanning Regional Routes..." : 
-               progress < 90 ? "Fetching Live Fares..." : "Ready for Departure"}
-            </p>
-          </div>
-        </div>
-
-        {/* Dynamic Percentage */}
-        <div className="mt-8">
-           <span className="text-white/20 text-6xl font-black italic tabular-nums">
-             {progress.toString().padStart(2, '0')}
-           </span>
+            className="absolute bg-white w-2 h-2 rounded-full shadow-[0_0_15px_#fff]"
+            style={{ left: `calc(50% + ${radius}px - 4px)`, top: 'calc(50% - 4px)' }}
+          />
         </div>
       </div>
 
+      {/* Modern Percentage Display */}
+      <div className="mt-12 flex flex-col items-center gap-2">
+        <div className="flex items-baseline gap-1">
+            <span className="text-white text-4xl font-light tracking-tighter tabular-nums">
+                {progress}
+            </span>
+            <span className="text-indigo-500 text-xl font-black">%</span>
+        </div>
+        <div className="h-[1px] w-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <span className="text-[10px] text-white/30 uppercase tracking-[0.5em] font-medium">
+            Loading Experience
+        </span>
+      </div>
+
       <style>{`
-        @keyframes slide-up {
-          0% { transform: translateY(20px); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
+        @keyframes logo-float {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-10px) scale(1.02); }
         }
-        .animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
+        .animate-logo-float { 
+          animation: logo-float 4s ease-in-out infinite; 
+        }
       `}</style>
     </div>
   );
 };
+
+
+
+
 
 
 const handleWhatsAppRedirect = (pkg: any) => {
