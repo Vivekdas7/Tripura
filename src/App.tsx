@@ -479,7 +479,7 @@ _Inquiry via EasyMyBook Verified App_`;
     <div className="space-y-2">
       <span className="text-orange-500 font-black text-xs uppercase tracking-[0.4em]">Local Treasures</span>
       <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter italic">
-        Tripura <span className="text-indigo-600">Specials.</span>
+        NorthEast <span className="text-indigo-600">Specials.</span>
       </h2>
     </div>
     
