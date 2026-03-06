@@ -258,8 +258,7 @@ _Sent from EasyMyBook Mobile App_`;
       </nav>
     </div>
   );
-}; and give me full upadted code 
-
+}; 
 // --- ADDITIONAL UI: LOYALTY COMPONENT ---
 
 // --- IMPROVED SUCCESS POPUP ---
