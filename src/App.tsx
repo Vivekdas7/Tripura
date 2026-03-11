@@ -399,7 +399,7 @@ _Inquiry via EasyMyBook Verified App_`;
 
   <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
     <div className="mb-8 px-6 py-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full animate-bounce">
-      <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.4em]">Ready for Agartala?</span>
+      <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.4em]">Ready for Fly?</span>
     </div>
 
     <h1 className="text-[14vw] md:text-[10rem] font-black text-white leading-[0.75] tracking-tighter text-center">
