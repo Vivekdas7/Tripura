@@ -48,7 +48,7 @@ export default function FlightSearch({ onSearch }: { onSearch: (params: any) => 
       
       {/* QUICK DATE TESTER (Helpful for your current testing) */}
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-        {['2026-01-15', '2026-01-16'].map((d) => (
+        {['2026-04-17', '2026-04-28'].map((d) => (
           <button
             key={d}
             type="button"

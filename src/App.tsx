@@ -437,11 +437,11 @@ _Inquiry via EasyMyBook Verified App_`;
                   </div>
                 </div>
 
-                <main className="container mx-auto px-4 py-12 max-w-7xl">
+                <main className="container mx-auto px-1 py-1 max-w-7xl">
                   <TechnicalNotice />
                   
                   {/* SEARCH RESULTS */}
-                  <div className="my-16">
+                  <div className="my-1">
                     {activeSearch ? (
                       <div className="space-y-8">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -1,87 +1,59 @@
-import { Zap, Wallet, Gift } from 'lucide-react';
+import React from 'react';
+import { Zap, IndianRupee, ChevronRight } from 'lucide-react';
 
-const TechnicalNotice = () => {
-  const scrollText =
-    "✨ SAVE MORE ON EVERY TRIP • SMART WALLET CASHBACK FOR LOYAL TRAVELLERS • BOOK EARLY & PAY LESS • AIR INDIA EXPRESS & INDIGO ROUTES LIVE • LIMITED SEATS AT LOWEST FARES • FLY SMARTER, BOOK BETTER • ✨ ";
-
+const CompactTechnicalNotice = () => {
   return (
-    <div className="mx-4 md:mx-0 mb-6 overflow-hidden bg-[#0A2351] rounded-[1.5rem] md:rounded-2xl shadow-xl border border-white/10 group">
+    <div className="mx-3 my-4 overflow-hidden bg-[#0F172A] rounded-2xl border border-white/5 shadow-2xl">
+      
+      {/* Top Accent Bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
-      {/* 1. Header */}
-      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-[#0A2351] to-[#163a7a]">
-        <div className="flex items-center gap-2">
-          <div className="bg-orange-500 p-1.5 rounded-lg shadow-lg">
-            <Zap size={14} className="text-white fill-white" />
+      <div className="p-3 md:p-4">
+        <div className="flex items-center justify-between gap-3">
+          
+          {/* Left: Icon & Main Info */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center border border-blue-500/30">
+                <IndianRupee size={20} className="text-blue-400" />
+              </div>
+              <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5">
+                <Zap size={10} className="text-slate-900 fill-slate-900" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-[13px] md:text-sm font-bold text-white leading-tight">
+                ₹50 Instant Cashback
+              </h3>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Auto-credited via <span className="text-blue-400">UPI</span> on 1st booking
+              </p>
+            </div>
           </div>
-          <span className="text-xs md:text-[13px] font-black text-white uppercase tracking-tight">
-            Smart <span className="text-orange-400">Savings</span>
-          </span>
-        </div>
 
-        <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30 animate-pulse">
-          <Gift size={12} className="text-emerald-400" />
-          <span className="text-[9px] md:text-[10px] font-black text-emerald-400 uppercase tracking-wider">
-            Wallet Reward
-          </span>
+          {/* Right: CTA */}
+          <button className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all active:scale-95">
+            <span className="text-[11px] font-bold uppercase tracking-tight">Claim</span>
+            <ChevronRight size={14} />
+          </button>
         </div>
       </div>
 
-      {/* 2. Wallet Cashback Section */}
-      <div className="px-5 py-5 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent border-y border-emerald-500/20 relative">
-        <div className="absolute top-0 right-0 w-24 h-full bg-emerald-500/10 blur-2xl rounded-full" />
-
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="hidden md:flex w-12 h-12 bg-emerald-500 rounded-2xl items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-            <Wallet size={24} className="text-white" />
-          </div>
-
-          <p className="text-[13px] md:text-sm font-black text-white leading-relaxed md:leading-tight">
-            <span className="text-emerald-400 block mb-1 md:inline md:mb-0">
-              🎁 LOYALTY WALLET:
-            </span>
-            {" "} COMPLETE YOUR{" "}
-            <span className="text-white border-b-2 border-emerald-500 pb-0.5">
-              3RD BOOKING
-            </span>{" "}
-            AND UNLOCK
-            <span className="mx-2 bg-emerald-500 text-slate-900 px-3 py-1 rounded shadow-[0_0_15px_rgba(16,185,129,0.4)] italic inline-block transform -rotate-1">
-              ₹75 WALLET CASHBACK
-            </span>
-            <span className="block text-[11px] md:text-xs text-blue-100/70 mt-1 font-semibold">
-              Auto-applied • Flight bookings only • Limited validity
-            </span>
-          </p>
+      {/* Ultra-slim Footer Strip */}
+      <div className="bg-white/[0.03] px-4 py-1.5 border-t border-white/5 flex justify-between items-center">
+        <div className="flex gap-3 items-center opacity-50">
+           <span className="text-[9px] font-bold text-slate-300">GPAY</span>
+           <span className="text-[9px] font-bold text-slate-300">PHONEPE</span>
+           <span className="text-[9px] font-bold text-slate-300">PAYTM</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-[9px] font-bold text-emerald-500 uppercase">Auto-Apply Active</span>
         </div>
       </div>
-
-      {/* 3. Scrolling Info Strip */}
-      <div className="bg-black/20 py-3 relative flex items-center">
-        <div className="flex whitespace-nowrap animate-marquee group-hover:pause">
-          <span className="text-[10px] md:text-[11px] font-bold text-blue-100/40 uppercase tracking-[0.2em] px-4">
-            {scrollText}
-          </span>
-          <span className="text-[10px] md:text-[11px] font-bold text-blue-100/40 uppercase tracking-[0.2em] px-4">
-            {scrollText}
-          </span>
-        </div>
-      </div>
-
-      {/* Animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: flex;
-          animation: marquee 35s linear infinite;
-        }
-        .group-hover\\:pause:hover {
-          animation-play-state: paused;
-        }
-      `}} />
     </div>
   );
 };
 
-export default TechnicalNotice;
+export default CompactTechnicalNotice;
