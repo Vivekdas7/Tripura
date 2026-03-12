@@ -933,8 +933,8 @@ _Inquiry via EasyMyBook Verified App_`;
                   {/* STATS SECTION */}
                   <section className="grid grid-cols-2 md:grid-cols-4 gap-8 py-20 border-t border-slate-100">
                     {[
-                      { val: "10+", label: "Happy Flyers" },
-                      { val: "4.9/5", label: "User Rating" },
+                      { val: "100+", label: "Happy Flyers" },
+                      { val: "4.8/5", label: "User Rating" },
                       { val: "100%", label: "Safe Booking" },
                       { val: "24/7", label: "Local Support" }
                     ].map((stat, i) => (
