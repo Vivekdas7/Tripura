@@ -216,7 +216,7 @@ const BottomNav = () => {
   const navItems = [
     { path: '/', icon: <Home size={22} />, label: 'Home' },
     { path: '/bookings', icon: <Ticket size={22} />, label: 'Bookings' },
-    { path: '/cab-booking', icon: <Car size={22} />, label: 'Cabs' },
+    { path: '/cab-booking', icon: <Train size={22} />, label: 'Cabs' },
     { path: '/game', icon: <User size={22} />, label: 'Profile' },
   ];
 
